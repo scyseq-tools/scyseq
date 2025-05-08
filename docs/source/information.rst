@@ -1,5 +1,5 @@
-Information theory procedures
-=============================
+Information theory
+==================
 
 .. automodule:: scyseq.information
    :members:

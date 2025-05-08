@@ -1,5 +1,5 @@
-scyseq exceptions
-=================
+Exceptions
+==========
 
 .. automodule:: scyseq.exceptions
    :members:

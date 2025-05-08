@@ -1,5 +1,5 @@
-Discretization and partition procedures
-=======================================
+Discretization and partition
+============================
 
 .. automodule:: scyseq.discretize
    :members:

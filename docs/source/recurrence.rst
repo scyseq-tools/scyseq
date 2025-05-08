@@ -1,5 +1,5 @@
-Symbolic recurrence quantification procedures
-=============================================
+Recurrence quantification
+=========================
 
 .. automodule:: scyseq.recurrence
    :members:

@@ -6,18 +6,15 @@ import numpy as np
 
 from . import exceptions as E
 
-#from . import stochastic as Sto
-#from . import markov as M
-
-__docformat__ = 'reStructuredText'
-
-DTYPES = [np.uint8, np.uint16]
-DEFAULT_DTYPE = np.uint8
+# __docformat__ = 'reStructuredText'
 
 """
 This module defines Symbols, Alphabets and symbolic Sequences objects, their
 related methods and functions.
 """
+
+DTYPES = [np.uint8, np.uint16]
+DEFAULT_DTYPE = np.uint8
 
 class Symbol(object):
     """
@@ -122,6 +119,7 @@ class Alphabet(object):
     >>> alpha == beta
     True
     """
+
     def __init__(self, nsymb):
         
         if type(nsymb) is int:

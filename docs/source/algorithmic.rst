@@ -1,5 +1,5 @@
-Algorithmic complexity procedures
-=================================
+Algorithmic complexity
+======================
 
 .. automodule:: scyseq.algorithmic
    :members:

@@ -1,5 +1,5 @@
-Visualisation procedures
-========================
+Visualisation
+=============
 
 .. automodule:: scyseq.viz
    :members:

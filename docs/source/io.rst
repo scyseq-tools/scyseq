@@ -1,5 +1,5 @@
-Input-output procedures
-=======================
+Input-output
+============
 
 .. automodule:: scyseq.iosymb
    :members:
