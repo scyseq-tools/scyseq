@@ -1,6 +1,7 @@
 import json
-import sequence as S
 from datetime import datetime
+
+from . import sequence as S
 
 def read_codix(fname, data_only=True):
     """

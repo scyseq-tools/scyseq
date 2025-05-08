@@ -4,7 +4,8 @@ import itertools
 from random import uniform
 import matplotlib.pyplot as plt
 import matplotlib
-import sequence as S
+
+from . import sequence as S
 
 # file:///usr/share/doc/python-matplotlib-doc/html/examples/pylab_examples/ellipse_demo.html
 

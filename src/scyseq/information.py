@@ -5,9 +5,9 @@ __docformat__ = 'reStructuredText'
 
 import numpy as np
 
-import sequence as S
-import algorithmic as A
-from stochastic import conditional_matrix
+from . import sequence as S
+from . import algorithmic as A
+from .stochastic import conditional_matrix
 
 
 def metric_entropy(seq):

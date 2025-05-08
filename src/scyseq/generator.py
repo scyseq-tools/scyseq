@@ -3,7 +3,7 @@
 Generation of specified symbolic sequences
 """
 import numpy as np
-from sequence import Sequence
+from scyseq import Sequence
 
 # Sequences generators
 #=====================

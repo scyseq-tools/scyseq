@@ -7,7 +7,8 @@ __docformat__ = 'reStructuredText'
 import numpy as np
 import numpy.testing as testing
 # import warnings
-import sequence as S
+
+from . import sequence as S
 
 # warnings.simplefilter('always', RuntimeWarning)
 

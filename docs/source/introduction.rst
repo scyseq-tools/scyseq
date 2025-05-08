@@ -17,6 +17,6 @@ systems, ergodic theory, automata theory and information theory.”
 
 Find the old reference...
 
-[DoPN22]_ gives an example of using scikits-symbolic in the context of
+[DoPN22]_ gives an example of using `scyseq` in the context of
 behavioral studies.
 

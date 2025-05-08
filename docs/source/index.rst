@@ -19,6 +19,8 @@ Welcome to scyseq's documentation!
    generators
    io
    visualisation
+   exceptions
+   recurrence
    contributors
    notebooks/tutorial
    notebooks/infant-mother

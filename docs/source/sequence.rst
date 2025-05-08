@@ -10,5 +10,5 @@ Alphabet should be bidirectional dictionary...
 
 This is the doc!
 
-.. automodule:: sequence
+.. automodule:: scyseq.sequence
    :members:

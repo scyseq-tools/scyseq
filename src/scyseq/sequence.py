@@ -5,6 +5,7 @@ import operator
 import numpy as np
 
 from . import exceptions as E
+
 #from . import stochastic as Sto
 #from . import markov as M
 

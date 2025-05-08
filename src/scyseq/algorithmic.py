@@ -4,8 +4,9 @@ Algorithms and procedures related to algorithmic approach of complexity
 __docformat__ = 'reStructuredText'
 
 import numpy as np
-import sequence as S
-from generator import uniform_sequence
+# import sequence as S
+from . import sequence as S
+from .generator import uniform_sequence
 
 def contains_sublist(lst, sublst):
     """
