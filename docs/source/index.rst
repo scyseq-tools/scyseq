@@ -1,0 +1,32 @@
+.. scyseq documentation master file, created by
+   sphinx-quickstart on Thu Jun  1 21:35:18 2023.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to scyseq's documentation!
+============================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   introduction
+   sequence
+   discretize
+   algorithmic
+   stochastic
+   information
+   generators
+   io
+   visualisation
+   contributors
+   notebooks/tutorial
+   notebooks/infant-mother
+   references
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

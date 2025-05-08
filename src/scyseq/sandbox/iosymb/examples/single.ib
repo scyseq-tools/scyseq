@@ -1,0 +1,68 @@
+# Blank lines or lines beginning with # are ignored by the parser.
+# They can be added wherever you want.
+
+#-------------------------------------------------------------
+% Code specification
+#-------------------------------------------------------------
+
+# The first percent sign tells the parser that code specification starts
+
+# !!! Warning !!!
+
+# 1. The order of the type of encoding defines the order in which
+#    they will be used in the data: the first defined is the left one
+#    and the last cited is the right one.
+
+# 2. There is neither space between interger:meaning nor between words 
+#    in the TypeNames or MeaningNames.
+
+# 3. The percent sign should be used ONLY for telling the parser that
+#    specifications start and stop
+
+# 4. We advice that those lines should be kept at the beginning of each 
+#    data file unless you and all the people working with you in the 
+#    next 25 years know exactly what you/they do.
+
+#-------------------------------------------------------------
+:regular: True
+:period: 5
+:t_unit: second
+
+:participants:
+[John]
+verbal 0:silence 1:onomatopoeia 2:question 3:sentence
+nonverbal 0:grimace 1:smile
+
+#-------------------------------------------------------------
+% End of the encoding specification
+#-------------------------------------------------------------
+
+# Comments:
+# Date: hier
+# Cotateur: Albert
+# etc.
+
+# data
+
+01 
+# Cpossible here
+01 
+01 
+01 
+01 
+# Olines
+
+20 
+30 
+01 
+20 
+
+# Ants
+# siming
+# 3
+
+30 
+00 
+20 
+30 
+
