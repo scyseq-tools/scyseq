@@ -3,8 +3,9 @@ from scipy.stats import scoreatpercentile
 
 import math
 import itertools
-import sequence as S
-import algorithmic as A
+
+from scyseq import sequence as S
+from scyseq import algorithmic as A
 
 def symbolize(arr, bins, d=None):
     """
@@ -12,7 +13,6 @@ def symbolize(arr, bins, d=None):
        is this funtion `symbolize` useful? (duplicate numpy.digitize?)
        Qu'est-ce que nbin ? Peut-être d ?
 
-    >>> 
     """
     if np.any(arr < nbin[0]):
         seq = np.digitize(arr, bins)
