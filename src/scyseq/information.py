@@ -1,7 +1,6 @@
-#!/usr/bin/env python
-#-*- coding:Utf-8 -*-
-
-__docformat__ = 'reStructuredText'
+"""
+Module for information theory related functions.
+"""
 
 import numpy as np
 
@@ -12,15 +11,13 @@ from .stochastic import conditional_matrix
 
 def metric_entropy(seq):
     """
-    Returns Shannon's (metric) entropy of sequence 
-    
+    Returns Shannon's (metric) entropy of sequence
+
     :param seq: a symbolic Sequence object
 
     :returns: a float
 
     Example :
-
-    On fixe la seed pour pouvoir contrôler la génération de vecteur "aléatoires"
 
     >>> np.random.seed(9)
     >>> a = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])  
@@ -32,14 +29,15 @@ def metric_entropy(seq):
     """
     prob = seq.frequency()
     return - np.sum(prob[prob > 0] * np.log(prob[prob > 0]))
-# shortcut for Shannon (metric) entropy
+
+# shortcuts for Shannon (metric) entropy
 H = metric_entropy
 shannon_entropy = metric_entropy
 
 def topological_entropy(seq):
     """
     Returns the topological entropy
-    
+
     :param seq: a symbolic Sequence object
 
     :returns: a float
@@ -56,6 +54,7 @@ def topological_entropy(seq):
     """
     nb_visit = np.sum(seq.count() > 0)
     return np.log(float(nb_visit))
+
 # shortcut for topological entropy
 T = topological_entropy
 
@@ -79,6 +78,7 @@ def renyi_entropy(seq, coef):
     """
     prob = seq.frequency()
     return (np.log(np.sum(prob[prob > 0]**coef))) / (1 - coef)
+
 # shortcut for Renyi entropy
 R = renyi_entropy
 
@@ -113,6 +113,7 @@ def block_entropy(seq, wlen): #, method="metric", *args):
 #        raise ValueError("Block size cannot be <0")
     nwords = S.words(seq, wlen)
     return H(nwords)
+
 # shortcut for n-block entropy
 # HN = block_entropy
 
@@ -297,7 +298,3 @@ def transfer_entropy(seq1, seq1p, seq2):
 #           + recode([y, x], new_dict=False).H() \
 #           + recode([xp, x], new_dict=False).H() \
 #           - x.H()
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

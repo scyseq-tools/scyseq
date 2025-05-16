@@ -34,6 +34,7 @@ nb_execution_mode = 'auto'
 
 # Display todos by setting to True
 todo_include_todos = True
+html_show_sourcelink = True
 
 
 # -- Options for HTML output -------------------------------------------------

@@ -12,12 +12,17 @@ def generate(method, N, k, *args):
     """
     Generates a Sequence according to a `method`
 
-    :param method: a string in `["uniform", "markov", "binary_logistic"]`
-    :param N: the length of the sequence
-    :type N: integer
-    :param k: the length of the alphabet
-    :param k: integer
-    :param args: supplementary parameters (transition matrix and order for
+    Parameters
+    ----------
+
+    method: str
+       a string in `["uniform", "markov", "binary_logistic"]`
+    N: int 
+       the length of the sequence
+    k: int
+        the length of the alphabet
+    args: 
+        supplementary parameters (transition matrix and order for
                  `"markov"` and :math:`\mu` for `"binary_logisitic"`)
 
     :raises:

@@ -9,8 +9,8 @@ from . import exceptions as E
 # __docformat__ = 'reStructuredText'
 
 """
-This module defines Symbols, Alphabets and symbolic Sequences objects, their
-related methods and functions.
+This module defines the base objects: Symbol, Alphabet and Sequence, their
+attributes and methods.
 """
 
 DTYPES = [np.uint8, np.uint16]
@@ -22,7 +22,7 @@ class Symbol(object):
 
     It has two properties:
 
-    - `strval`: its name which can be accessed, changed but not deleted
+    - `sval`: its name which can be accessed, changed but not deleted
     
     - `ival`: its associated integer value which can be accessed but neither
       changed nor deleted
@@ -30,18 +30,18 @@ class Symbol(object):
     setter and deleter raise exception for explicit behavior.
     """
 
-    def __init__(self, strval):
-        self.__strval = str(strval)
+    def __init__(self, sval):
+        self.__sval = str(sval)
         # __ival is set to an integer when state is included in an alphabet
         self.__ival = None
 
     @property
-    def strval(self):
-        return self.__strval
+    def sval(self):
+        return self.__sval
 
-    @strval.setter
-    def strval(self, value):
-        self.__strval = str(value)
+    @sval.setter
+    def sval(self, value):
+        self.__sval = str(value)
 
     @property
     def ival(self):
@@ -55,19 +55,19 @@ class Symbol(object):
             raise ValueError("Should be interger value")
 
     def __eq__(self, other):
-        return (self.__strval == other.__strval) & (self.__ival == other.__ival)
+        return (self.__sval == other.__sval) & (self.__ival == other.__ival)
 
     def __str__(self):
         if self.__ival is not None:
-            return 'Symbol(%d | %s)' % (self.__ival, self.__strval)
+            return 'Symbol(%d | %s)' % (self.__ival, self.__sval)
         else:
-            return 'Symbol(- | %s)' % self.__strval
+            return 'Symbol(- | %s)' % self.__sval
 
     def __repr__(self):
         if self.__ival is not None:
-            return 'Symbol(%d | %s)' % (self.__ival, self.__strval)
+            return 'Symbol(%d | %s)' % (self.__ival, self.__sval)
         else:
-            return 'Symbol(- | %s)' % self.__strval
+            return 'Symbol(- | %s)' % self.__sval
 
 class Alphabet(object): 
     """
@@ -138,7 +138,7 @@ class Alphabet(object):
                             s._set__ival(n)
             
                 elif all([type(symb) == str for symb in nsymb]):
-                    states = [Symbol(strval=ii) for ii in nsymb]
+                    states = [Symbol(sval=ii) for ii in nsymb]
                     for n, s in enumerate(states):
                         s._set__ival(n)
 
@@ -159,8 +159,8 @@ class Alphabet(object):
 
 ## FIXME:
 ## Just in case...
-#        self.__ditos = dict([(s.ival, s.strval) for s in self.__states])
-#        self.__dstoi = dict([(s.strval, s.ival) for s in self.__states])
+#        self.__ditos = dict([(s.ival, s.sval) for s in self.__states])
+#        self.__dstoi = dict([(s.sval, s.ival) for s in self.__states])
 
     def __str__(self):
         return 'Alphabet['+', '.join([s.__str__() for s in self.__states])+']'
@@ -190,7 +190,7 @@ class Alphabet(object):
 
         if type(value) == Symbol:
             if value.ival is None:
-                if all([value.strval != s.strval for s in self.__states]):
+                if all([value.sval != s.sval for s in self.__states]):
                     self.__states[key] = value
                     self.__states[key]._set__ival(key)
                 else:
@@ -207,15 +207,15 @@ class Alphabet(object):
         return tuple(s for s in self.__states)
     
     @property
-    def strvals(self):
-        return tuple([s.strval for s in self.__states])
+    def svals(self):
+        return tuple([s.sval for s in self.__states])
 
-#    @strvals.setter
-#    def strvals(self, value):
-#        self.__strval = str(value)
+#    @svals.setter
+#    def svals(self, value):
+#        self.__sval = str(value)
 
-#    @strvals.deleter
-#    def strval(self):
+#    @svals.deleter
+#    def sval(self):
 #        raise KeyError("Cannot delete the name of a state")
 
     @property
@@ -234,15 +234,15 @@ class Alphabet(object):
 #        return tuple([s._ival for s in self])
 #    ivals = property(fget=get_ivals)
 #    
-#    def get_strvals(self):
-#        return tuple([s.strval for s in self])
-#    strvals = property(fget=get_strvals)
+#    def get_svals(self):
+#        return tuple([s.sval for s in self])
+#    svals = property(fget=get_svals)
 #
 #    def items(self):
-#        return zip(self.ivals, self.strvals)
+#        return zip(self.ivals, self.svals)
 #        # FIXME: get a dict for each index?
 ##        for index in range(len(self)):
-##            yield self[index]._ival, self[index].strval
+##            yield self[index]._ival, self[index].sval
 #
 # Binary_Alphabet = Alphabet(('False', 'True'))
 
@@ -500,9 +500,9 @@ class Sequence(object):
         return vals
 
     @property
-    def strvals(self):
+    def svals(self):
         # FIXME: check .flags.writeable = False as for ivals.
-        return np.array([self.alphabet[i].strval for i in self.__ivals])
+        return np.array([self.alphabet[i].sval for i in self.__ivals])
 
 # Copy method
     def __deepcopy__(self, memo):
@@ -590,13 +590,13 @@ class Sequence(object):
         return self.__ivals.__iter__()
 
     def iteritems(self):
-        return zip(self.__ivals, self.strvals)
+        return zip(self.__ivals, self.svals)
 
     def iterivals(self):
         return self.__ivals.__iter__()
 
-    def iterstrvals(self):
-        return self.strvals.__iter__()
+    def itersvals(self):
+        return self.svals.__iter__()
 
 ## FIXME:
 ## I do not know when this is really used... for checking reversibility etc.
@@ -606,7 +606,7 @@ class Sequence(object):
 #        """
 #        # return np.flipud(self.ivals).__iter__()
 #
-#        # return zip(np.flipud(self.ivals), np.flipud(self.strvals))
+#        # return zip(np.flipud(self.ivals), np.flipud(self.svals))
 ##        raises:
 ##        AttributeError: property 'ivals' of 'Sequence' object has no setter
 
@@ -778,7 +778,7 @@ class Sequence(object):
             return np.array([len(np.where(self.__ivals == i)[0]) \
                                    for i in range(self.k)])  
         else:
-            assert(type(code) is int)
+            assert(type(ival) is int)
             return len(np.where(self.__ivals == ival)[0])
 
     def frequency(self):
@@ -917,7 +917,7 @@ def recode(lseq, new_alphabet=False, sep='+', names=None):
         else:
             alld = []
             for seq, name in zip(lseq, names):
-                alld.append(['_'.join((name, anitem.strval)) for anitem in seq.alphabet])
+                alld.append(['_'.join((name, anitem.sval)) for anitem in seq.alphabet])
 #
         new_alphabet = []
         for pp in itertools.product(*alld):
@@ -967,7 +967,7 @@ def words(seq, wlen, new_alphabet=False):
 #    """
 #    freq = S.frequency()
 #    # alph_ivals = seq.alphabet.ivals
-#    # alph_strvals = seq.alphabet.strvals
+#    # alph_svals = seq.alphabet.svals
 #    alphabet = seq.alphabet
 #    if sort:
 #        lsort = list(np.argsort(freq))
@@ -975,7 +975,7 @@ def words(seq, wlen, new_alphabet=False):
 #        # FIXME: lsort elements have type numpy.int64 which is not directly usable for
 #        # indexing Alphabet. See the __index__ method for that.
 #        # so here is a local hack which might be generalized if needed...
-#        # return [(alph_ivals[idx], freq[idx], alph_strvals[idx]) for idx in lsort]
+#        # return [(alph_ivals[idx], freq[idx], alph_svals[idx]) for idx in lsort]
 #        indices = [int(i) for i in lsort]
 #        return [(alphabet[idx], freq[idx]) for idx in indices]
 #    else:

@@ -5,7 +5,7 @@ from . import sequence as S
 
 def read_codix(fname, data_only=True):
     """
-    Reads data file from the codix-encoder of the codix software suite for
+    Reads data file from the codix encoder of the codix software suite for
     behavioral studies.
 
     returns in all cases a dictionary with data['site']['code'] = Sequence

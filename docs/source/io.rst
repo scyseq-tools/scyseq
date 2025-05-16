@@ -1,7 +1,7 @@
 Input-output
 ============
 
-.. automodule:: scyseq.iosymb
+.. automodule:: scyseq.io
    :members:
 
 
