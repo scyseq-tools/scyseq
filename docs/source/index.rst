@@ -11,18 +11,9 @@ Welcome to scyseq's documentation!
    :caption: Contents:
 
    introduction
-   sequence
-   discretize
-   algorithmic
-   stochastic
-   information
-   generators
-   io
-   visualisation
-   exceptions
-   recurrence
-   contributors
    notebooks/tutorial
+   library
+   contributors
    notebooks/infant-mother
    references
 

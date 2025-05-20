@@ -1,4 +1,3 @@
-# -*- encoding:utf8
 """
 Test the generator module from stimlib
 """

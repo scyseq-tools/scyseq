@@ -20,7 +20,9 @@ sys.path.append('../../src/')
 #import sys
 #sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.mathjax',
+extensions = ['sphinx.ext.autodoc', 
+              'sphinx.ext.napoleon',
+              'sphinx.ext.mathjax',
               'nbsphinx',
               'sphinx.ext.todo',
               'sphinxcontrib.bibtex' ]
@@ -31,6 +33,11 @@ exclude_patterns = []
 bibtex_bibfiles = ['references.bib']
 
 nb_execution_mode = 'auto'
+
+napoleon_numpy_docstring = True
+napoleon_google_docstring = False
+
+autoclass_content = "class" # can be "class", "init", "both"
 
 # Display todos by setting to True
 todo_include_todos = True

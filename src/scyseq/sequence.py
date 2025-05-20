@@ -1,3 +1,16 @@
+"""
+This module defines the base objects: Symbol, Alphabet and Sequence, their
+attributes and methods.
+
+A symbolic sequence is a list of symbols taken from a finite alphabet of length
+:math:`k`
+
+Internally they are encoded according to integers from :math:`0` to :math:`k-1`.
+
+Alphabet behaves like bidirectional dictionaries with restrictions to avoid
+problems.
+"""
+
 import copy
 import itertools
 import operator
@@ -6,37 +19,47 @@ import numpy as np
 
 from . import exceptions as E
 
-# __docformat__ = 'reStructuredText'
-
-"""
-This module defines the base objects: Symbol, Alphabet and Sequence, their
-attributes and methods.
-"""
 
 DTYPES = [np.uint8, np.uint16]
 DEFAULT_DTYPE = np.uint8
 
-class Symbol(object):
+class Symbol:
     """
-    A symbol (or state) is used to define the state of the system at time $t$.
-
-    It has two properties:
-
-    - `sval`: its name which can be accessed, changed but not deleted
-    
-    - `ival`: its associated integer value which can be accessed but neither
-      changed nor deleted
-
-    setter and deleter raise exception for explicit behavior.
+    A symbol (or state) is used to define the state of the system at time
+    :math:`t`.
     """
 
-    def __init__(self, sval):
-        self.__sval = str(sval)
-        # __ival is set to an integer when state is included in an alphabet
+    def __init__(self, value):
+        """
+
+        :param value: Value associated with the sval property. Must be an
+        integer or a string.  It is automatically converted to a string.  
+        :type value: int or str
+
+        *Examples:*
+
+        >>> Symbol(1) # 1 is converted to a string
+        Symbol(- | 1)
+        >>> Symbol('One')
+        Symbol(- | One)
+
+        The integer value (ival) of a symbol is only attributed once the symbol is
+        inserted in an alphabet.
+
+        It has two properties: ival and sval
+        """
+        if not isinstance(value, (str, int)):
+            raise ValueError("value must be an integer or a string")
+        self.__sval = str(value)
         self.__ival = None
 
     @property
     def sval(self):
+        """
+        The "string value" of the Symbol (i.e. its "name") which can be accessed or
+        changed (set) but not deleted (deleter raises exception for explicit
+        behavior).
+        """
         return self.__sval
 
     @sval.setter
@@ -45,23 +68,32 @@ class Symbol(object):
 
     @property
     def ival(self):
+        """
+        The "integer value" of the Symbol associated integer value which can be
+        accessed but neither changed nor deleted
+
+        setter and deleter raise exception for explicit behavior.
+        """
         return self.__ival
 
     def _set__ival(self, value):
-        """Explicit change of __ival for access from external classes"""
-        if type(value) is int:
+        """
+        Explicit change of __ival for access from the Alphabet class in
+        Alphabet.__init__
+        """
+        if isinstance(value, int):
             self.__ival = value
         else:
-            raise ValueError("Should be interger value")
+            raise ValueError("Should be integer value")
 
     def __eq__(self, other):
         return (self.__sval == other.__sval) & (self.__ival == other.__ival)
 
     def __str__(self):
         if self.__ival is not None:
-            return 'Symbol(%d | %s)' % (self.__ival, self.__sval)
+            return '(%d : %s)' % (self.__ival, self.__sval)
         else:
-            return 'Symbol(- | %s)' % self.__sval
+            return '(- : %s)' % self.__sval
 
     def __repr__(self):
         if self.__ival is not None:
@@ -71,23 +103,13 @@ class Symbol(object):
 
 class Alphabet(object): 
     """
-    The set of states or symbols that can be visited for a sequence or Markov
-    process realization.
-
-    Tests on Symbol and Alphabet
-
-    >>> state1 = Symbol('One')
-    >>> state1
-    Symbol(- | One)
-
-    An integer representation of a state is only attributed once the state is
-    inserted in an alphabet.
-
-    >>> state2 = Symbol('Two')
-    >>> state3 = Symbol('Three')
+    The set of states or symbols that can be visited in a Sequence.
 
     Alphabets can be created with a list of states:
 
+    >>> state1 = Symbol('One')
+    >>> state2 = Symbol('Two')
+    >>> state3 = Symbol('Three')
     >>> alpha = Alphabet([state1, state2, state3])
     >>> alpha
     Alphabet[Symbol(0 | One), Symbol(1 | Two), Symbol(2 | Three)]
@@ -99,7 +121,7 @@ class Alphabet(object):
     Alphabets can also be created using only the length as argument.
 
     >>> beta = Alphabet(3)
-    >>> beta 
+    >>> beta
     Alphabet[Symbol(0 | 0), Symbol(1 | 1), Symbol(2 | 2)]
     >>> alpha[0]
     Symbol(0 | One)
@@ -110,7 +132,7 @@ class Alphabet(object):
     >>> alpha
     Alphabet[Symbol(0 | One), Symbol(1 | Deux), Symbol(2 | Three)]
 
-    Alphabet's states can be changed using a dictionary representation.
+    Alphabet's symbols can be changed using a dictionary representation.
 
     >>> alpha.rename({0 : 'Uno', 2 : 'Tre'})
     >>> alpha
@@ -120,38 +142,32 @@ class Alphabet(object):
     True
     """
 
-    def __init__(self, nsymb):
-        
-        if type(nsymb) is int:
-            states = [Symbol(str(ii)) for ii in range(nsymb)]
-            for n, s in enumerate(states):
-                s._set__ival(n)
+    def __init__(self, symbols):
 
-        elif (type(nsymb) is list) or (type(nsymb) is tuple):
+        if isinstance(symbols, int):
+            self.__symbols = [Symbol(str(ii)) for ii in range(symbols)]
 
-             # Check that all the elements of nsymb are different" 
-             if all([sa != sb for sa, sb in itertools.combinations(nsymb, 2)]):
+        elif isinstance(symbols, (list, tuple)):
+             # Check that all the elements of symbols are different"
+             if all([sa != sb for sa, sb in itertools.combinations(symbols, 2)]):
 
-                if all([type(symb) == Symbol for symb in nsymb]):
-                        states = list(nsymb)
-                        for n, s in enumerate(states):
-                            s._set__ival(n)
-            
-                elif all([type(symb) == str for symb in nsymb]):
-                    states = [Symbol(sval=ii) for ii in nsymb]
-                    for n, s in enumerate(states):
-                        s._set__ival(n)
+                if all([isinstance(symb, Symbol) for symb in symbols]):
+                    self.__symbols = list(symbols)
 
+                elif all([isinstance(symb, str) for symb in symbols]):
+                    self.__symbols = [Symbol(symb) for symb in symbols]
                 else:
                     raise ValueError("Values must be Symbols or strings")
-            
              else:
                 raise E.AlphabetError("The values must all be different.")
         else:
             raise E.AlphabetError(\
             "The values must be an integer, a list or a tuple.")
 
-        self.__states = states
+        for n, s in enumerate(self.__symbols):
+            s._set__ival(n)
+
+        # self.__states = states
 
 # FIXME: Not sure this is useful
         # When an alphabet is associated to a sequence it cannot be modified.
@@ -159,27 +175,27 @@ class Alphabet(object):
 
 ## FIXME:
 ## Just in case...
-#        self.__ditos = dict([(s.ival, s.sval) for s in self.__states])
-#        self.__dstoi = dict([(s.sval, s.ival) for s in self.__states])
+#        self.__ditos = dict([(s.ival, s.sval) for s in self.__symbols])
+#        self.__dstoi = dict([(s.sval, s.ival) for s in self.__symbols])
 
     def __str__(self):
-        return 'Alphabet['+', '.join([s.__str__() for s in self.__states])+']'
+        return 'Alphabet['+', '.join([s.__str__() for s in self.__symbols])+']'
 
     def __repr__(self):
-        return 'Alphabet['+', '.join([s.__repr__() for s in self.__states])+']'
+        return 'Alphabet['+', '.join([s.__repr__() for s in self.__symbols])+']'
 
     def __len__(self):
-        return len(self.__states)
+        return len(self.__symbols)
 
     def __eq__(self, other):
 
         if len(self) != len(other):
             return False
         else:
-            return all([sstate == ostate for sstate, ostate in zip(self, other)]) 
+            return all([ssymbol == osymbol for ssymbol, osymbol in zip(self, other)]) 
 
     def __getitem__(self, key):
-        return self.__states[key]
+        return self.__symbols[key]
 
     def __setitem__(self, key, value):
 
@@ -190,9 +206,9 @@ class Alphabet(object):
 
         if type(value) == Symbol:
             if value.ival is None:
-                if all([value.sval != s.sval for s in self.__states]):
-                    self.__states[key] = value
-                    self.__states[key]._set__ival(key)
+                if all([value.sval != s.sval for s in self.__symbols]):
+                    self.__symbols[key] = value
+                    self.__symbols[key]._set__ival(key)
                 else:
                     raise ValueError('The Symbol already exists')
             else:
@@ -203,12 +219,12 @@ class Alphabet(object):
     
 
     @property
-    def states(self):
-        return tuple(s for s in self.__states)
+    def symbols(self):
+        return tuple(s for s in self.__symbols)
     
     @property
     def svals(self):
-        return tuple([s.sval for s in self.__states])
+        return tuple([s.sval for s in self.__symbols])
 
 #    @svals.setter
 #    def svals(self, value):
@@ -216,19 +232,19 @@ class Alphabet(object):
 
 #    @svals.deleter
 #    def sval(self):
-#        raise KeyError("Cannot delete the name of a state")
+#        raise KeyError("Cannot delete the name of a symbol")
 
     @property
     def ivals(self):
-        return tuple([s.ival for i in __states])
+        return tuple([s.ival for i in __symbols])
 
 #    @ivals.setter
 #    def ival(self, value):
-#        raise TypeError("Cannot change the ival of a state")
+#        raise TypeError("Cannot change the ival of a symbol")
 #
 #    @ivals.deleter
 #    def ival(self):
-#        raise TypeError("Cannot delete the ival of a state")
+#        raise TypeError("Cannot delete the ival of a symbol")
 #
 #    def get_ivals(self):
 #        return tuple([s._ival for s in self])
