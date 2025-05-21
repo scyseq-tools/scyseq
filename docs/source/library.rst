@@ -8,6 +8,13 @@ Symbolic sequences
    :members:
    :special-members:
 
+Operations
+----------
+
+.. automodule:: scyseq.operation
+   :members:
+   :special-members:
+
 Discretisation and partition
 ----------------------------
 
