@@ -10,3 +10,4 @@ __authors__ = ["Laurent Pezard",
                "Florent Boyer-Aymé"]
 
 from .sequence import Symbol, Alphabet, Sequence
+from .exceptions import *

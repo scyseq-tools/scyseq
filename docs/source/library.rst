@@ -6,7 +6,7 @@ Symbolic sequences
 
 .. automodule:: scyseq.sequence
    :members:
-   :special-members:
+   :special-members: __init__, __eq__
 
 Operations
 ----------

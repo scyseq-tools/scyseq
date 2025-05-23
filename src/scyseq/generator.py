@@ -1,4 +1,3 @@
-#-*- coding:Utf-8 -*-
 """
 Generation of specified symbolic sequences
 """
@@ -12,18 +11,18 @@ def generate(method, N, k, *args):
     """
     Generates a Sequence according to a `method`
 
-    Parameters
-    ----------
 
-    method: str
-       a string in `["uniform", "markov", "binary_logistic"]`
-    N: int 
-       the length of the sequence
-    k: int
-        the length of the alphabet
-    args: 
-        supplementary parameters (transition matrix and order for
-                 `"markov"` and :math:`\mu` for `"binary_logisitic"`)
+    :param method: a string in `["uniform", "markov", "binary_logistic"]`
+    :type method: str
+
+    :param N: the length of the sequence
+    :type N: int
+
+    :param k: the length of the alphabet
+    :type k: int
+
+    :param args: supplementary parameters (transition matrix and order for
+           `"markov"` and parameter for `"binary_logisitic"`)
 
     :raises:
        :exc:`NotImplementedError` if `method` is not in the list above.
@@ -96,9 +95,9 @@ def binary_map1d_sequence(length, map1d, xinit, threshold=0.5, skip=100):
 def binary_logistic_sequence(length, param, xinit, threshold=0.5, skip=100):
     """
     Returns a binary sequence with logistic dynamics according to the
-    parameter :math:`\mu`.
+    parameter :math:`\\mu`.
 
-    The equation used here is: :math:`x(t+1) = \mu x (1-x)`
+    The equation used here is: :math:`x(t+1) = \\mu x (1-x)`
 
     :param N: the length of the sequence
     :param mu: the paramter for the logistic equation

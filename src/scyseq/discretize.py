@@ -151,13 +151,20 @@ def subdivision(data, iter_max):
 
 def phase_cluster(data, nb_symb, target_dim=2):
     """
-    This function provides the symbolic dynamic of a multivariate data
-    It is based on the clusterisation of the "phase space" of the channels of MEG temporal signal 
+    This function provides the symbolic dynamic of a multivariate data It is
+    based on the clusterisation of the "phase space" of the channels of MEG
+    temporal signal 
 
 
-    :param data: The input matrix, the lines are the channels and the columns are the time, must be an array
-    :param nb_symb: The number of bins used for the clusterisation i.e. the number of symbols of the symbolic sequences that will be created
-    :param nb_vp : The number of eigen vectors that we want to conserve to project our data on it
+    :param data: The input matrix, the lines are the channels and the columns
+           are the time, must be an array
+
+    :param nb_symb: The number of bins used for the clusterisation i.e. the
+           number of symbols of the symbolic sequences that will be created
+
+    :param nb_vp : The number of eigen vectors that we want to conserve to
+           project our data on it
+
     """
     # SVD
     data = data.T
@@ -167,15 +174,18 @@ def phase_cluster(data, nb_symb, target_dim=2):
 
     # Partitionnage
     edges = np.histogramdd(reduced_data.T, bins= nb_symb)[1]
-    entropy_list = []
 
-    for i in range(len(reduced_data)):
-        edges[i][-1] = edges[i][-1] + 1
-        seq = np.digitize(reduced_data[i], edges[i]) - 1 # symbols between 0 and k-1
-        entropy_rate = A.lempel_ziv(S.Sequence(seq, nb_symb))
-        entropy_list.append(entropy_rate)
+    #FIXME: this is not the place to compute entropy!!!
     
-    return np.array(entropy_list)
+    # entropy_list = []
+
+#    for i in range(len(reduced_data)):
+#        edges[i][-1] = edges[i][-1] + 1
+#        seq = np.digitize(reduced_data[i], edges[i]) - 1 # symbols between 0 and k-1
+#        entropy_rate = A.lempel_ziv(S.Sequence(seq, nb_symb))
+#        entropy_list.append(entropy_rate)
+
+    # return np.array(entropy_list)
 
 
 if __name__ == "__main__":

@@ -1,86 +1,80 @@
-# -*- encoding:utf8 -*-
 """
-This is the exception handling for symbolic sequences
+Exception classes for the scyseq library.
 """
 
-#FIXME: How can we get the expression that call  
-
-class Error(Exception):
-    """
-    This exception does nothing. 
-
-    I found "Exception handling" in "Python tutorial" and just copied the
-    examples.
-
-    .. todo::
-       Understand better "Exception handling" chapter and make better
-       exception handling in the whole package.  
-    """ 
+class ScyseqError(Exception):
+    """Base exception for all errors raised by the scyseq library."""
     pass
 
-class ShapeError(Error):
-    """
-    This exception is used when the length of the alphabet causes an error.
-    """
-    def __init__(self, message):
-        """
-        Init the exception
+# === Symbol-related errors ===
 
-        .. todo::
-           Can we deal with the expression as in the "Python tutorial"
-        """
-        self.message = message
-        #self.expression = expression
-    def  __str__(self):
-        return self.message
+class SymbolError(ScyseqError):
+    """Base exception for symbol-related issues."""
+    pass
 
-class SymbolError(Error):
-    """
-    This exception is used when the length of the alphabet causes an error.
-    """
-    def __init__(self, message):
-        """
-        Init the exception
+class SymbolDefinitionError(SymbolError):
+    """Exception raised when a symbol cannot be defined."""
+    def __init__(self, value, msg):
+        super().__init__(msg)
+        self.value = value
 
-        .. todo::
-           Can we deal with the expression as in the "Python tutorial"
-        """
-        self.message = message
-        #self.expression = expression
-    def  __str__(self):
-        return self.message
+class SymbolAccessError(SymbolError):
+    """Exception raised when a symbol cannot be accessed."""
+    def __init__(self, msg):
+        super().__init__(msg)
 
-class AlphabetError(Error):
-    """
-    This exception is used when the length of the alphabet causes an error.
-    """
-    def __init__(self, message):
-        """
-        Init the exception
+# === Alphabet-related errors ===
 
-        .. todo::
-           Can we deal with the expression as in the "Python tutorial"
-        """
-        self.message = message
-        #self.expression = expression
-    def  __str__(self):
-        return self.message
+class AlphabetError(ScyseqError):
+    """Base exception for alphabet-related issues."""
+    pass
 
-class LengthError(Error):
-    """
-    This exception is used when the length of the sequence causes an error.
-    """
-    def __init__(self, message):
-        self.message = message
-    def  __str__(self):
-        return self.message
+class AlphabetAccessError(SymbolError):
+    """Exception raised when an alphabet cannot be accessed."""
+    def __init__(self, msg):
+        super().__init__(msg)
 
-class DictionaryError(Error):
-    """
-    This exception is used when the dictionary causes an error.
-    """
-    def __init__(self, message):
-        self.message = message
-    def  __str__(self):
-        return self.message
+class InvalidSymbolError(AlphabetError):
+    """Raised when an invalid symbol is used in an alphabet or sequence."""
+    def __init__(self, symbol, alphabet):
+        msg = f"Symbol '{symbol}' is not part of the allowed alphabet: {alphabet}"
+        super().__init__(msg)
+        self.symbol = symbol
+        self.alphabet = alphabet
 
+
+class EmptyAlphabetError(AlphabetError):
+    """Raised when attempting to use an empty alphabet."""
+    def __init__(self):
+        super().__init__("The alphabet must not be empty.")
+
+
+# === Sequence-related errors ===
+
+class SequenceError(ScyseqError):
+    """Base exception for sequence-related issues."""
+    pass
+
+
+class SequenceParseError(SequenceError):
+    """Raised when parsing a sequence fails due to invalid format."""
+    def __init__(self, sequence, message="Unable to parse sequence."):
+        super().__init__(f"{message} Input: {sequence}")
+        self.sequence = sequence
+
+
+class SymbolMismatchError(SequenceError):
+    """Raised when a sequence contains symbols not in the defined alphabet."""
+    def __init__(self, sequence, invalid_symbols):
+        msg = f"Sequence contains invalid symbols: {invalid_symbols}"
+        super().__init__(msg)
+        self.sequence = sequence
+        self.invalid_symbols = invalid_symbols
+
+
+__all__ = [
+    "ScyseqError",
+    "SymbolError", "SymbolDefinitionError", "SymbolAccessError",
+    "AlphabetError", "InvalidSymbolError", "EmptyAlphabetError",
+    "SequenceError", "SequenceParseError", "SymbolMismatchError",
+]

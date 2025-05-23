@@ -1,8 +1,9 @@
 import pytest
+import scyseq as sq
 from scyseq import Symbol
 
 def test_symbol_badinit():
-    with pytest.raises(ValueError) as exc_info:
+    with pytest.raises(sq.SymbolDefinitionError) as exc_info:
         Symbol([1,2,3])
     assert "integer" in str(exc_info.value)
 
@@ -25,14 +26,14 @@ def test_symbol_initint(init_int):
     assert init_int.sval == "1"
 
 def test_symbol_ival_setter(init_str):
-    with pytest.raises(AttributeError) as exc_info:
+    with pytest.raises(sq.SymbolAccessError) as exc_info:
         init_str.ival = 0
-    assert "no setter" in str(exc_info.value)
+    assert "read-only" in str(exc_info.value)
 
 def test_symbol_ival_deleter(init_str):
-    with pytest.raises(AttributeError) as exc_info:
+    with pytest.raises(sq.SymbolAccessError) as exc_info:
         del init_str.ival
-    assert "no deleter" in str(exc_info.value)
+    assert "deleted" in str(exc_info.value)
 
 def test_symbol_sval_setter(init_str):
     init_str.sval = "zero"
@@ -40,9 +41,9 @@ def test_symbol_sval_setter(init_str):
     assert init_str.ival is None
 
 def test_symbol_sval_deleter(init_str):
-    with pytest.raises(AttributeError) as exc_info:
+    with pytest.raises(sq.SymbolAccessError) as exc_info:
         del init_str.sval
-    assert "no deleter" in str(exc_info.value)
+    assert "deleted" in str(exc_info.value)
 
 def test_symbol_equal(init_str):
     assert init_str == Symbol('one')
