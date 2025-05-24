@@ -55,9 +55,9 @@ class Symbol:
         """
         if not isinstance(value, (str, int)):
             raise E.SymbolDefinitionError(value, "Value must be an integer or a string")
-        self.__sval = str(value)
-        self.__ival = None
-        self.__alphabet = None
+        self._sval = str(value)
+        self._ival = None
+        self._alphabet = None
 
     @property
     def sval(self):
@@ -69,18 +69,18 @@ class Symbol:
         If the symbol is inserted in an alphabet, the sval should not already
         exist in the alphabet.
         """
-        return self.__sval
+        return self._sval
 
     @sval.setter
     def sval(self, value):
         if not isinstance(value, str):
             raise E.SymbolDefinitionError(value, "Value must be a string")
 
-        if self.__alphabet is not None:
-            if value in self.__alphabet.svals:
+        if self._alphabet is not None:
+            if value in self._alphabet.svals:
                 raise E.AlphabetAccessError("Symbol sval already exists in alphabet")
 
-        self.__sval = value
+        self._sval = value
 
     @sval.deleter
     def sval(self):
@@ -94,7 +94,7 @@ class Symbol:
 
         setter and deleter raise exception for explicit behavior.
         """
-        return self.__ival
+        return self._ival
 
     @ival.setter
     def ival(self, value):
@@ -107,12 +107,12 @@ class Symbol:
 
     def _attach(self, alphabet, value):
         """
-        Explicit change of __ival for access from the Alphabet class in
+        Explicit change of _ival for access from the Alphabet class in
         Alphabet.__init__
         """
         if isinstance(value, int) and isinstance(alphabet, Alphabet):
-            self.__ival = value
-            self.__alphabet = alphabet
+            self._ival = value
+            self._alphabet = alphabet
         else:
             # This is the sign of a bug...
             raise E.SymbolAccessError("Attachment of symbol failed.")
@@ -121,19 +121,32 @@ class Symbol:
         """
         Returns True if self.ival == other.ival and self.sval == other.sval
         """
-        return (self.__sval == other.__sval) & (self.__ival == other.__ival)
+        return (self._sval == other._sval) & (self._ival == other._ival)
 
     def __str__(self):
-        if self.__ival is not None:
-            return '(%d | %s)' % (self.__ival, self.__sval)
+        if self._ival is not None:
+            return '(%d | %s)' % (self._ival, self._sval)
         else:
-            return '(- | %s)' % self.__sval
+            return '(- | %s)' % self._sval
 
     def __repr__(self):
-        if self.__ival is not None:
-            return 'Symbol(%d | %s)' % (self.__ival, self.__sval)
+        if self._ival is not None:
+            return 'Symbol(%d | %s)' % (self._ival, self._sval)
         else:
-            return 'Symbol(- | %s)' % self.__sval
+            return 'Symbol(- | %s)' % self._sval
+
+    def __deepcopy__(self, memo):
+        # Create a new instance without calling __init__
+        copied = self.__class__.__new__(self.__class__)
+
+        # Insert the original in the memo to take care of the cycles
+        memo[id(self)] = copied
+
+        copied._ival = copy.deepcopy(self._ival, memo)
+        copied._sval = copy.deepcopy(self._sval, memo)
+        copied._alphabet = copy.deepcopy(self._alphabet, memo)
+
+        return copied
 
 class Alphabet(tuple): 
     """
@@ -146,7 +159,7 @@ class Alphabet(tuple):
         if isinstance(symbols, cls):
             return copy.deepcopy(symbols)
 
-        if isinstance(symbols, int):
+        elif isinstance(symbols, int):
             elements = [Symbol(str(ii)) for ii in range(symbols)]
 
         elif isinstance(symbols, (list, tuple)):
@@ -194,12 +207,12 @@ class Alphabet(tuple):
         for n, symb in enumerate(self):
             symb._attach(self, n)
 
-        self.__ivals = tuple(s.ival for s in self)
-        self.__svals = tuple(s.sval for s in self)
-        self.__symbols = tuple(s for s in self)
+        self._ivals = tuple(s.ival for s in self)
+        self._svals = tuple(s.sval for s in self)
+        self._symbols = tuple(s for s in self)
         # FIXME: Not sure this is useful
         # When an alphabet is associated to a sequence it cannot be modified.
-        # self.__islinked = False
+        # self._islinked = False
 
     def __str__(self):
         return '('+', '.join([s.__str__() for s in self])+')'
@@ -230,15 +243,30 @@ class Alphabet(tuple):
     def __getitem__(self, key):
         try:
             if isinstance(key, int):
-                return self.__symbols[key]
+                return self._symbols[key]
             elif isinstance(key, str):
                 idx = self.svals.index(key)
-                return self.__symbols[idx]
+                return self._symbols[idx]
         except:
             raise E.AlphabetAccessError('Key not in alphabet')
 
     def __setitem__(self, key, value):
         raise E.AlphabetAccessError("'Alphabet' object does not support item assignment") 
+
+    def __deepcopy__(self, memo):
+        # Deepcopy of the content of the tuple
+        deepcopied = copy.deepcopy(tuple(self), memo)
+        # Create a new instance without calling __init__
+        copied = tuple.__new__(self.__class__, deepcopied)
+
+        # Insert the original in the memo to take care of the cycles
+        memo[id(self)] = copied
+
+        copied._ivals = copy.deepcopy(self._ivals, memo)
+        copied._svals = copy.deepcopy(self._svals, memo)
+        copied._symbols = copy.deepcopy(self._symbols, memo)
+
+        return copied
 
     @property
     def svals(self):
@@ -249,11 +277,11 @@ class Alphabet(tuple):
         >>> alpha_a.svals
         ('a', 'b', 'c')
         """
-        return self.__svals
+        return self._svals
 
 #    @svals.setter
 #    def svals(self, value):
-#        self.__sval = str(value)
+#        self._sval = str(value)
 
 #    @svals.deleter
 #    def svals(self):
@@ -268,7 +296,7 @@ class Alphabet(tuple):
         >>> alpha_a.ivals
         (0, 1, 2)
         """
-        return self.__ivals
+        return self._ivals
 
 #    @ivals.setter
 #    def ivals(self, value):
@@ -349,6 +377,7 @@ class Sequence(object):
 
         # Check correspondence between symbols and alphabet
         if check:
+            print(array, max(array), len(alpha))
             if (max(array) >= len(alpha)): 
                 raise E.AlphabetError("Invalid alphabet length")
 
@@ -376,18 +405,18 @@ class Sequence(object):
 ##        if len(symbols.shape) != 1: # 1D sequences for now
 ##            raise E.ShapeError(\
 ##                  'Data shape is not one-dimensional')
-#        # self.__ivals = np.asarray(symbols).astype(dtype)
+#        # self._ivals = np.asarray(symbols).astype(dtype)
 #        # Parse the alphabet
 #
 #        if isinstance(alphabet, Alphabet):
-#            self.__alphabet = copy.deepcopy(alphabet)
+#            self._alphabet = copy.deepcopy(alphabet)
 #
 ## FIXME: is the islinked is useful?
-##                self.__alphabet.__islinked = True
+##                self._alphabet._islinked = True
 #
 #        elif type(alphabet) == int :
 #            # self._alphabet = Alphabet(alphabet)
-#            self.__alphabet = Alphabet(alphabet)
+#            self._alphabet = Alphabet(alphabet)
 #        else:
 #            raise TypeError('The parameter alphabet must be an integer or a sequence.Alphabet object')
 
@@ -431,8 +460,8 @@ class Sequence(object):
             pass
 
         else:
-            self.__alphabet = self._validalphabet
-            self.__ivals = self._validivals
+            self._alphabet = self._validalphabet
+            self._ivals = self._validivals
 
             del self._validalphabet, self._validivals
 
@@ -449,29 +478,29 @@ class Sequence(object):
 #            if len(symbols.shape) != 1: # 1D sequences for now
 #                raise E.ShapeError(\
 #                      'Data shape is not one-dimensional')
-#            self.__ivals = np.asarray(symbols).astype(dtype)
+#            self._ivals = np.asarray(symbols).astype(dtype)
 #            # Parse the alphabet
 #            if isinstance(alphabet, Alphabet):
-#                self.__alphabet = copy.deepcopy(alphabet)
+#                self._alphabet = copy.deepcopy(alphabet)
 #
 ## FIXME: is the islinked is useful?
-##                self.__alphabet.__islinked = True
+##                self._alphabet._islinked = True
 #
 #            elif type(alphabet) == int :
 #                # self._alphabet = Alphabet(alphabet)
-#                self.__alphabet = Alphabet(alphabet)
+#                self._alphabet = Alphabet(alphabet)
 #            else:
 #                raise TypeError('The parameter alphabet must be an integer or a sequence.Alphabet object')
 #            # Check correspondence between symbols and alphabet
 #            if check:
-#                if (max(self.__ivals) >= len(self.__alphabet)): 
+#                if (max(self._ivals) >= len(self._alphabet)): 
 #                    raise E.AlphabetError("Invalid alphabet length")
 
 ## Alphabet property
 
     @property
     def alphabet(self):
-        return self.__alphabet
+        return self._alphabet
 
     @property
     def k(self):
@@ -479,12 +508,12 @@ class Sequence(object):
 
     @property
     def ivals(self):
-        return self.__ivals
+        return self._ivals
 
     @property
     def svals(self):
         # FIXME: check .flags.writeable = False as for ivals.
-        tmp = np.array([self.alphabet[i].__sval for i in self.__ivals])
+        tmp = np.array([self.alphabet[i]._sval for i in self._ivals])
         tmp.flags.writeable = False
         return tmp
 
@@ -493,7 +522,7 @@ class Sequence(object):
         """
         Returns a copy of the Sequence object
         """
-        return Sequence(np.copy(self.__ivals), \
+        return Sequence(np.copy(self._ivals), \
                         copy.deepcopy(self.alphabet))
 
 # Sequences representation
@@ -518,7 +547,7 @@ class Sequence(object):
         """
         Returns the length of a Sequence (:func:`len`).
         """
-        return len(self.__ivals)
+        return len(self._ivals)
 
     def __getitem__(self, key):
         """
@@ -526,14 +555,14 @@ class Sequence(object):
         ndarray 
         """
         if type(key) is int:
-            tmpval = [self.__ivals[key]]
+            tmpval = [self._ivals[key]]
         elif type(key) is slice:
-            tmpval = self.__ivals[key]
+            tmpval = self._ivals[key]
         elif type(key) is np.ndarray:
             # print(key, type(key))
-            tmpval = self.__ivals[np.where(key)[0]]
+            tmpval = self._ivals[np.where(key)[0]]
 #        elif type(key) is Sequence:
-#            tmpval = self.__ivals[np.where(key.__ivals)[0]]
+#            tmpval = self._ivals[np.where(key._ivals)[0]]
         else:
             print(key, type(key))
             raise ValueError("Cannot slice with %s" % str(type(key)))
@@ -571,13 +600,13 @@ class Sequence(object):
         Returns an iterator on the Sequence. Should return an itertor over the
         ivals otherwise the all(seq != seq) returns True...
         """
-        return self.__ivals.__iter__()
+        return self._ivals.__iter__()
 
     def iteritems(self):
-        return zip(self.__ivals, self.svals)
+        return zip(self._ivals, self.svals)
 
     def iterivals(self):
-        return self.__ivals.__iter__()
+        return self._ivals.__iter__()
 
     def itersvals(self):
         return self.svals.__iter__()
@@ -607,7 +636,7 @@ class Sequence(object):
 #        if (self.alphabet != other.alphabet):
 #            raise ValueError('Alphabets are different')
 #        else:
-#            return Sequence(np.concatenate((self.__ivals, other.__ivals)), \
+#            return Sequence(np.concatenate((self._ivals, other._ivals)), \
 #                            self.alphabet, check=False)
 
 # Logical operations
@@ -629,8 +658,8 @@ class Sequence(object):
 #        if self.k != 2 or other.k != 2:
 #            raise NotImplementedError('& is defined for binary sequences only')
 #        else:
-#            seq = np.logical_and(self.__ivals, other.__ivals)
-#            return Sequence(seq.astype(self.__ivals.dtype), Alphabet(('False', 'True')), \
+#            seq = np.logical_and(self._ivals, other._ivals)
+#            return Sequence(seq.astype(self._ivals.dtype), Alphabet(('False', 'True')), \
 #                            check=False)
 #
 #    def __or__(self, other):
@@ -647,11 +676,11 @@ class Sequence(object):
 #        if self.k != 2 or other.k != 2:
 #            raise NotImplementedError('| is defined for binary sequences only')
 #        else:
-#            arr = np.logical_or(self.__ivals, other.__ivals)
-#            return Sequence(arr.astype(self.__ivals.dtype), Alphabet(('False', 'True')), \
+#            arr = np.logical_or(self._ivals, other._ivals)
+#            return Sequence(arr.astype(self._ivals.dtype), Alphabet(('False', 'True')), \
 #                            check=False)
 #
-#    def __xor__(self, other):
+#    def _xor_(self, other):
 #        """
 #        Returns a binary sequence which is the result of comparison with `^`
 #
@@ -665,8 +694,8 @@ class Sequence(object):
 #        if self.k != 2 or other.k != 2:
 #            raise NotImplementedError('| is defined for binary sequences only')
 #        else:
-#            arr = np.logical_xor(self.__ivals, other.__ivals)
-#            return Sequence(arr.astype(self.__ivals.dtype), Alphabet(('False', 'True')), \
+#            arr = np.logical_xor(self._ivals, other._ivals)
+#            return Sequence(arr.astype(self._ivals.dtype), Alphabet(('False', 'True')), \
 #                            check=False)
 
 # Rich comparison methods"
@@ -676,7 +705,7 @@ class Sequence(object):
         if isinstance(other, Sequence):
             if self.alphabet == other.alphabet:
                 if len(other) == len(self):
-                    arr = op(self.__ivals, other.__ivals)
+                    arr = op(self._ivals, other._ivals)
                 else:
                     raise \
                     ValueError('Cannot compare Sequences with different lengths')
@@ -685,12 +714,12 @@ class Sequence(object):
                 ValueError('Cannot compare Sequences with different alphabets')
 
         elif isinstance(other, int) and other >= 0:
-                arr = op(self.__ivals, other)
+                arr = op(self._ivals, other)
         else:
             raise \
             ValueError("Sequence can be compared with a Sequence or a positive integer only")
 
-        return Sequence(arr.astype(self.__ivals.dtype), Alphabet(('False', 'True')), check=False)
+        return Sequence(arr.astype(self._ivals.dtype), Alphabet(('False', 'True')), check=False)
 
     def __lt__(self, other):
         return self.__mkcomp__(other, operator.__lt__)
@@ -715,37 +744,37 @@ class Sequence(object):
         """
         Return a "rolled" sequence
         """
-#        self.__ivals = np.roll(self.__ivals, step)
+#        self._ivals = np.roll(self._ivals, step)
 
-        return Sequence(np.roll(self.__ivals, step), self.__alphabet)
+        return Sequence(np.roll(self._ivals, step), self._alphabet)
 
     def reverse(self):
         """
         Return a "reversed" the sequence
         """
-        # self.__ivals = np.flipud(self.__ivals)
-        return Sequence(np.flipud(self.__ivals), self.__alphabet)
+        # self._ivals = np.flipud(self._ivals)
+        return Sequence(np.flipud(self._ivals), self._alphabet)
 
     def shuffle(self):
         """
         Return a "shuffled" sequence
         """
-        # np.random.shuffle(self.__ivals)
-        shuffled = np.random.shuffle(copy.copy(self.__ivals))
-        return Sequence(shuffled, self.__alphabet)
+        # np.random.shuffle(self._ivals)
+        shuffled = np.random.shuffle(copy.copy(self._ivals))
+        return Sequence(shuffled, self._alphabet)
 
     def reduce(self):
         """
         Delete the repetitions of symbols in a sequence *in place*
         """
         #diff = np.diff(self.ivals)
-        diff = np.ediff1d(self.__ivals)
+        diff = np.ediff1d(self._ivals)
         bool_idx = list(diff!=0)
         bool_idx.append(True)
-        reduced = self.__ivals[bool_idx]
+        reduced = self._ivals[bool_idx]
 
         # self.ivals = np.hstack((self.ivals[diff!=0], self.ivals[-1]))
-        return Sequence(reduced, self.__alphabet)
+        return Sequence(reduced, self._alphabet)
 
 # Methods that compute characteristics of the sequence
 
@@ -757,14 +786,14 @@ class Sequence(object):
         :returns: a numpy.ndarray of integers
         """
         if value is None:
-            return np.array([np.sum(self.__ivals == i) for i in range(self.k)])
+            return np.array([np.sum(self._ivals == i) for i in range(self.k)])
 
-#            return np.array([len(np.where(self.__ivals == i)[0]) \
+#            return np.array([len(np.where(self._ivals == i)[0]) \
 #                                   for i in range(self.k)])  
         elif isinstance(value, int):
-            return np.sum(self.__ivals == value)
+            return np.sum(self._ivals == value)
         elif isinstance(value, str):
-            return np.sum(self.__svals == value)
+            return np.sum(self._svals == value)
         else:
             raise ValueError("value should be an int or a string")
 
