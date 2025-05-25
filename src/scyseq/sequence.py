@@ -125,15 +125,15 @@ class Symbol:
 
     def __str__(self):
         if self._ival is not None:
-            return '(%d | %s)' % (self._ival, self._sval)
-        else:
-            return '(- | %s)' % self._sval
+            return f"({self._ival} | {self._sval})"
+
+        return f"(- | {self._sval})"
 
     def __repr__(self):
         if self._ival is not None:
-            return 'Symbol(%d | %s)' % (self._ival, self._sval)
-        else:
-            return 'Symbol(- | %s)' % self._sval
+            return f"Symbol({self._ival} | {self._sval})"
+
+        return f"Symbol(- | {self._sval})"
 
     def __deepcopy__(self, memo):
         # Create a new instance without calling __init__
@@ -148,7 +148,7 @@ class Symbol:
 
         return copied
 
-class Alphabet(tuple): 
+class Alphabet(tuple):
     """
     The set of symbols that can be visited in a Sequence.
     """
@@ -159,12 +159,12 @@ class Alphabet(tuple):
         if isinstance(symbols, cls):
             return copy.deepcopy(symbols)
 
-        elif isinstance(symbols, int):
+        if isinstance(symbols, int):
             elements = [Symbol(str(ii)) for ii in range(symbols)]
 
         elif isinstance(symbols, (list, tuple)):
              # Check that all the elements of symbols are different"
-             if all([sa != sb for sa, sb in itertools.combinations(symbols, 2)]):
+            if all([sa != sb for sa, sb in itertools.combinations(symbols, 2)]):
 
                 if all([isinstance(symb, Symbol) for symb in symbols]):
                     elements = symbols
@@ -173,7 +173,7 @@ class Alphabet(tuple):
                     elements = [Symbol(symb) for symb in symbols]
                 else:
                     raise ValueError("Values must all be Symbols or strings")
-             else:
+            else:
                 raise E.AlphabetError("The values must all be different.")
         else:
             raise E.AlphabetError("The values must be an integer, a list or a tuple.")
@@ -237,21 +237,21 @@ class Alphabet(tuple):
             raise E.AlphabetAccessError("Can only compare alphabets with alphabets")
         if len(self) != len(other):
             return False
-        else:
-            return all([ssymbol == osymbol for ssymbol, osymbol in zip(self, other)]) 
+
+        return all([ssymbol == osymbol for ssymbol, osymbol in zip(self, other)])
 
     def __getitem__(self, key):
         try:
             if isinstance(key, int):
                 return self._symbols[key]
-            elif isinstance(key, str):
+            if isinstance(key, str):
                 idx = self.svals.index(key)
                 return self._symbols[idx]
         except:
             raise E.AlphabetAccessError('Key not in alphabet')
 
     def __setitem__(self, key, value):
-        raise E.AlphabetAccessError("'Alphabet' object does not support item assignment") 
+        raise E.AlphabetAccessError("'Alphabet' object does not support item assignment")
 
     def __deepcopy__(self, memo):
         # Deepcopy of the content of the tuple
@@ -334,18 +334,18 @@ class Alphabet(tuple):
         >>> alpha_d
         Alphabet(Symbol(0 | a), Symbol(1 | One), Symbol(2 | c), Symbol(3 | Three))
         """
-        if type(replacement) != dict :
+        if not isinstance(replacement, dict):
             raise TypeError ('The input must be a dictionnary')
-        if not all([isinstance(k, int) and isinstance(v, str)
-                    for k, v in replacement.items()]):
+        if not all(isinstance(k, int) and isinstance(v, str)
+                    for k, v in replacement.items()):
             raise E.AlphabetAccessError("Replacements should be int : str")
-        else:
-            for k, v in replacement.items():
-                # symbol.sval setter takes care of the unicity of the symbol in
-                # the alphabet.
-                self[k].sval = v
 
-class Sequence(object):
+        for k, v in replacement.items():
+            # symbol.sval setter takes care of the unicity of the symbol in
+            # the alphabet.
+            self[k].sval = v
+
+class Sequence:
     """
     Defines a symbolic sequence coded using integers in :math:`{0,
     k-1}` and their methods.
@@ -377,8 +377,7 @@ class Sequence(object):
 
         # Check correspondence between symbols and alphabet
         if check:
-            print(array, max(array), len(alpha))
-            if (max(array) >= len(alpha)): 
+            if max(array) >= len(alpha):
                 raise E.AlphabetError("Invalid alphabet length")
 
         instance = super().__new__(cls)
@@ -418,7 +417,8 @@ class Sequence(object):
 #            # self._alphabet = Alphabet(alphabet)
 #            self._alphabet = Alphabet(alphabet)
 #        else:
-#            raise TypeError('The parameter alphabet must be an integer or a sequence.Alphabet object')
+#            raise 
+# TypeError('The parameter alphabet must be an integer or a sequence.Alphabet object')
 
     def __init__(self, symbols, alphabet, check=True):
         """
@@ -490,29 +490,41 @@ class Sequence(object):
 #                # self._alphabet = Alphabet(alphabet)
 #                self._alphabet = Alphabet(alphabet)
 #            else:
-#                raise TypeError('The parameter alphabet must be an integer or a sequence.Alphabet object')
+#                raise
+# TypeError('The parameter alphabet must be an integer or a sequence.Alphabet object')
 #            # Check correspondence between symbols and alphabet
 #            if check:
-#                if (max(self._ivals) >= len(self._alphabet)): 
+#                if (max(self._ivals) >= len(self._alphabet)):
 #                    raise E.AlphabetError("Invalid alphabet length")
 
 ## Alphabet property
 
     @property
     def alphabet(self):
+        """
+        The alphabet property
+        """
         return self._alphabet
 
     @property
     def k(self):
+        """
+        The length of the alphabet
+        """
         return len(self.alphabet)
 
     @property
     def ivals(self):
+        """
+        The tuple of integer values
+        """
         return self._ivals
 
     @property
     def svals(self):
-        # FIXME: check .flags.writeable = False as for ivals.
+        """
+        The tuple of string values
+        """
         tmp = np.array([self.alphabet[i]._sval for i in self._ivals])
         tmp.flags.writeable = False
         return tmp
@@ -535,7 +547,7 @@ class Sequence(object):
            Do we need more information when we want to print a Sequence
         """
         return self.ivals.__str__() # FIXME: need more info ??
-    
+
     def __repr__(self):
         """
         Defines the representation of a Sequence.
@@ -554,18 +566,18 @@ class Sequence(object):
         Allows to slice a sequence. Can be sliced with an int, a slice or an
         ndarray 
         """
-        if type(key) is int:
+        if isinstance(key, int):
             tmpval = [self._ivals[key]]
-        elif type(key) is slice:
+        elif isinstance(key, slice):
             tmpval = self._ivals[key]
-        elif type(key) is np.ndarray:
+        elif isinstance(key, np.ndarray):
             # print(key, type(key))
             tmpval = self._ivals[np.where(key)[0]]
 #        elif type(key) is Sequence:
 #            tmpval = self._ivals[np.where(key._ivals)[0]]
         else:
             print(key, type(key))
-            raise ValueError("Cannot slice with %s" % str(type(key)))
+            raise ValueError(f"Cannot slice with {str(type(key))}")
 
         return Sequence(tmpval, self.alphabet, check=False)
 
@@ -577,7 +589,7 @@ class Sequence(object):
 #        :raises:
 #           :exc:`ValueError`: if `value` is not in :math:`{0, k-1}`
 #        """
-#        if (value<0) or (value>=self._alen) or type(value) is not int: 
+#        if (value<0) or (value>=self._alen) or type(value) is not int:
 #            raise ValueError("%d is not allowed for alphabet length=%d" % \
 #                            (value, self._alen))
 #        self.ivals.__setitem__(key, int(value))
@@ -603,12 +615,21 @@ class Sequence(object):
         return self._ivals.__iter__()
 
     def iteritems(self):
+        """
+        Returns the pairs ival : sval
+        """
         return zip(self._ivals, self.svals)
 
     def iterivals(self):
+        """
+        Returns the iterator over the integer values
+        """
         return self._ivals.__iter__()
 
     def itersvals(self):
+        """
+        Returns the iterator over the string values
+        """
         return self.svals.__iter__()
 
 ## FIXME:
@@ -640,7 +661,7 @@ class Sequence(object):
 #                            self.alphabet, check=False)
 
 # Logical operations
-# FIXME: 
+# FIXME:
 # np.logical_? are defined for any array. Why do we check binary?
 # This is strange to change logical_? to operators, no?
 
@@ -714,7 +735,7 @@ class Sequence(object):
                 ValueError('Cannot compare Sequences with different alphabets')
 
         elif isinstance(other, int) and other >= 0:
-                arr = op(self._ivals, other)
+            arr = op(self._ivals, other)
         else:
             raise \
             ValueError("Sequence can be compared with a Sequence or a positive integer only")
@@ -759,21 +780,19 @@ class Sequence(object):
         """
         Return a "shuffled" sequence
         """
-        # np.random.shuffle(self._ivals)
         shuffled = np.random.shuffle(copy.copy(self._ivals))
+
         return Sequence(shuffled, self._alphabet)
 
     def reduce(self):
         """
-        Delete the repetitions of symbols in a sequence *in place*
+        Delete the repetitions of symbols in a sequence
         """
-        #diff = np.diff(self.ivals)
         diff = np.ediff1d(self._ivals)
         bool_idx = list(diff!=0)
         bool_idx.append(True)
         reduced = self._ivals[bool_idx]
 
-        # self.ivals = np.hstack((self.ivals[diff!=0], self.ivals[-1]))
         return Sequence(reduced, self._alphabet)
 
 # Methods that compute characteristics of the sequence
@@ -788,14 +807,13 @@ class Sequence(object):
         if value is None:
             return np.array([np.sum(self._ivals == i) for i in range(self.k)])
 
-#            return np.array([len(np.where(self._ivals == i)[0]) \
-#                                   for i in range(self.k)])  
-        elif isinstance(value, int):
+        if isinstance(value, int):
             return np.sum(self._ivals == value)
-        elif isinstance(value, str):
-            return np.sum(self._svals == value)
-        else:
-            raise ValueError("value should be an int or a string")
+
+        if isinstance(value, str):
+            return np.sum(self.svals == value)
+
+        raise ValueError("Value should be an integer or a string")
 
 
     def frequency(self):
