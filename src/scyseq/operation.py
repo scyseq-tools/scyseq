@@ -8,39 +8,39 @@ def roll(seq, step):
     """
     Roll the sequence
     """
-    newseq = copy.deepcopy(seq)
-    newseq.roll(step)
-    return newseq
+#    newseq = copy.deepcopy(seq)
+#    newseq.roll(step)
+    return newseq.roll(step)
 
 def reverse(seq):
     """
     Reverse the sequence
     """
-    newseq = copy.deepcopy(seq)
-    newseq.reverse()
-    return newseq
+#    newseq = copy.deepcopy(seq)
+#    newseq.reverse()
+    return newseq.reverse()
 
 def shuffle(seq):
     """
     Shuffle the sequence
     """
-    newseq = copy.deepcopy(seq)
-    newseq.shuffle()
-    return newseq
+#    newseq = copy.deepcopy(seq)
+#    newseq.shuffle()
+    return newseq.shuffle()
 
 def reduce(seq):
     """
     Returns a reduced sequence (ie only keep the transitions)
     """
-    newseq = copy.deepcopy(seq)
-    newseq.reduce()
-    return newseq
+#    newseq = copy.deepcopy(seq)
+#    newseq.reduce()
+    return newseq.reduce()
 
-def issequence(obj):
-    """
-    Returns True if x is a symbolic sequence
-    """
-    return isinstance(obj, Sequence) 
+#def issequence(obj):
+#    """
+#    Returns True if x is a symbolic sequence
+#    """
+#    return isinstance(obj, Sequence) 
 
 def transform(seq, correspondance, new_alphabet=None):
     """
@@ -122,7 +122,7 @@ def recode(lseq, new_alphabet=False, sep='+', names=None):
 #
 #    # construction of the new alphabet
     if new_alphabet: # and all([type(alpha) is not int for alpha in alld]):
-#        
+
         if names is None:
             raise ValueError('Names should be the same length as lseq')
         else:
