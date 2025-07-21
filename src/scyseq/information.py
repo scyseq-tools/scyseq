@@ -4,6 +4,8 @@ Module for information theory related functions.
 
 import numpy as np
 
+from .operation import recode
+
 from . import sequence as S
 from . import algorithmic as A
 from .stochastic import conditional_matrix
@@ -11,7 +13,7 @@ from .stochastic import conditional_matrix
 
 def metric_entropy(seq):
     """
-    Returns Shannon's (metric) entropy of sequence
+    Returns # Shannon's (metric) entropy of sequence
 
     :param seq: a symbolic Sequence object
 
@@ -229,7 +231,7 @@ def mutual_information(seq1, seq2):
     >>> mutual_information(seq1, seq2)
     0.0002988020334349084
     """
-    seq12 = S.recode([seq1, seq2])
+    seq12 = recode([seq1, seq2])
     return H(seq1) + H(seq2) - H(seq12)
 
 def multi_information(seq1, seq2, seq3):

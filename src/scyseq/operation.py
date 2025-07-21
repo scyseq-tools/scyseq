@@ -1,8 +1,10 @@
 """
-Definitons of operations some of which are just wrappers to sequences' methods.
+Definitions of operations some of which are just wrappers to sequences' methods.
 """
 
 import copy
+import numpy as np
+from .sequence import Sequence, Alphabet, Symbol
 
 def roll(seq, step):
     """
@@ -10,7 +12,7 @@ def roll(seq, step):
     """
 #    newseq = copy.deepcopy(seq)
 #    newseq.roll(step)
-    return newseq.roll(step)
+    return seq.roll(step)
 
 def reverse(seq):
     """
@@ -18,7 +20,7 @@ def reverse(seq):
     """
 #    newseq = copy.deepcopy(seq)
 #    newseq.reverse()
-    return newseq.reverse()
+    return seq.reverse()
 
 def shuffle(seq):
     """
@@ -26,7 +28,7 @@ def shuffle(seq):
     """
 #    newseq = copy.deepcopy(seq)
 #    newseq.shuffle()
-    return newseq.shuffle()
+    return seq.shuffle()
 
 def reduce(seq):
     """
@@ -34,7 +36,7 @@ def reduce(seq):
     """
 #    newseq = copy.deepcopy(seq)
 #    newseq.reduce()
-    return newseq.reduce()
+    return seq.reduce()
 
 #def issequence(obj):
 #    """
