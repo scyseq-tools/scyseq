@@ -6,11 +6,11 @@ A symbolic sequence is a list of symbols taken from a finite alphabet of length
 :math:`k`
 
 Internally they are encoded according to integers from :math:`0` to :math:`k-1`
-called `ivals` and all the computations use this representation. For human
-readability, there is also a string value (`svals`) which is associated with the
-integer representation when needed.
+called `ivals` (for **i**nteger **val**ue**s**) and all the computations use
+this representation. For human readability, there is also a string value (named
+`svals`) which is associated with the integer representation when needed.
 
-Alphabet behaves like bidirectional dictionaries with restrictions to avoid
+An `Alphabet` behaves like bidirectional dictionaries with restrictions to avoid
 problems.
 """
 
@@ -22,9 +22,6 @@ import numpy as np
 
 from . import exceptions as E
 from . import utils as U
-
-# DTYPES = [np.uint8, np.uint16]
-# DEFAULT_DTYPE = np.uint16
 
 class Symbol:
     """
@@ -89,7 +86,7 @@ class Symbol:
     @property
     def ival(self):
         """
-        The "integer value" of the Symbol associated integer value which can be
+        The "integer value" of the Symbol associate an integer value which can be
         accessed but neither changed nor deleted
 
         setter and deleter raise exception for explicit behavior.
@@ -210,9 +207,11 @@ class Alphabet(tuple):
         self._ivals = tuple(s.ival for s in self)
         self._svals = tuple(s.sval for s in self)
         self._symbols = tuple(s for s in self)
+
         # FIXME: Not sure this is useful
         # When an alphabet is associated to a sequence it cannot be modified.
         # self._islinked = False
+# This not useful since only the sval of symbols can be modified.
 
     def __str__(self):
         return '('+', '.join([s.__str__() for s in self])+')'
@@ -277,7 +276,8 @@ class Alphabet(tuple):
         >>> alpha_a.svals
         ('a', 'b', 'c')
         """
-        return self._svals
+        # return self._svals
+        return tuple(s.sval for s in self)
 
 #    @svals.setter
 #    def svals(self, value):
@@ -497,7 +497,7 @@ class Sequence:
 #                if (max(self._ivals) >= len(self._alphabet)):
 #                    raise E.AlphabetError("Invalid alphabet length")
 
-## Alphabet property
+## Alphabet properties
 
     @property
     def alphabet(self):

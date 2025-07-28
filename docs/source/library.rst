@@ -1,8 +1,8 @@
 Library reference
 =================
 
-Symbolic sequences
-------------------
+Base classes
+------------
 
 .. automodule:: scyseq.sequence
    :members:
