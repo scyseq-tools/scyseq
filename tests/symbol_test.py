@@ -1,6 +1,6 @@
 import pytest
 import scyseq as sq
-from scyseq import Symbol
+from scyseq import Symbol, Alphabet
 
 def test_symbol_badinit():
     with pytest.raises(sq.SymbolDefinitionError) as exc_info:
@@ -31,6 +31,18 @@ def test_symbol_sval_setter(init_str):
     init_str.sval = "zero"
     assert init_str.sval == "zero"
     assert init_str.ival is None
+# test error outside a dictionary
+    with pytest.raises(sq.SymbolDefinitionError) as exc_info:
+        init_str.sval = 99
+    assert "must be a string" in str(exc_info.value)
+# test error inside a dictionary
+    a = Alphabet(3)
+    assert a[0].sval == "0"
+    a[0].sval = "zero"
+    assert a[0].sval == "zero"
+    with pytest.raises(sq.AlphabetAccessError) as exc_info:
+        a[1].sval = "zero"
+    assert "already exists" in str(exc_info.value)
 
 def test_symbol_sval_deleter(init_str):
     with pytest.raises(sq.SymbolAccessError) as exc_info:

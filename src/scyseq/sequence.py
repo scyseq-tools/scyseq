@@ -75,7 +75,7 @@ class Symbol:
 
         if self._alphabet is not None:
             if value in self._alphabet.svals:
-                raise E.AlphabetAccessError("Symbol sval already exists in alphabet")
+                raise E.AlphabetAccessError(f"Symbol '{value}' already exists in alphabet")
 
         self._sval = value
 
@@ -333,12 +333,39 @@ class Alphabet(tuple):
         >>> alpha_d.rename({1: 'One', 3: 'Three'})
         >>> alpha_d
         Alphabet(Symbol(0 | a), Symbol(1 | One), Symbol(2 | c), Symbol(3 | Three))
+
+        The replacement variable should be a valid replacement candidate. So exceptions
+        are raised if:
+
+        >>> alpha_d.rename(['bad1', 'bad2', 'bad3']) # not a dictionary
+        Traceback (most recent call last):
+        ...
+        TypeError: The input must be a dictionary
+
+        >>> alpha_d.rename({'bad1': 'bad2', 'bad3': 'bad4'}) # not {int : str}
+        Traceback (most recent call last):
+        ...
+        scyseq.exceptions.AlphabetAccessError: Replacements should be {integer : string, ...}
+
+        >>> alpha_d.rename({0: 'bad0', 1: 'bad0'}) # values are not different
+        Traceback (most recent call last):
+        ...
+        scyseq.exceptions.AlphabetAccessError: Replacement values should all be different.
+
+        >>> alpha_d.rename({0: 'Three'}) # values already exists
+        Traceback (most recent call last):
+        ...
+        scyseq.exceptions.AlphabetAccessError: Symbol 'Three' already exists in alphabet
+
         """
         if not isinstance(replacement, dict):
-            raise TypeError ('The input must be a dictionnary')
+            raise TypeError ('The input must be a dictionary')
         if not all(isinstance(k, int) and isinstance(v, str)
                     for k, v in replacement.items()):
-            raise E.AlphabetAccessError("Replacements should be int : str")
+            raise E.AlphabetAccessError("Replacements should be {integer : string, ...}")
+
+        if not len(set(replacement.values())) == len(replacement):
+            raise E.AlphabetAccessError("Replacement values should all be different.")
 
         for k, v in replacement.items():
             # symbol.sval setter takes care of the unicity of the symbol in
