@@ -17,6 +17,7 @@ problems.
 import copy
 import itertools
 import operator
+import warnings
 
 import numpy as np
 
@@ -75,8 +76,13 @@ class Symbol:
 
         if self._alphabet is not None:
             if value in self._alphabet.svals:
-                raise E.AlphabetAccessError(f"Symbol '{value}' already exists in alphabet")
-
+                if value == self.sval:
+                    warnings.warn(
+                    f"'{value}' is already the sval of Symbol {self.ival}.",
+                    UserWarning, stacklevel=3)
+                else:
+                    raise E.AlphabetAccessError(
+                    f"Symbol '{value}' already exists in alphabet")
         self._sval = value
 
     @sval.deleter
@@ -241,7 +247,7 @@ class Alphabet(tuple):
 
     def __getitem__(self, key):
         try:
-            if isinstance(key, int):
+            if isinstance(key, (int, np.integer)):
                 return self._symbols[key]
             if isinstance(key, str):
                 idx = self.svals.index(key)
@@ -552,8 +558,8 @@ class Sequence:
         """
         The tuple of string values
         """
-        tmp = np.array([self.alphabet[i]._sval for i in self._ivals])
-        tmp.flags.writeable = False
+        tmp = tuple([self.alphabet[i].sval for i in self.ivals])
+        # tmp.flags.writeable = False
         return tmp
 
 # Copy method
@@ -593,13 +599,13 @@ class Sequence:
         Allows to slice a sequence. Can be sliced with an int, a slice or an
         ndarray 
         """
-        if isinstance(key, int):
-            tmpval = [self._ivals[key]]
+        if isinstance(key, (int, np.integer)):
+            tmpval = [self.ivals[key]]
         elif isinstance(key, slice):
-            tmpval = self._ivals[key]
+            tmpval = self.ivals[key]
         elif isinstance(key, np.ndarray):
             # print(key, type(key))
-            tmpval = self._ivals[np.where(key)[0]]
+            tmpval = self.ivals[np.where(key)[0]]
 #        elif type(key) is Sequence:
 #            tmpval = self._ivals[np.where(key._ivals)[0]]
         else:
@@ -639,19 +645,19 @@ class Sequence:
         Returns an iterator on the Sequence. Should return an itertor over the
         ivals otherwise the all(seq != seq) returns True...
         """
-        return self._ivals.__iter__()
+        return self.ivals.__iter__()
 
     def iteritems(self):
         """
         Returns the pairs ival : sval
         """
-        return zip(self._ivals, self.svals)
+        return zip(self.ivals, self.svals)
 
     def iterivals(self):
         """
         Returns the iterator over the integer values
         """
-        return self._ivals.__iter__()
+        return self.ivals.__iter__()
 
     def itersvals(self):
         """
