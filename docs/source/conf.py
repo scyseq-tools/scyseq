@@ -20,7 +20,7 @@ sys.path.append('../../src/')
 #import sys
 #sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 
-extensions = ['sphinx.ext.autodoc', 
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary',
               'sphinx.ext.napoleon',
               'sphinx.ext.mathjax',
               'nbsphinx',

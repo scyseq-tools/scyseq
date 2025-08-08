@@ -6,7 +6,7 @@ A symbolic sequence is a list of symbols taken from a finite alphabet of length
 :math:`k`
 
 Internally they are encoded according to integers from :math:`0` to :math:`k-1`
-called `ivals` (for **i**nteger **val**ue**s**) and all the computations use
+called `ivals` (for Integer VALueS) and all the computations use
 this representation. For human readability, there is also a string value (named
 `svals`) which is associated with the integer representation when needed.
 
@@ -563,6 +563,7 @@ class Sequence:
         return tmp
 
 # Copy method
+
     def __deepcopy__(self, memo):
         """
         Returns a copy of the Sequence object
@@ -571,7 +572,7 @@ class Sequence:
                         copy.deepcopy(self.alphabet))
 
 # Sequences representation
-# FIXME: change the repr and str (print -> str)
+
     def __str__(self):
         """
         Defines the string representation of a Sequence.
@@ -752,7 +753,7 @@ class Sequence:
 #            return Sequence(arr.astype(self._ivals.dtype), Alphabet(('False', 'True')), \
 #                            check=False)
 
-# Rich comparison methods"
+# Rich comparison methods
 
     def __mkcomp__(self, other, op): 
 
@@ -794,9 +795,16 @@ class Sequence:
         return self.__mkcomp__(other, operator.__ge__)
 
 # Methods that transform the sequence
+
     def roll(self, step):
         """
         Return a "rolled" sequence
+
+        See also:
+        ---------
+
+        scyseq.operations.roll : the implementation
+        numpy.roll : the underlying function
         """
 #        self._ivals = np.roll(self._ivals, step)
 

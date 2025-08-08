@@ -5,13 +5,28 @@ Base classes
 ------------
 
 .. automodule:: scyseq.sequence
+   :no-members:
+   :no-undoc-members:
+
+.. autoclass:: Symbol
    :members:
+   :undoc-members:
+   :special-members: __init__, __eq__
+
+.. autoclass:: Alphabet
+   :members:
+   :undoc-members:
+   :special-members: __init__, __eq__
+
+.. autoclass:: Sequence
+   :members:
+   :undoc-members:
    :special-members: __init__, __eq__
 
 Operations
 ----------
 
-.. automodule:: scyseq.operation
+.. automodule:: scyseq.operations
    :members:
    :special-members:
 

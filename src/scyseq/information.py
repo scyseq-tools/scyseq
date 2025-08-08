@@ -4,7 +4,7 @@ Module for information theory related functions.
 
 import numpy as np
 
-from .operation import recode
+from .operations import recode
 
 from . import sequence as S
 from . import algorithmic as A
