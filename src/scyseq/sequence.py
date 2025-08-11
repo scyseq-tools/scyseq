@@ -23,6 +23,7 @@ import numpy as np
 
 from . import exceptions as E
 from . import utils as U
+# from . import operations as O
 
 class Symbol:
     """
@@ -324,59 +325,64 @@ class Alphabet(tuple):
         """
         return zip(self.ivals, self.svals)
 
-    def rename(self, replacement):
-        """
-        To rename symbols in an alphabet, pass a dictionary with integers as
-        keys and strings as values so that the replacement of ivals and svals
-        are explicit.
+# Methods from .operations
 
-        :param replacement: The dictionary which describes the replacement. 
-        :type  replacement: dict
+    rename = U.delegate_to("scyseq.operations", "rename")
 
-        >>> alpha_d = Alphabet(['a','b','c', 'd'])
-        >>> alpha_d
-        Alphabet(Symbol(0 | a), Symbol(1 | b), Symbol(2 | c), Symbol(3 | d))
-        >>> alpha_d.rename({1: 'One', 3: 'Three'})
-        >>> alpha_d
-        Alphabet(Symbol(0 | a), Symbol(1 | One), Symbol(2 | c), Symbol(3 | Three))
+#    def rename(self, replacement):
+#        """
+#        To rename symbols in an alphabet, pass a dictionary with integers as
+#        keys and strings as values so that the replacement of ivals and svals
+#        are explicit.
+#
+#        :param replacement: The dictionary which describes the replacement. 
+#        :type  replacement: dict
+#
+#        >>> alpha_d = Alphabet(['a','b','c', 'd'])
+#        >>> alpha_d
+#        Alphabet(Symbol(0 | a), Symbol(1 | b), Symbol(2 | c), Symbol(3 | d))
+#        >>> alpha_d.rename({1: 'One', 3: 'Three'})
+#        >>> alpha_d
+#        Alphabet(Symbol(0 | a), Symbol(1 | One), Symbol(2 | c), Symbol(3 | Three))
+#
+#        The replacement variable should be a valid replacement candidate. So exceptions
+#        are raised if:
+#
+#        >>> alpha_d.rename(['bad1', 'bad2', 'bad3']) # not a dictionary
+#        Traceback (most recent call last):
+#        ...
+#        TypeError: The input must be a dictionary
+#
+#        >>> alpha_d.rename({'bad1': 'bad2', 'bad3': 'bad4'}) # not {int : str}
+#        Traceback (most recent call last):
+#        ...
+#        scyseq.exceptions.AlphabetAccessError: Replacements should be {integer : string, ...}
+#
+#        >>> alpha_d.rename({0: 'bad0', 1: 'bad0'}) # values are not different
+#        Traceback (most recent call last):
+#        ...
+#        scyseq.exceptions.AlphabetAccessError: Replacement values should all be different.
+#
+#        >>> alpha_d.rename({0: 'Three'}) # values already exists
+#        Traceback (most recent call last):
+#        ...
+#        scyseq.exceptions.AlphabetAccessError: Symbol 'Three' already exists in alphabet
+#
+#        """
+#        if not isinstance(replacement, dict):
+#            raise TypeError ('The input must be a dictionary')
+#        if not all(isinstance(k, int) and isinstance(v, str)
+#                    for k, v in replacement.items()):
+#            raise E.AlphabetAccessError("Replacements should be {integer : string, ...}")
+#
+#        if not len(set(replacement.values())) == len(replacement):
+#            raise E.AlphabetAccessError("Replacement values should all be different.")
+#
+#        for k, v in replacement.items():
+#            # symbol.sval setter takes care of the unicity of the symbol in
+#            # the alphabet.
+#            self[k].sval = v
 
-        The replacement variable should be a valid replacement candidate. So exceptions
-        are raised if:
-
-        >>> alpha_d.rename(['bad1', 'bad2', 'bad3']) # not a dictionary
-        Traceback (most recent call last):
-        ...
-        TypeError: The input must be a dictionary
-
-        >>> alpha_d.rename({'bad1': 'bad2', 'bad3': 'bad4'}) # not {int : str}
-        Traceback (most recent call last):
-        ...
-        scyseq.exceptions.AlphabetAccessError: Replacements should be {integer : string, ...}
-
-        >>> alpha_d.rename({0: 'bad0', 1: 'bad0'}) # values are not different
-        Traceback (most recent call last):
-        ...
-        scyseq.exceptions.AlphabetAccessError: Replacement values should all be different.
-
-        >>> alpha_d.rename({0: 'Three'}) # values already exists
-        Traceback (most recent call last):
-        ...
-        scyseq.exceptions.AlphabetAccessError: Symbol 'Three' already exists in alphabet
-
-        """
-        if not isinstance(replacement, dict):
-            raise TypeError ('The input must be a dictionary')
-        if not all(isinstance(k, int) and isinstance(v, str)
-                    for k, v in replacement.items()):
-            raise E.AlphabetAccessError("Replacements should be {integer : string, ...}")
-
-        if not len(set(replacement.values())) == len(replacement):
-            raise E.AlphabetAccessError("Replacement values should all be different.")
-
-        for k, v in replacement.items():
-            # symbol.sval setter takes care of the unicity of the symbol in
-            # the alphabet.
-            self[k].sval = v
 
 class Sequence:
     """
@@ -490,7 +496,7 @@ class Sequence:
         N = 15 ; k = 3
         """
         if isinstance(symbols, Sequence):
-            pass
+            pass # everything has been done in __new__
 
         else:
             self._alphabet = self._validalphabet
@@ -794,73 +800,19 @@ class Sequence:
     def __ge__(self, other):
         return self.__mkcomp__(other, operator.__ge__)
 
-# Methods that transform the sequence
+# Method that transform the sequence (wrapped from .operations)
 
-    def roll(self, step):
-        """
-        Return a "rolled" sequence
+    rename = U.delegate_to(".operations", "rename")
 
-        See also:
-        ---------
+# Method that return a new sequence (wrapped from .operations)
 
-        scyseq.operations.roll : the implementation
-        numpy.roll : the underlying function
-        """
-#        self._ivals = np.roll(self._ivals, step)
+    roll = U.delegate_to(".operations", "roll")
+    reverse = U.delegate_to(".operations", "reverse")
+    shuffle = U.delegate_to(".operations", "shuffle")
+    reduce = U.delegate_to(".operations", "reduce")
 
-        return Sequence(np.roll(self._ivals, step), self._alphabet)
+# Methods that compute characteristics of the sequence (wrapped from
+# .operations)
 
-    def reverse(self):
-        """
-        Return a "reversed" the sequence
-        """
-        # self._ivals = np.flipud(self._ivals)
-        return Sequence(np.flipud(self._ivals), self._alphabet)
-
-    def shuffle(self):
-        """
-        Return a "shuffled" sequence
-        """
-        shuffled = np.random.shuffle(copy.copy(self._ivals))
-
-        return Sequence(shuffled, self._alphabet)
-
-    def reduce(self):
-        """
-        Delete the repetitions of symbols in a sequence
-        """
-        diff = np.ediff1d(self._ivals)
-        bool_idx = list(diff!=0)
-        bool_idx.append(True)
-        reduced = self._ivals[bool_idx]
-
-        return Sequence(reduced, self._alphabet)
-
-# Methods that compute characteristics of the sequence
-
-    def count(self, value=None):
-        """
-        Counts the number of each symbol in :math:`{0, k-1}` if code is None
-        or the number of the code symbol
-
-        :returns: a numpy.ndarray of integers
-        """
-        if value is None:
-            return np.array([np.sum(self._ivals == i) for i in range(self.k)])
-
-        if isinstance(value, int):
-            return np.sum(self._ivals == value)
-
-        if isinstance(value, str):
-            return np.sum(self.svals == value)
-
-        raise ValueError("Value should be an integer or a string")
-
-
-    def frequency(self):
-        """
-        Returns the probability of each symbol in :math:`{0, k-1}`
-
-        :returns: a numpy.ndarray of floats
-        """
-        return self.count() / float(len(self))
+    count = U.delegate_to(".operations", "count")
+    frequency = U.delegate_to(".operations", "frequency")

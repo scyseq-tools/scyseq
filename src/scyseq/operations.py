@@ -1,52 +1,172 @@
 """
-Definitions of operations some of which are just wrappers to sequences' methods.
+Definitions of operations on objects Sequence and Alphabet.
+
+The object's methods are wrappers to these operations
 """
 
 import copy
 import numpy as np
+
 from .sequence import Sequence, Alphabet, Symbol
+from . import exceptions as E
 
-def roll(seq, step):
+def rename(obj, replacement):
     """
-    Roll the sequence
-    """
-#    newseq = copy.deepcopy(seq)
-#    newseq.roll(step)
-    return seq.roll(step)
+    To rename symbols in an alphabet, pass a dictionary with integers as
+    keys and strings as values so that the replacement of ivals and svals
+    are explicit.
 
-def reverse(seq):
-    """
-    Reverse the sequence
-    """
-#    newseq = copy.deepcopy(seq)
-#    newseq.reverse()
-    return seq.reverse()
+    :param replacement: The dictionary which describes the replacement. 
+    :type  replacement: dict
 
-def shuffle(seq):
-    """
-    Shuffle the sequence
-    """
-#    newseq = copy.deepcopy(seq)
-#    newseq.shuffle()
-    return seq.shuffle()
+    >>> alpha_d = Alphabet(['a','b','c', 'd'])
+    >>> alpha_d
+    Alphabet(Symbol(0 | a), Symbol(1 | b), Symbol(2 | c), Symbol(3 | d))
+    >>> alpha_d.rename({1: 'One', 3: 'Three'})
+    >>> alpha_d
+    Alphabet(Symbol(0 | a), Symbol(1 | One), Symbol(2 | c), Symbol(3 | Three))
 
-def reduce(seq):
-    """
-    Returns a reduced sequence (ie only keep the transitions)
-    """
-#    newseq = copy.deepcopy(seq)
-#    newseq.reduce()
-    return seq.reduce()
+    The replacement variable should be a valid replacement candidate. So exceptions
+    are raised if:
 
-#def issequence(obj):
-#    """
-#    Returns True if x is a symbolic sequence
-#    """
-#    return isinstance(obj, Sequence) 
+    >>> alpha_d.rename(['bad1', 'bad2', 'bad3']) # not a dictionary
+    Traceback (most recent call last):
+    ...
+    TypeError: The input must be a dictionary
+
+    >>> alpha_d.rename({'bad1': 'bad2', 'bad3': 'bad4'}) # not {int : str}
+    Traceback (most recent call last):
+    ...
+    scyseq.exceptions.AlphabetAccessError: Replacements should be {integer : string, ...}
+
+    >>> alpha_d.rename({0: 'bad0', 1: 'bad0'}) # values are not different
+    Traceback (most recent call last):
+    ...
+    scyseq.exceptions.AlphabetAccessError: Replacement values should all be different.
+
+    >>> alpha_d.rename({0: 'Three'}) # values already exists
+    Traceback (most recent call last):
+    ...
+    scyseq.exceptions.AlphabetAccessError: Symbol 'Three' already exists in alphabet
+
+    """
+    if isinstance(obj, Sequence):
+        rename(obj.alphabet, replacement)
+
+ #       return Sequence(obj.ivals, rename(obj.alphabet, replacement))
+
+    elif isinstance(obj, Alphabet):
+
+        if not isinstance(replacement, dict):
+            raise TypeError ('The input must be a dictionary')
+        if not all(isinstance(k, int) and isinstance(v, str)
+                    for k, v in replacement.items()):
+            raise E.AlphabetAccessError("Replacements should be {integer : string, ...}")
+
+        if not len(set(replacement.values())) == len(replacement):
+            raise E.AlphabetAccessError("Replacement values should all be different.")
+
+        for k, v in replacement.items():
+            # symbol.sval setter takes care of the unicity of the symbol in
+            # the alphabet.
+            obj[k].sval = v
+#        return obj
+
+    else:
+        raise ValueError(f"Cannot rename an object of type {type(obj)}.")
+
+
+def roll(obj, step):
+    """
+    Return a "rolled" sequence
+
+    See also:
+    ---------
+
+    scyseq.operations.roll : the implementation
+    numpy.roll : the underlying function
+    """
+    if isinstance(obj, Sequence):
+        return Sequence(np.roll(obj.ivals, step), obj.alphabet)
+    else:
+        raise ValueError(f"Cannot roll from object of type {type(obj)}.")
+
+def reverse(obj):
+    """
+    Return a "reversed" the sequence
+    """
+    if isinstance(obj, Sequence):
+        return Sequence(np.flipud(obj.ivals), obj.alphabet)
+    else:
+        raise ValueError(f"Cannot roll from object of type {type(obj)}.")
+
+def shuffle(obj):
+    """
+    Return a "shuffled" sequence
+    """
+    if isinstance(obj, Sequence):
+        shuffled = np.random.shuffle(copy.copy(obj.ivals))
+        return Sequence(shuffled, obj.alphabet)
+    else:
+        raise ValueError(f"Cannot roll from object of type {type(obj)}.")
+
+def reduce(obj):
+    """
+    Delete the repetitions of symbols in a sequence
+    """
+    if isinstance(obj, Sequence):
+        diff = np.ediff1d(obj._ivals)
+        bool_idx = list(diff!=0)
+        bool_idx.append(True)
+        reduced = obj._ivals[bool_idx]
+        return Sequence(reduced, obj._alphabet)
+
+    else:
+        raise ValueError(f"Cannot roll from object of type {type(obj)}.")
+
+
+# Methods that compute characteristics of the sequence
+
+def count(obj, value=None):
+    """
+    Counts the number of each symbol in :math:`{0, k-1}` if code is None
+    or the number of the code symbol
+
+    :returns: a numpy.ndarray of integers
+    """
+    if isinstance(obj, Sequence):
+        if value is None:
+            return np.array([np.sum(obj._ivals == i) for i in range(obj.k)])
+
+        if isinstance(value, int):
+            return np.sum(obj._ivals == value)
+
+        if isinstance(value, str):
+            return np.sum(obj.svals == value)
+
+        raise ValueError("Value should be an integer or a string")
+    else:
+        raise ValueError(f"Cannot count from object of type {type(obj)}.")
+
+
+def frequency(obj, value=None):
+    """
+    Returns the probability of each symbol in :math:`{0, k-1}`
+
+    :returns: a numpy.ndarray of floats
+    """
+    if isinstance(obj, Sequence):
+        return obj.count(value) / float(len(obj))
+    else:
+        raise ValueError(f"Cannot compute frequency from object of type {type(obj)}.")
 
 def transform(seq, correspondance, new_alphabet=None):
     """
     Transforms the initial sequence according to the correspondence iterable
+
+    The correspondence defines how the ivals from sequence should be grouped in
+    the new alphabet: this is not a simple rename.
+
     """
     if len(correspondance) != len(seq.alphabet):
         raise ValueError('Correspondence does not match sequence alphabet')
