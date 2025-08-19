@@ -11,4 +11,4 @@ __authors__ = ["Laurent Pezard",
 
 from .sequence import Symbol, Alphabet, Sequence
 from .exceptions import *
-from .operations import rename
+from .operations import *

@@ -207,7 +207,44 @@ class Alphabet(tuple):
 
         >>> Alphabet([Symbol('s0'), Symbol('s1'), Symbol('s2')])
         Alphabet(Symbol(0 | s0), Symbol(1 | s1), Symbol(2 | s2))
+
+
+        Alphabets can be created with a list of states:
+
+        >>> state1 = Symbol('One')
+        >>> state2 = Symbol('Two')
+        >>> state3 = Symbol('Three')
+        >>> alpha = Alphabet([state1, state2, state3])
+        >>> alpha
+        Alphabet(Symbol(0 | One), Symbol(1 | Two), Symbol(2 | Three))
+        >>> print(alpha)
+        ((0 | One), (1 | Two), (2 | Three))
+        >>> len(alpha)
+        3
+
+        >>> alpha[0]
+        Symbol(0 | One)
+
+        Symbols cannot be changed directly:
+
+        >>> alpha[1] = Symbol('Deux')
+        Traceback (most recent call last):
+        ...
+        scyseq.exceptions.AlphabetAccessError: 'Alphabet' object does not support item assignment
+
+        But their sval can:
+
+        >>> alpha[1].sval = 'Deux'
+        >>> alpha
+        Alphabet(Symbol(0 | One), Symbol(1 | Deux), Symbol(2 | Three))
+
+        Alphabet's symbols can be changed using a dictionary representation.
+
+        >>> alpha.rename({0 : 'Uno', 2 : 'Tre'})
+        >>> alpha
+        Alphabet(Symbol(0 | Uno), Symbol(1 | Deux), Symbol(2 | Tre))
         """
+
         for n, symb in enumerate(self):
             symb._attach(self, n)
 
@@ -238,6 +275,9 @@ class Alphabet(tuple):
         True
         >>> alpha_a == alpha_c
         False
+        >>> alpha_c.rename({0 : 'a', 1 : 'b', 2 : 'c'})
+        >>> alpha_a == alpha_c
+        True
         """
         if not isinstance(other, Alphabet):
             raise E.AlphabetAccessError("Can only compare alphabets with alphabets")
@@ -327,62 +367,16 @@ class Alphabet(tuple):
 
 # Methods from .operations
 
-    rename = U.delegate_to("scyseq.operations", "rename")
+    def rename(self, replacement):
+        """
+        Rename the svals of the alphabet according to a dictionary.
 
-#    def rename(self, replacement):
-#        """
-#        To rename symbols in an alphabet, pass a dictionary with integers as
-#        keys and strings as values so that the replacement of ivals and svals
-#        are explicit.
-#
-#        :param replacement: The dictionary which describes the replacement. 
-#        :type  replacement: dict
-#
-#        >>> alpha_d = Alphabet(['a','b','c', 'd'])
-#        >>> alpha_d
-#        Alphabet(Symbol(0 | a), Symbol(1 | b), Symbol(2 | c), Symbol(3 | d))
-#        >>> alpha_d.rename({1: 'One', 3: 'Three'})
-#        >>> alpha_d
-#        Alphabet(Symbol(0 | a), Symbol(1 | One), Symbol(2 | c), Symbol(3 | Three))
-#
-#        The replacement variable should be a valid replacement candidate. So exceptions
-#        are raised if:
-#
-#        >>> alpha_d.rename(['bad1', 'bad2', 'bad3']) # not a dictionary
-#        Traceback (most recent call last):
-#        ...
-#        TypeError: The input must be a dictionary
-#
-#        >>> alpha_d.rename({'bad1': 'bad2', 'bad3': 'bad4'}) # not {int : str}
-#        Traceback (most recent call last):
-#        ...
-#        scyseq.exceptions.AlphabetAccessError: Replacements should be {integer : string, ...}
-#
-#        >>> alpha_d.rename({0: 'bad0', 1: 'bad0'}) # values are not different
-#        Traceback (most recent call last):
-#        ...
-#        scyseq.exceptions.AlphabetAccessError: Replacement values should all be different.
-#
-#        >>> alpha_d.rename({0: 'Three'}) # values already exists
-#        Traceback (most recent call last):
-#        ...
-#        scyseq.exceptions.AlphabetAccessError: Symbol 'Three' already exists in alphabet
-#
-#        """
-#        if not isinstance(replacement, dict):
-#            raise TypeError ('The input must be a dictionary')
-#        if not all(isinstance(k, int) and isinstance(v, str)
-#                    for k, v in replacement.items()):
-#            raise E.AlphabetAccessError("Replacements should be {integer : string, ...}")
-#
-#        if not len(set(replacement.values())) == len(replacement):
-#            raise E.AlphabetAccessError("Replacement values should all be different.")
-#
-#        for k, v in replacement.items():
-#            # symbol.sval setter takes care of the unicity of the symbol in
-#            # the alphabet.
-#            self[k].sval = v
-
+        See also:
+        ---------
+        The implementation in the operations module: :func:`~scyseq.operations.rename`
+        """
+        from .operations import rename as _rename
+        return _rename(self, replacement)
 
 class Sequence:
     """
@@ -802,17 +796,80 @@ class Sequence:
 
 # Method that transform the sequence (wrapped from .operations)
 
-    rename = U.delegate_to(".operations", "rename")
+    def rename(self, replacement):
+        """
+        Rename the svals of a sequence (in fact the svals of the alphabet)
+
+        See the implementation in the operations module: :func:`~scyseq.operations.rename`
+        """
+        from .operations import rename as _rename
+        return _rename(self, replacement)
 
 # Method that return a new sequence (wrapped from .operations)
 
-    roll = U.delegate_to(".operations", "roll")
-    reverse = U.delegate_to(".operations", "reverse")
-    shuffle = U.delegate_to(".operations", "shuffle")
-    reduce = U.delegate_to(".operations", "reduce")
+    # roll = U.delegate_to(".operations", "roll")
+    def roll(self, step):
+        """
+        Roll the sequence of `step` (with periodic boundary conditions).
+
+        See the implementation in the operations module:
+        :func:`~scyseq.operations.roll`
+        """
+
+        from .operations import roll as _roll
+        return _roll(self, step)
+
+    def reverse(self):
+        """
+        Reverse the sequence.
+
+        See the implementation in the operations module:
+        :func:`~scyseq.operations.reverse`
+        """
+
+        from .operations import reverse as _reverse
+        return _reverse(self)
+
+    def shuffle(self):
+        """
+        Shuffle the sequence.
+
+        See the implementation in the operations module:
+        :func:`~scyseq.operations.shuffle`
+        """
+
+        from .operations import shuffle as _shuffle
+        return _shuffle(self)
+
+    def reduce(self):
+        """
+        Reduce the sequence i.e. delete repeated symbols.
+
+        See the implementation in the operations module:
+        :func:`~scyseq.operations.reduce`
+        """
+        from .operations import reduce as _reduce
+        return _reduce(self)
 
 # Methods that compute characteristics of the sequence (wrapped from
 # .operations)
 
-    count = U.delegate_to(".operations", "count")
-    frequency = U.delegate_to(".operations", "frequency")
+    def count(self, value=None):
+        """
+        Count the number of `value`
+
+        See the implementation in the operations module:
+        :func:`~scyseq.operations.count`
+        """
+        from .operations import count as _count
+        return _count(self)
+
+    def frequency(self, value=None):
+        """
+        Returns the frequency of `value`
+
+        See the implementation in the operations module:
+        :func:`~scyseq.operations.frequency`
+        """
+        from .operations import frequency as _frequency
+        return _frequency(self)
