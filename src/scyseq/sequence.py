@@ -633,7 +633,7 @@ class Sequence:
             print(key, type(key))
             raise ValueError(f"Cannot slice with {str(type(key))}")
 
-        return Sequence(tmpval, self.alphabet, check=False)
+        return Sequence(tmpval, self.alphabet) #, check=False)
 
 # FIXME: is it useful?
 #    def __setitem__(self, key, value):
@@ -910,3 +910,5 @@ class Sequence:
         """
         from .operations import frequency as _frequency
         return _frequency(self, value)
+
+# vim: set spell spelllang=en

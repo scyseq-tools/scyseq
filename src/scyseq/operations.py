@@ -12,9 +12,9 @@ from . import exceptions as E
 
 def rename(obj, replacement):
     """
-    To rename symbols in an alphabet, pass a dictionary with integers as
-    keys and strings as values so that the replacement of ivals and svals
-    are explicit.
+    To rename **in place** symbols in an alphabet or a sequence, pass a
+    dictionary with integers as keys and strings as values so that the
+    replacement of ivals and svals are explicit.
 
     :param replacement: The dictionary which describes the replacement. 
     :type  replacement: dict
@@ -59,6 +59,7 @@ def rename(obj, replacement):
 
         if not isinstance(replacement, dict):
             raise TypeError ('The input must be a dictionary')
+
         if not all(isinstance(k, int) and isinstance(v, str)
                     for k, v in replacement.items()):
             raise E.AlphabetAccessError("Replacements should be {integer : string, ...}")
@@ -79,6 +80,8 @@ def rename(obj, replacement):
 def roll(obj, step):
     """
     Return a "rolled" sequence
+
+    >>> seq = Sequence(
 
     See also:
     ---------
@@ -105,8 +108,9 @@ def shuffle(obj):
     Return a "shuffled" sequence
     """
     if isinstance(obj, Sequence):
-        shuffled = np.random.shuffle(copy.copy(obj.ivals))
-        return Sequence(shuffled, obj.alphabet)
+        tmp = copy.copy(obj.ivals)
+        np.random.shuffle(tmp)
+        return Sequence(tmp, obj.alphabet)
     else:
         raise ValueError(f"Cannot roll from object of type {type(obj)}.")
 
@@ -115,14 +119,14 @@ def reduce(obj):
     Delete the repetitions of symbols in a sequence
     """
     if isinstance(obj, Sequence):
-        diff = np.ediff1d(obj._ivals)
+        diff = np.ediff1d(obj.ivals)
         bool_idx = list(diff!=0)
         bool_idx.append(True)
-        reduced = obj._ivals[bool_idx]
-        return Sequence(reduced, obj._alphabet)
+        reduced = obj.ivals[bool_idx]
+        return Sequence(reduced, obj.alphabet)
 
     else:
-        raise ValueError(f"Cannot roll from object of type {type(obj)}.")
+        raise ValueError(f"Cannot reduce from object of type {type(obj)}.")
 
 
 # Methods that compute characteristics of the sequence
@@ -136,10 +140,10 @@ def count(obj, value=None):
     """
     if isinstance(obj, Sequence):
         if value is None:
-            return np.array([np.sum(obj._ivals == i) for i in range(obj.k)])
+            return np.array([np.sum(obj.ivals == i) for i in range(obj.k)])
 
         if isinstance(value, int):
-            return np.sum(obj._ivals == value)
+            return np.sum(obj.ivals == value)
 
         if isinstance(value, str):
             return np.sum(obj.svals == value)
@@ -173,21 +177,22 @@ def transform(seq, correspondance, new_alphabet=None):
 
     # if (not all([type(c) is str for c in correspondance])) and \
        #(not all([type(c) is Symbol for c in correspondance])) and \
+
     if (not all([type(c) is int for c in correspondance])):
        # raise ValueError('Correspondences are strings, ints or Symbols.')
        raise ValueError('Correspondences are given as integers.')
 
     if new_alphabet is None:
-        alphabet = Alphabet(list(set(correspondance)))
+        alphabet = Alphabet([str(i) for i in list(set(correspondance))])
     else:
         if type(new_alphabet) is not Alphabet:
            raise E.AlphabetError('New alphabet should be an Alphabet object')
         elif len(set(correspondance)) != len(new_alphabet):
            raise 
-           E.AlphabetError('Length of new alphabet does not fit the correspondance length.')
+           E.AlphabetError('Length of new alphabet does not fit the correspondence length.')
         else:
             alphabet = new_alphabet
-            nb_symbols = len(alphabet)
+    nb_symbols = len(alphabet)
 
     if all([type(c) is int for c in correspondance]):     
         # make sure that corresp is [0, k-1]
@@ -210,7 +215,7 @@ def recode(lseq, new_alphabet=False, sep='+', names=None):
     """
     Recodes a list of sequences with (possibly) different alphabets but
     with the same length (This is an error to pass Sequences with different
-    length.) A new dictionnary is built for the new sequence.
+    length.) A new dictionary is built for the new sequence.
 
     :param lseq: a list of Sequences
 
@@ -258,11 +263,11 @@ def recode(lseq, new_alphabet=False, sep='+', names=None):
             new_alphabet.append(sep.join(strlist))
 #
         # return Sequence(new_s, new_alphabet, check=False)
-        return Sequence(new_s, Alphabet(new_alphabet), check=False)
+        return Sequence(new_s, Alphabet(new_alphabet))#, check=False)
 #
     else:
         # return Sequence(new_s, int(new_alen), check=False)
-        return Sequence(new_s, Alphabet(int(new_k)), check=False)
+        return Sequence(new_s, Alphabet(int(new_k))) #, check=False)
 
 def words(seq, wlen, new_alphabet=False):
     """
