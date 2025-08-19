@@ -18,6 +18,12 @@ Base classes
    :undoc-members:
    :special-members: __init__, __eq__
 
+.. autodata:: scyseq.sequence.boolean_alphabet
+   :annotation: instance of Alphabet
+
+.. autodata:: scyseq.sequence.binary_alphabet
+   :annotation: instance of Alphabet
+
 .. autoclass:: Sequence
    :members:
    :undoc-members:

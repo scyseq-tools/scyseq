@@ -9,6 +9,6 @@ __authors__ = ["Laurent Pezard",
                "Yann Manhoun", 
                "Florent Boyer-Aymé"]
 
-from .sequence import Symbol, Alphabet, Sequence
+from .sequence import Symbol, Alphabet, boolean_alphabet, binary_alphabet, Sequence
 from .exceptions import *
 from .operations import *

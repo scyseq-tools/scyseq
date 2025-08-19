@@ -1,3 +1,4 @@
+# pylint: disable=import-outside-toplevel
 """
 This module defines the base classes: Symbol, Alphabet and Sequence, their
 attributes and methods.
@@ -12,6 +13,14 @@ this representation. For human readability, there is also a string value (named
 
 An `Alphabet` behaves like bidirectional dictionaries with restrictions to avoid
 problems.
+
+also provides two specific alphabets:
+
+>>> boolean_alphabet
+Alphabet(Symbol(0 | False), Symbol(1 | True))
+
+>>> binary_alphabet
+Alphabet(Symbol(0 | 0), Symbol(1 | 1))
 """
 
 import copy
@@ -378,12 +387,25 @@ class Alphabet(tuple):
         from .operations import rename as _rename
         return _rename(self, replacement)
 
+boolean_alphabet = Alphabet([Symbol(False), Symbol(True)])
+"""
+A predefined :class:`~scyseq.sequence.Alphabet` with the two symbols `(0 |
+False)` and `(1 | True)` representing boolean values.
+"""
+
+binary_alphabet = Alphabet(2)
+"""
+A predefined :class:`~scyseq.sequence.Alphabet` with the two symbols `(0 |
+0)` and `(1 | 1)` representing binary values.
+
+"""
+
 class Sequence:
     """
     Defines a symbolic sequence coded using integers in :math:`{0,
     k-1}` and their methods.
     """
-    def __new__(cls, symbols, alphabet, check=True):
+    def __new__(cls, symbols, alphabet): #, check=True):
         """
         Creates a Sequence object.
         """
@@ -395,23 +417,21 @@ class Sequence:
         if array.ndim != 1:
             raise ValueError("The symbols argument should be unidimensional (1D).")
 
-        # Try to cast to unsigned integer
-        if not np.issubdtype(array.dtype, np.unsignedinteger):
-            if np.issubdtype(array.dtype, np.integer):
-                if np.any(array < 0):
-                    raise ValueError("All values should be >=0")
-                dtype = U.choose_uint_dtype(array)
-                array = array.astype(dtype)
-                array.flags.writeable = False
-            else:
-                raise TypeError("Symbols should be convertible into unsigned integers")
+        if array.dtype == np.bool:
+            array = array.astype(np.uint8)
+            alpha = boolean_alphabet
 
-        alpha = Alphabet(alphabet)
-
-        # Check correspondence between symbols and alphabet
-        if check:
+        elif np.issubdtype(array.dtype, np.integer):
+            if np.any(array < 0):
+                raise ValueError("All values should be >=0")
+            dtype = U.choose_uint_dtype(array)
+            array = array.astype(dtype)
+            array.flags.writeable = False
+            alpha = Alphabet(alphabet)
             if max(array) >= len(alpha):
                 raise E.AlphabetError("Invalid alphabet length")
+        else:
+            raise TypeError("Symbols should be convertible into unsigned integers")
 
         instance = super().__new__(cls)
         instance._validivals = array
@@ -450,7 +470,7 @@ class Sequence:
 #            # self._alphabet = Alphabet(alphabet)
 #            self._alphabet = Alphabet(alphabet)
 #        else:
-#            raise 
+#            raise
 # TypeError('The parameter alphabet must be an integer or a sequence.Alphabet object')
 
     def __init__(self, symbols, alphabet, check=True):
@@ -643,10 +663,11 @@ class Sequence:
 
     def __iter__(self): # returns an iterator
         """
-        Returns an iterator on the Sequence. Should return an itertor over the
+        Returns an iterator on the Sequence. Should return an iterator over the
         ivals otherwise the all(seq != seq) returns True...
         """
-        return self.ivals.__iter__()
+        # return iter(self.ivals)
+        return iter([self.alphabet[i] for i in self.ivals])
 
     def iteritems(self):
         """
@@ -658,13 +679,13 @@ class Sequence:
         """
         Returns the iterator over the integer values
         """
-        return self.ivals.__iter__()
+        return iter(self.ivals) # .__iter__()
 
     def itersvals(self):
         """
         Returns the iterator over the string values
         """
-        return self.svals.__iter__()
+        return iter(self.svals) #.__iter__()
 
 ## FIXME:
 ## I do not know when this is really used... for checking reversibility etc.
@@ -755,12 +776,12 @@ class Sequence:
 
 # Rich comparison methods
 
-    def __mkcomp__(self, other, op): 
+    def __mkcomp__(self, other, op):
 
         if isinstance(other, Sequence):
             if self.alphabet == other.alphabet:
                 if len(other) == len(self):
-                    arr = op(self._ivals, other._ivals)
+                    arr = op(self.ivals, other.ivals)
                 else:
                     raise \
                     ValueError('Cannot compare Sequences with different lengths')
@@ -769,18 +790,28 @@ class Sequence:
                 ValueError('Cannot compare Sequences with different alphabets')
 
         elif isinstance(other, int) and other >= 0:
-            arr = op(self._ivals, other)
+            arr = op(self.ivals, other)
+        elif isinstance(other, str):
+            print('str comp')
+            arr = np.array([op(sval, other) for sval in self.svals])
         else:
             raise \
-            ValueError("Sequence can be compared with a Sequence or a positive integer only")
+            ValueError("Sequence can be compared with a Sequence, a positive integer or a string only")
 
-        return Sequence(arr.astype(self._ivals.dtype), Alphabet(('False', 'True')), check=False)
+        # return Sequence(arr.astype(self._ivals.dtype), Alphabet(('False', 'True')), check=False)
+        return arr
 
     def __lt__(self, other):
-        return self.__mkcomp__(other, operator.__lt__)
+        if isinstance(other, str):
+            raise ValueError("Sequence cannot be compared with a string")
+        else:
+            return self.__mkcomp__(other, operator.__lt__)
 
     def __le__(self, other):
-        return self.__mkcomp__(other, operator.__le__)
+        if isinstance(other, str):
+            raise ValueError("Sequence cannot be compared with a string")
+        else:
+            return self.__mkcomp__(other, operator.__le__)
 
     def __eq__(self, other):
         return self.__mkcomp__(other, operator.__eq__)
@@ -789,10 +820,16 @@ class Sequence:
         return self.__mkcomp__(other, operator.__ne__)
 
     def __gt__(self, other):
-        return self.__mkcomp__(other, operator.__gt__)
+        if isinstance(other, str):
+            raise ValueError("Sequence cannot be compared with a string")
+        else:
+            return self.__mkcomp__(other, operator.__gt__)
 
     def __ge__(self, other):
-        return self.__mkcomp__(other, operator.__ge__)
+        if isinstance(other, str):
+            raise ValueError("Sequence cannot be compared with a string")
+        else:
+            return self.__mkcomp__(other, operator.__ge__)
 
 # Method that transform the sequence (wrapped from .operations)
 
@@ -862,7 +899,7 @@ class Sequence:
         :func:`~scyseq.operations.count`
         """
         from .operations import count as _count
-        return _count(self)
+        return _count(self, value)
 
     def frequency(self, value=None):
         """
@@ -872,4 +909,4 @@ class Sequence:
         :func:`~scyseq.operations.frequency`
         """
         from .operations import frequency as _frequency
-        return _frequency(self)
+        return _frequency(self, value)
