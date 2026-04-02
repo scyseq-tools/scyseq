@@ -1,14 +1,13 @@
-#-*- coding:Utf-8 -*-
 """
 Defines stochastic matrices
 """
-__docformat__ = 'reStructuredText'
 
 import numpy as np
 import numpy.testing as testing
 # import warnings
 
 from . import sequence as S
+from . import operations as O
 
 # warnings.simplefilter('always', RuntimeWarning)
 
@@ -21,7 +20,7 @@ def conditional_matrix(seq1, seq2):
     :param seq1: a symbolic Sequence object
     :param seq2: a symbolic Sequence object
 
-    :returns: A numpy.matrix of floats
+    :returns: A numpy.array of floats
 
     ..todo::
 
@@ -44,8 +43,8 @@ def conditional_matrix(seq1, seq2):
     [[0.71947674 0.28052326]
      [0.69551282 0.30448718]] [688 312]
     (array([], dtype=int64),)
-    matrix([[0.71947674, 0.28052326],
-            [0.69551282, 0.30448718]])
+    array([[0.71947674, 0.28052326],
+           [0.69551282, 0.30448718]])
     """
     assert len(seq1) == len(seq2), 'Sequence should have the same length.'
 
@@ -55,7 +54,7 @@ def conditional_matrix(seq1, seq2):
 
     # Joint probabilities
     # x = seq1; y = seq2 and P(x|y) ie transition from y -> x (seq2 -> seq1)
-    join_seq = S.recode([seq2, seq1])
+    join_seq = O.recode([seq2, seq1])
     # Freq: (y0, x0) (y0, x1) ... (y0, xn) (y1, x0) ...
     # reshape: k2 rows and ordered by rows:
     # [(y0, x0) (y0, x1) ... (y0, xn) 
@@ -84,7 +83,7 @@ def conditional_matrix(seq1, seq2):
 
     # FIXME: add a warning for Borel-Kolmogorov paradox
     
-    return np.matrix(p_cond)
+    return np.array(p_cond)
 
 def transition_matrix(seq, time=1):
     """
@@ -106,8 +105,8 @@ def transition_matrix(seq, time=1):
     [[0.70224719 0.29775281]
      [0.73519164 0.26480836]] [712 287]
     (array([], dtype=int64),)
-    matrix([[0.70224719, 0.29775281],
-            [0.73519164, 0.26480836]])
+    array([[0.70224719, 0.29775281],
+           [0.73519164, 0.26480836]])
     """
     # Do not change: not tested (or write test...)
     return conditional_matrix(seq[time:], seq[:-time])
@@ -136,12 +135,12 @@ def influence_matrix(seq1, seq2, time=1):
     [[0.70887918 0.29112082]
      [0.71794872 0.28205128]] [687 312]
     (array([], dtype=int64),)
-    matrix([[0.70887918, 0.29112082],
-            [0.71794872, 0.28205128]])
+    array([[0.70887918, 0.29112082],
+           [0.71794872, 0.28205128]])
     """
     # Do not change: not tested (or write test...)
     return conditional_matrix(seq1[time:], seq2[:-time])
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
+#
+#if __name__ == "__main__":
+#    import doctest
+#    doctest.testmod()
