@@ -1,15 +1,59 @@
+# For development, [hatch](https://hatch.pypa.io/latest/why/) is used to manage the virtual environment and dependencies.
+
+Make sure you have hatch installed in your default Python environment:
+
+```bash
+hatch --version
+```
+
+If it is not installed, you can install it using pip:
+
+```bash
+pip install hatch
+```
+
 # Development installation / activation
+```bash
+hatch shell
+```
+
+## Virtual Environment Setup
+
+Hatch manages virtual environments for this project. Virtual environments can be stored in a centralized location by adding the following to `~/.config/hatch/config.toml`:
+
+```toml
+[envs]
+storage.path = "~/_virtualenvs/hatch_envs"
+```
+
+This configuration centralizes all environments in one directory for easier management across projects.
+
+To deactivate the environment, run:
+
+```bash
+exit
+```
+
+## Building Documentation
+
+To generate HTML documentation, first activate the Hatch environment:
 
 ```bash
 hatch shell
 ```
 
-My own configuration uses a specific virtual environment per project:
+Then navigate to the docs folder and build the HTML files:
 
-env = "~/_virtualenvs/hatch_envs" is set in ~/.config/hatch/config.toml
-
-and
-
+**On Windows:**
 ```bash
-exit
+cd docs
+./make.bat html
 ```
+
+**On Linux/Mac:**
+```bash
+cd docs
+make html
+```
+
+The generated HTML documentation will be available in `docs/build/html/`. Open `docs/build/html/index.html` in your browser to view the documentation.
