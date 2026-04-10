@@ -57,3 +57,25 @@ make html
 ```
 
 The generated HTML documentation will be available in `docs/build/html/`. Open `docs/build/html/index.html` in your browser to view the documentation.
+
+## Tutorials
+
+Tutorials are available in the `docs/source/notebooks` directory. To run a tutorial, activate the Hatch environment and execute the desired tutorial script:
+
+```bash
+hatch shell
+```
+
+Make sure you have Jupyter installed in the environment:
+
+```bash
+pip install jupyter
+```
+
+Then you can open the Jupyter Notebook interface by running:
+
+```bash
+jupyter notebook 
+```
+
+This will open a web interface where you can navigate to the `docs/source/notebooks` directory and open the tutorial notebooks to run them interactively.
