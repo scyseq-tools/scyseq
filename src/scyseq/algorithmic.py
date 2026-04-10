@@ -1,153 +1,197 @@
 """
-Algorithms and procedures related to algorithmic approach of complexity
+Utilities for algorithmic complexity on symbolic sequences.
+
+The public helpers in this module compute Lempel-Ziv complexities on
+integer-encoded symbolic sequences. ``lz76`` and ``lz77`` accept non-empty
+one-dimensional arrays of integers and can optionally return the parsing
+history used to count phrases. ``lempel_ziv`` works on
+:class:`scyseq.sequence.Sequence` objects and returns either the raw or the
+normalized complexity score.
 """
-__docformat__ = 'reStructuredText'
+__docformat__ = "reStructuredText"
 
 import numpy as np
-# import sequence as S
+
 from . import sequence as S
 from .generator import uniform_sequence
 
+
 def contains_sublist(lst, sublst):
     """
-    Check wether a sublist appears in a list
-    
-    found at: http://stackoverflow.com/questions/3313590/...
-    ... check-for-presence-of-a-sublist-in-python
-   """
-    sll = len(sublst) # sublist length
-    return any((sublst == lst[i:i+sll]) for i in range(len(lst)-sll+1))
+    Return whether ``sublst`` appears contiguously inside ``lst``.
+
+    :param lst: Sequence to inspect.
+    :param sublst: Candidate contiguous subsequence.
+    :returns: ``True`` if ``sublst`` appears in ``lst``, ``False`` otherwise.
+
+    The empty sublist is considered to be contained in every list.
+
+    >>> contains_sublist([1, 2, 3, 4], [2, 3])
+    True
+    >>> contains_sublist([1, 2, 3], [2, 4])
+    False
+    >>> contains_sublist([1, 2], [])
+    True
+    """
+    sublist_length = len(sublst)
+    return any(
+        sublst == lst[index:index + sublist_length]
+        for index in range(len(lst) - sublist_length + 1)
+    )
+
 
 def lz76(arr, summary=False):
     """
-    Returns Lempel-Ziv complexity according to LZ76 parsing.
+    Return the Lempel-Ziv complexity obtained with the LZ76 parsing.
 
-    :param arr: an array of integers
-    :param summary: A boolean (should the dictionary be returned)
+    :param arr: Non-empty array-like object of integers.
+    :param summary: If ``True``, also return the parsing history.
+    :returns: Either an integer or a tuple ``(complexity, history)`` when
+              ``summary=True``.
+    :raises: :exc:`IndexError` if ``arr`` is empty.
 
-    :returns: either an integer (`summary=False`) or a tuple
-              (`summary=True`) with an integer and a list of strings.
-    
-    Example :
+    The returned history is the ordered list of phrases discovered during the
+    parsing.
 
-    >>> np.random.seed(9)
-    >>> a = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
-    >>> lz76(a)
-    92
+    >>> arr = np.array([0, 0, 1, 0, 1, 1], dtype=np.uint8)
+    >>> lz76(arr)
+    3
+    >>> lz76(arr, summary=True)
+    (3, [[0], [0, 1], [0, 1, 1]])
     """
     dot, ind = 1, 0
     history = [[int(arr[0])]]
     previous = [int(arr[0])]
     current = []
 
-    while ind < len(arr)-1:
+    while ind < len(arr) - 1:
+        current.append(int(arr[ind + 1]))
 
-        current.append(int(arr[ind+1]))
-        
         if not contains_sublist(previous, current):
             dot += 1
             history.append(current)
             previous.extend(current)
             current = []
+
         ind += 1
 
-    if len(current) != 0:
+    if current:
         dot += 1
         history.append(current)
 
     if summary:
         return dot, history
-    else:
-        return dot
+
+    return dot
+
 
 def lz77(arr, summary=False):
     """
-    Returns Lempel-Ziv complexity according to LZ77 parsing.
+    Return the Lempel-Ziv complexity obtained with the LZ77 parsing.
 
-    :param arr: an array of integers
-    :param summary: A boolean (should the dictionary be returned)
+    :param arr: Non-empty array-like object of integers.
+    :param summary: If ``True``, also return the parsing history.
+    :returns: Either an integer or a tuple ``(complexity, history)`` when
+              ``summary=True``.
+    :raises: :exc:`IndexError` if ``arr`` is empty.
 
-    :returns: either an integer (`summary=False`) or a tuple
-              (`summary=True`) with an integer and a list of strings.
-    
-    Example : 
+    The returned history is the ordered list of phrases discovered during the
+    parsing.
 
-    >>> np.random.seed(9)
-    >>> a = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
-    >>> lz77(a)
-    158
+    >>> arr = np.array([0, 0, 1, 0, 1, 1], dtype=np.uint8)
+    >>> lz77(arr)
+    3
+    >>> lz77(arr, summary=True)
+    (3, [[0], [0, 1], [0, 1, 1]])
     """
     dot, ind = 1, 0
-    # need to convert into integers since if I keep np.int16 the test
-    # Q in history does not work
     history = [[int(arr[0])]]
     current = []
 
-    while ind < len(arr)-1:
+    while ind < len(arr) - 1:
+        current.append(int(arr[ind + 1]))
 
-        current.append(int(arr[ind+1]))
-        
-        if not current in history: 
+        if current not in history:
             dot += 1
             history.append(current)
             current = []
-        ind += 1 
 
-    if len(current) != 0:
+        ind += 1
+
+    if current:
         dot += 1
         history.append(current)
 
     if summary:
         return dot, history
-    else:
-        return dot
+
+    return dot
+
+
+def _get_parser(parsing):
+    parsers = {
+        "lz76": lz76,
+        "lz77": lz77,
+    }
+
+    try:
+        return parsers[parsing]
+    except KeyError as exc:
+        raise NotImplementedError("The parsing %s is not implemented" % parsing) from exc
+
+
+def _complexity_from_phrases(dotcount, alphabet_length, sequence_length):
+    """
+    Return the normalized Lempel-Ziv score for a phrase count.
+    """
+    return dotcount * (np.log(dotcount) / np.log(alphabet_length) + 1.0) / sequence_length
+
 
 def lempel_ziv(seq, parsing='lz76', norm=False, nbsur=None):
     """
-    Returns the Lempel-Ziv normalized complexity using either lz76 or lz77
-    parsing.
+    Return the Lempel-Ziv complexity of a symbolic sequence.
 
-    :param seq: a Sequence object
-    :param parsing: a string in `["lz76", "lz77"]`
-    :param norm: a bolean (should the complexity be normalized?)
-    :param ns: the number of surrogate data used in the normalization.
+    :param seq: A symbolic :class:`scyseq.sequence.Sequence`.
+    :param parsing: Parsing name in ``["lz76", "lz77"]``.
+    :param norm: If ``True``, normalize the raw score with surrogate sequences.
+    :param nbsur: Number of surrogate sequences used for normalization.
+    :returns: A float complexity score.
 
-    :raise:
-       :exc:`NotImplementedError` if `parsing` is not in the list above.
+    :raises:
+       :exc:`NotImplementedError` if ``parsing`` is not implemented.
+       :exc:`ValueError` if ``norm`` is ``True`` and ``nbsur`` is not provided.
 
-    :returns: a float (the Lempel-Ziv complexity)
-
-    Example :
-
-    >>> np.random.seed(9)
-    >>> a = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
-    >>> A = S.Alphabet(['a','b'])
-    >>> seq = S.Sequence(a,A)
+    >>> seq = S.Sequence(np.array([0, 0, 1, 0, 1, 1], dtype=np.uint8), 2)
     >>> lempel_ziv(seq)
-    0.6
+    1.292481250360578
+    >>> np.random.seed(123)
+    >>> lempel_ziv(seq, norm=True, nbsur=5)
+    0.0
     """
-    try:
-        algorithm = eval(parsing)
-    except NameError:
-        raise NotImplementedError("The parsing %s is not implemented" % parsing)
-
+    algorithm = _get_parser(parsing)
     seqlen = len(seq)
     dotcount = algorithm(seq.ivals)
-    # (log(c)/log(k)) + 1  since we want log_k(c)
-    lz_raw  = dotcount * (np.log(dotcount) / np.log(seq.k) + 1.) / seqlen
+    lz_raw = _complexity_from_phrases(dotcount, seq.k, seqlen)
 
-    if norm:
-        if nbsur is None:
-            raise ValueError('You should give the number of surrogate data')
-        c_min  = algorithm(S.Sequence(np.zeros(seqlen), seq.k).ivals)
-        c_max  = max([algorithm(uniform_sequence(seqlen, \
-                                alen=seq.k).ivals) for i in range(nbsur)])
-        lz_min = c_min * (np.log(c_min) / np.log(seq.k) + 1) / seqlen
-        lz_max = c_max * (np.log(c_max) / np.log(seq.k) + 1) / seqlen
-        return (lz_raw - lz_min) / (lz_max - lz_min)
-    else:
+    if not norm:
         return lz_raw
+
+    if nbsur is None:
+        raise ValueError('You should give the number of surrogate data')
+
+    zero_ivals = np.zeros(seqlen, dtype=seq.ivals.dtype)
+    c_min = algorithm(S.Sequence(zero_ivals, seq.k).ivals)
+    c_max = max(
+        algorithm(uniform_sequence(seqlen, alen=seq.k).ivals)
+        for _ in range(nbsur)
+    )
+    lz_min = _complexity_from_phrases(c_min, seq.k, seqlen)
+    lz_max = _complexity_from_phrases(c_max, seq.k, seqlen)
+
+    return (lz_raw - lz_min) / (lz_max - lz_min)
+
 
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()
