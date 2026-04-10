@@ -1,279 +1,300 @@
 """
-Information-theoretic measures for symbolic sequences.
-
-This module gathers entropy, mutual-information, and transfer-entropy helpers
-for :class:`scyseq.sequence.Sequence` objects. All logarithms are natural
-logarithms, so the returned values are expressed in nats.
+Module for information theory related functions.
 """
 
 import numpy as np
 
 from . import sequence as S
-
-
-def _build_word_sequence(seq, wlen):
-    """
-    Return the sequence of overlapping words of length ``wlen``.
-    """
-    if not isinstance(wlen, (int, np.integer)):
-        raise ValueError("Word length should be a positive integer.")
-
-    wlen = int(wlen)
-    if wlen <= 0:
-        raise ValueError("Word length should be > 0.")
-    if wlen > len(seq):
-        raise ValueError("Word length should be <= sequence length.")
-
-    slen = len(seq)
-    word_sequences = [seq[index:slen - wlen + index + 1] for index in range(wlen)]
-    return _recode_sequences(word_sequences)
-
-
-def _recode_sequences(sequences):
-    """
-    Return a single symbolic sequence obtained by jointly recoding ``sequences``.
-    """
-    if len(sequences) == 0:
-        raise ValueError("At least one sequence is required.")
-
-    if not all(len(seq) == len(sequences[0]) for seq in sequences):
-        raise ValueError("Sequences should have the same length.")
-
-    alphabet_sizes = [seq.k for seq in sequences]
-    symbolic_matrix = np.vstack([seq.ivals for seq in sequences]).T
-
-    # Each column is weighted by the product of alphabet sizes to its right.
-    weights = np.flipud(np.insert(np.cumprod(alphabet_sizes[::-1])[:-1], 0, 1))
-    new_ivals = np.dot(symbolic_matrix, weights).astype(int)
-    new_alphabet = S.Alphabet(int(np.prod(alphabet_sizes)))
-
-    return S.Sequence(new_ivals, new_alphabet, check=False)
+from . import algorithmic as A
+from .stochastic import conditional_matrix
 
 
 def metric_entropy(seq):
     """
-    Return Shannon's metric entropy of a symbolic sequence.
+    Returns Shannon's (metric) entropy of sequence
 
-    :param seq: A symbolic :class:`scyseq.sequence.Sequence`.
-    :returns: A float entropy value in nats.
+    :param seq: a symbolic Sequence object
+
+    :returns: a float
+
+    Example :
 
     >>> np.random.seed(9)
-    >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq = S.Sequence(a, alpha)
+    >>> a = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])  
+    >>> A = S.Alphabet(['a','b'])
+    >>> seq = S.Sequence(a,A)
     >>> metric_entropy(seq)
     0.6003511877776578
+
     """
     prob = seq.frequency()
-    return -np.sum(prob[prob > 0] * np.log(prob[prob > 0]))
-
+    return - np.sum(prob[prob > 0] * np.log(prob[prob > 0]))
 
 # shortcuts for Shannon (metric) entropy
 H = metric_entropy
 shannon_entropy = metric_entropy
 
-
 def topological_entropy(seq):
     """
-    Return the topological entropy of a symbolic sequence.
+    Returns the topological entropy
 
-    :param seq: A symbolic :class:`scyseq.sequence.Sequence`.
-    :returns: A float entropy value in nats.
+    :param seq: a symbolic Sequence object
+
+    :returns: a float
+
+    Example :
 
     >>> np.random.seed(9)
-    >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq = S.Sequence(a, alpha)
+    >>> a = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
+    >>> A = S.Alphabet(['a','b'])
+    >>> seq = S.Sequence(a,A)
     >>> topological_entropy(seq)
     0.6931471805599453
+
     """
     nb_visit = np.sum(seq.count() > 0)
     return np.log(float(nb_visit))
 
-
 # shortcut for topological entropy
 T = topological_entropy
 
-
 def renyi_entropy(seq, coef):
     """
-    Return the Renyi entropy of order ``coef``.
+    Returns the Rényi entropy
 
-    :param seq: A symbolic :class:`scyseq.sequence.Sequence`.
-    :param coef: Renyi order. The formula used here assumes ``coef != 1``.
-    :returns: A float entropy value in nats.
+    ..todo:: 
+
+         Make the doc of renyi_entropy!
+
+    Example :
 
     >>> np.random.seed(9)
-    >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq = S.Sequence(a, alpha)
+    >>> a = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
+    >>> A = S.Alphabet(['a','b'])
+    >>> seq = S.Sequence(a,A)
     >>> renyi_entropy(seq, 0.9)
     0.6088567303148161
+
     """
     prob = seq.frequency()
-    return np.log(np.sum(prob[prob > 0] ** coef)) / (1 - coef)
-
+    return (np.log(np.sum(prob[prob > 0]**coef))) / (1 - coef)
 
 # shortcut for Renyi entropy
 R = renyi_entropy
 
-
-def block_entropy(seq, wlen):
+# def block_entropy(seq, n, method="metric", *args):
+def block_entropy(seq, wlen): #, method="metric", *args):
     """
-    Return the entropy of the overlapping words of length ``wlen``.
+    Returns the block entropy
 
-    :param seq: A symbolic :class:`scyseq.sequence.Sequence`.
-    :param wlen: Positive word length not exceeding ``len(seq)``.
-    :returns: A float entropy value in nats.
-    :raises: :exc:`ValueError` if ``wlen`` is invalid.
+    :param seq: a symbolic Sequence object
+    :param n: the block length
+    :param method: a string in `[ "metric", "shannon", "topological", "renyi",  "all"]`
+
+    :raises:
+       :exc:`ValueError` if :math:`n< 0`
+
+       :exc:`NotImplementedError` if the method is not in the list above.
+
+    :returns: either the value of the demanded entropy or all their value
+              in a tuple `Tn, Hn, hav`
+
+    Example :
 
     >>> np.random.seed(9)
-    >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq = S.Sequence(a, alpha)
+    >>> a = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
+    >>> A = S.Alphabet(['a','b'])
+    >>> seq = S.Sequence(a,A)
     >>> block_entropy(seq, 6)
     3.577559335188841
+
     """
-    nwords = _build_word_sequence(seq, wlen)
+#    if (n < 0): 
+#        raise ValueError("Block size cannot be <0")
+    nwords = S.words(seq, wlen)
     return H(nwords)
 
+# shortcut for n-block entropy
+# HN = block_entropy
 
+##    N = len(seq)
+##    seq_list = [seq[i:N-n+i+1] for i in range(n)]
+###     for se in seq_list: print len(se)
+##    new_seq = recode(seq_list, new_dict=False)
+#
+#    if method.lower() in ["metric", "shannon"]: 
+#        return new_seq.H()
+#    
+#    elif method.lower() == "topological": 
+#        return new_seq.T() / n
+#
+#    elif method.lower() == "renyi":
+#        b = args[0]
+#        return renyi_entropy(new_seq, b)
+#    
+##    elif method.lower() == "average": 
+##        return new_seq.H() / n
+#    
+#    elif method.lower() == "all":
+#        Tn = new_seq.T() / n
+#        Hn = new_seq.H()
+#        return Tn, Hn #, Hn / n
+#
+#    else: raise NotImplementedError("The %s entropy is not implemented" % method)
+
+# def entropy_rate(seq, method, **kwargs):
 def entropy_rate(seq, wlen, method='average'):
     """
-    Return an entropy-rate estimate based on block entropies.
+    Returns the entropy rate
 
-    :param seq: A symbolic :class:`scyseq.sequence.Sequence`.
-    :param wlen: Positive word length not exceeding ``len(seq)``.
-    :param method: One of ``["average", "difference"]``.
-    :returns: The entropy-rate estimate as a float.
-    :raises:
-       :exc:`ValueError` if ``wlen`` is invalid.
-       :exc:`NotImplementedError` if ``method`` is unsupported.
+    :param seq: a symbolic Sequence object
+    :param method: a string in ['lempel_ziv', 'average']
+    :param kwargs: parameter to pass to the method
+
+    :returns: the entropy rate computed using the method
+
+    Example :
 
     >>> np.random.seed(9)
-    >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq = S.Sequence(a, alpha)
+    >>> a = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
+    >>> A = S.Alphabet(['a','b'])
+    >>> seq = S.Sequence(a,A)
     >>> entropy_rate(seq, 6)
     0.5962598891981402
-    >>> entropy_rate(seq, 6, method="difference")
-    0.5689107029836205
+
     """
+#    if method.lower() == "lempel_ziv":
+#        #FIXME: how to handle kwargs and default values in lempel_ziv
+#        return A.lempel_ziv(seq) * np.log(seq.alen)
+    
+    # elif method.lower() == "average":
     if method.lower() == "average":
+        # wlen = kwargs['n']
         return block_entropy(seq, wlen) / wlen
 
-    if method.lower() == "difference":
-        return block_entropy(seq, wlen + 1) - block_entropy(seq, wlen)
-
-    raise NotImplementedError("The %s entropy rate is not implemented" % method)
-
+    elif method.lower() == "difference":
+        # wlen = kwargs['n']
+        return block_entropy(seq, wlen+1) - block_entropy(seq, wlen)
+    
+    else:
+        raise NotImplementedError(\
+                "The %s entropy rate is not implemented" % method)
 
 def effective_complexity(seq, n_max):
     """
-    Return Grassberger's effective complexity estimate.
+    Computes the effective complexity defined by Grassberger
 
-    :param seq: A symbolic :class:`scyseq.sequence.Sequence`.
-    :param n_max: Maximum block length used in the estimate.
-    :returns: A float effective-complexity value.
+    ..todo::
 
-    >>> np.random.seed(9)
-    >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq = S.Sequence(a, alpha)
-    >>> effective_complexity(seq, 6)
-    0.05784767682768299
+        Make the doc of effective complexity
     """
+    # EC =  \sum_n n.(h_{n-1}-h_n) where h_n = H_{n+1} - H_n
+    # FIXME: this is only valid for n \geq 2
+    # FIXME: check this against real results!
+   
     blocks = [block_entropy(seq, wlen) for wlen in range(1, n_max + 1)]
-    rates = np.diff(blocks)
-    drate = np.diff(np.flipud(rates))
-    return np.sum(np.arange(2, len(drate) + 2) * np.flipud(drate))
+    rates = np.diff(blocks) # from 0  to n
+    drate = np.diff(np.flipud(rates)) # from n to 0 then last flipud below
+    return np.sum(np.arange(2, len(drate)+2) * np.flipud(drate))
 
+#def block_entropies(seq, n):
+#    """
+#    .. warning::
+#       Do not use this function: it will be deprecated
+#
+#    It is equivalent to::
+#
+#       block_entropy(seq, n, method="all")
+#    """
+#    warnings.warn("Use block_entropy and entropy_rate instead", DeprecationWarning)
+#    return block_entropy(seq, n, method="all"), entropy_rate(seq, method="metric", n=n)
 
 def mutual_information(seq1, seq2):
     """
-    Return the mutual information between two symbolic sequences.
+    Computes the mutual information for symbolic sequences
 
-    :param seq1: First symbolic :class:`scyseq.sequence.Sequence`.
-    :param seq2: Second symbolic :class:`scyseq.sequence.Sequence`.
-    :returns: The mutual information as a float.
-    :raises: :exc:`ValueError` if the sequences do not have the same length.
+    :param x, y: two symbolic Sequences
+
+    :returns: the mutual information (float)
+
+    Example :
 
     >>> np.random.seed(9)
-    >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
+    >>> a = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
     >>> np.random.seed(6)
-    >>> b = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq1 = S.Sequence(a, alpha)
-    >>> seq2 = S.Sequence(b, alpha)
+    >>> b = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
+    >>> A = S.Alphabet(['a','b'])
+    >>> seq1 = S.Sequence(a,A)
+    >>> seq2 = S.Sequence(b,A)
     >>> mutual_information(seq1, seq2)
     0.0002988020334349084
     """
-    seq12 = _recode_sequences([seq1, seq2])
+    seq12 = S.recode([seq1, seq2])
     return H(seq1) + H(seq2) - H(seq12)
-
 
 def multi_information(seq1, seq2, seq3):
     """
-    Return the three-variable mutual information for symbolic sequences.
+    Computes the multi information for 3 symbolic sequences, 
+    
+    A kind of 3 variables mutual information (See Blanc J.L. & Coq J.O.,
+    J.Physiol. 2007)
+    
+    :param x, y, z: three symbolic Sequences
 
-    :param seq1: First symbolic :class:`scyseq.sequence.Sequence`.
-    :param seq2: Second symbolic :class:`scyseq.sequence.Sequence`.
-    :param seq3: Third symbolic :class:`scyseq.sequence.Sequence`.
-    :returns: The three-variable mutual information as a float.
-    :raises: :exc:`ValueError` if the sequences do not have the same length.
+    :returns: the three variable mutual information
+
+    Example :
 
     >>> np.random.seed(9)
-    >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
+    >>> a = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
     >>> np.random.seed(6)
-    >>> b = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
+    >>> b = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
     >>> np.random.seed(3)
-    >>> c = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq1 = S.Sequence(a, alpha)
-    >>> seq2 = S.Sequence(b, alpha)
-    >>> seq3 = S.Sequence(c, alpha)
+    >>> c = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
+    >>> A = S.Alphabet(['a','b'])
+    >>> seq1 = S.Sequence(a,A)
+    >>> seq2 = S.Sequence(b,A)
+    >>> seq3 = S.Sequence(c,A)
     >>> multi_information(seq1, seq2, seq3)
     -4.8757282800737656e-05
+
     """
-    seq12 = _recode_sequences([seq1, seq2])
-    seq13 = _recode_sequences([seq1, seq3])
-    seq23 = _recode_sequences([seq2, seq3])
-    seq123 = _recode_sequences([seq1, seq2, seq3])
+    seq12 = S.recode([seq1, seq2])
+    seq13 = S.recode([seq1, seq3])
+    seq23 = S.recode([seq2, seq3])    
+    seq123 = S.recode([seq1, seq2, seq3])
 
-    return H(seq1) + H(seq2) + H(seq3) + H(seq123) - H(seq12) - H(seq13) - H(seq23)
-
+    # return x.H() + y.H() + z.H() + xyz.H() - xy.H() - xz.H() - yz.H()
+    return H(seq1) + H(seq2) + H(seq3) + H(seq123) - \
+           H(seq12) - H(seq13) - H(seq23)
 
 def transfer_entropy(seq1, seq1p, seq2):
     """
-    Return the symbolic transfer entropy from ``seq2`` to ``seq1``.
+    Computes the symbolic transfer entropy T y->x
 
-    ``seq1`` corresponds to :math:`x_t`, ``seq1p`` to :math:`x_{t+1}`, and
-    ``seq2`` to :math:`y_t`.
+    we can use: P(x|y) = P(x,y) / P(y) in the formula:
+    P(x+, x, y) log (P(x+|x,y) / P(x+|x))
 
-    :param seq1: Target sequence at time :math:`t`.
-    :param seq1p: Shifted version of the target sequence at time :math:`t+1`.
-    :param seq2: Driving sequence at time :math:`t`.
-    :returns: The transfer entropy as a float.
-    :raises: :exc:`ValueError` if the sequences do not have the same length.
+    but (see Kugiumtzis, 2011)
+    
+    -H(x+, x, y) + H(x, y) + H(x+, x) - H(x) 
+    
+    gives a better implementation
 
-    >>> np.random.seed(9)
-    >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> np.random.seed(6)
-    >>> b = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq1 = S.Sequence(a, alpha)
-    >>> seq2 = S.Sequence(b, alpha)
-    >>> transfer_entropy(seq1[:-1], seq1[1:], seq2[:-1])
-    0.00019242807727182232
+    see:
+
+    Schreiber (2000)
+    Staniek and Lehnertz (2008) Symbolic transfer entropy PRE
+    Kugiumtzis (2011) Journal of Nonlinear Systems and Applications vol. 2 n°3
+    http://arxiv.org/abs/1007.0357
     """
-    seq1p21 = _recode_sequences([seq1p, seq2, seq1])
-    seq21 = _recode_sequences([seq2, seq1])
-    seq1p1 = _recode_sequences([seq1p, seq1])
+    seq1p21 = S.recode([seq1p, seq2, seq1])
+    seq21 = S.recode([seq2, seq1])
+    seq1p1 = S.recode([seq1p, seq1])
 
-    return -H(seq1p21) + H(seq21) + H(seq1p1) - H(seq1)
+    return - H(seq1p21) + H(seq21) + H(seq1p1) - H(seq1)
 
-
-if __name__ == "__main__":
-    import doctest
-
-    doctest.testmod()
+#    return - recode([xp, y, x], new_dict=False).H() \
+#           + recode([y, x], new_dict=False).H() \
+#           + recode([xp, x], new_dict=False).H() \
+#           - x.H()
