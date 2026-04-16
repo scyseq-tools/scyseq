@@ -3,6 +3,12 @@ Definitons of operations some of which are just wrappers to sequences' methods.
 """
 
 import copy
+import itertools
+
+import numpy as np
+
+from . import exceptions as E
+from .sequence import Alphabet, Sequence
 
 def roll(seq, step):
     """
@@ -149,7 +155,14 @@ def words(seq, wlen, new_alphabet=False):
     .. todo::
         Write the doc of "words"
     """
-    assert wlen > 0, 'Word length should be > 0.'
+    if not isinstance(wlen, (int, np.integer)):
+        raise ValueError("Word length should be a positive integer.")
+
+    if wlen <= 0:
+        raise ValueError("Word length should be > 0.")
+    if wlen > len(seq):
+        raise ValueError("Word length should be <= sequence length.")
+
     slen = len(seq)
     lseq = [seq[i:slen-wlen+i+1] for i in range(wlen)]
 

@@ -63,6 +63,12 @@ class SequenceParseError(SequenceError):
         self.sequence = sequence
 
 
+class LengthError(SequenceError):
+    """Raised when sequence lengths do not match an operation's requirements."""
+    def __init__(self, message):
+        super().__init__(message)
+
+
 class SymbolMismatchError(SequenceError):
     """Raised when a sequence contains symbols not in the defined alphabet."""
     def __init__(self, sequence, invalid_symbols):
@@ -76,5 +82,5 @@ __all__ = [
     "ScyseqError",
     "SymbolError", "SymbolDefinitionError", "SymbolAccessError",
     "AlphabetError", "InvalidSymbolError", "EmptyAlphabetError",
-    "SequenceError", "SequenceParseError", "SymbolMismatchError",
+    "SequenceError", "SequenceParseError", "LengthError", "SymbolMismatchError",
 ]
