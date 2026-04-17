@@ -152,7 +152,6 @@ def count(obj, value=None):
     else:
         raise ValueError(f"Cannot count from object of type {type(obj)}.")
 
-
 def frequency(obj, value=None):
     """
     Returns the probability of each symbol in :math:`{0, k-1}`

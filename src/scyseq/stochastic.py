@@ -11,9 +11,15 @@ from . import operations as O
 
 # warnings.simplefilter('always', RuntimeWarning)
 
-def conditional_matrix(seq1, seq2):
+def conditional_matrix(dependent, conditioning, smooth=0):
     """
-    Returns the conditional matrix ie P(s1=j | x2=i).
+    Returns the conditional matrix ie P(y=j | x=i).
+
+    P(x) = 0 is dealt with add-k smoothing:
+
+    P(y | x) = (P(x,y) + k) / (P(x) + k * |Ay|)
+
+    with |Ay| the alphabet length of the dependent sequence
 
     This is estimated using the maximum likelihood estimator.
 
@@ -40,52 +46,62 @@ def conditional_matrix(seq1, seq2):
     >>> seq1 = S.Sequence(a,A)
     >>> seq2 = S.Sequence(b,A)
     >>> conditional_matrix(seq1, seq2)
-    [[0.71947674 0.28052326]
-     [0.69551282 0.30448718]] [688 312]
-    (array([], dtype=int64),)
     array([[0.71947674, 0.28052326],
            [0.69551282, 0.30448718]])
     """
-    assert len(seq1) == len(seq2), 'Sequence should have the same length.'
+    dseq, cseq = dependent, conditioning
+    assert len(dseq) == len(cseq), 'Sequence should have the same length.'
+    if not isinstance(smooth, (int, float, np.integer)):
+        raise ValueError(f"Smooth should be float or integer not {type(smooth)}")
 
-    alen1 = seq1.k
-    alen2 = seq2.k
-    # slen = len(seq1)
+# FIXME: Give a better exception
+    if any(cseq.count() == 0) and smooth == 0:
+        raise ValueError('Cannot compute conditional probabilities with null marginals and no smoothing')
 
-    # Joint probabilities
-    # x = seq1; y = seq2 and P(x|y) ie transition from y -> x (seq2 -> seq1)
-    join_seq = O.recode([seq2, seq1])
-    # Freq: (y0, x0) (y0, x1) ... (y0, xn) (y1, x0) ...
-    # reshape: k2 rows and ordered by rows:
-    # [(y0, x0) (y0, x1) ... (y0, xn) 
-    #  (y1, x0) ...]
-    p_join = np.reshape(join_seq.count(), (alen2, -1))
+    d_alen = dseq.k
+    c_alen = cseq.k
 
-    # Marginal probabilities
-    fq_marg = seq2.count()
-    # freq: y0, y1, ... yn, y0, y1, ...  k1 times
-    # reshape with k1 rows and ordered by rows:
-    # [y0, y1, ... yn
-    #  y0, y1, ... yn
-    #  ...] so we need to transpose
-    p_marg =  np.reshape(np.tile(fq_marg, alen1), (alen1, -1)).T
-    # Borel-Kolmogorov paradox
-    ind0 = np.where(p_marg == 0.)
-    p_marg[ind0] = 1 # avoid divide by zero
-    p_cond = p_join / p_marg
-    print(p_cond, fq_marg)
-    # set nulls -> nulls transitions / conditions = 1
-    nulls = np.where(fq_marg==0.)
-    # p_cond[nulls[0], nulls[0]] = 1
-    print(nulls)
-    p_cond[nulls] = 1
+    # Joint probabilities:
+    # P(dseq | cseq) ie transition from conditioning -> dependent (cseq -> dseq)
+    join_seq = O.recode([cseq, dseq]) #, new_alphabet=True, names=['From_', 'To_'])
+
+#    # Freq: (cond0, dep0) (cond0, dep1) ... (cond0, depn) (cond1, dep0) ...
+#    # reshape: c_alen rows and ordered by rows:
+#    # [(cond0, dep0) (cond0, dep1) ... (cond0, depn) 
+#    #  (cond1, dep0) ...]
+    p_join = np.reshape(join_seq.count(), (c_alen, -1))
+
+#    # Marginal probabilities
+    fq_marg = cseq.count()
+#    # freq: y0, y1, ... yn, y0, y1, ...  k1 times
+#    # reshape with k1 rows and ordered by rows:
+#    # [y0, y1, ... yn
+#    #  y0, y1, ... yn
+#    #  ...] so we need to transpose
+    p_marg =  np.reshape(np.tile(fq_marg, d_alen), (d_alen, -1)).T
+
+# Add-k smoothing
+    p_cond = (p_join + smooth) / (p_marg + smooth * d_alen)
     testing.assert_allclose(np.sum(p_cond, 1), 1)
+    return p_cond
 
-    # FIXME: add a warning for Borel-Kolmogorov paradox
-    
-    return np.array(p_cond)
+#    ind0 = np.where(p_marg == 0.)
+#    p_marg[ind0] = 1 # avoid divide by zero
+#    p_cond = p_join / p_marg
+#    # print(p_cond, fq_marg)
+#    # set nulls -> nulls transitions / conditions = 1
+#    nulls = np.where(fq_marg==0.)
+#    # p_cond[nulls[0], nulls[0]] = 1
+#    #print(nulls)
+#    p_cond[nulls] = 1
+#    print(p_cond)
+#    testing.assert_allclose(np.sum(p_cond, 1), 1)
+#
+#    # FIXME: add a warning for P(x) = 0 and / or P(x,y)=0 P(y)=0
+#    
+#    return np.array(p_cond)
 
-def transition_matrix(seq, time=1):
+def transition_matrix(seq, time=1, smooth=0):
     """
     Returns the transition matrix.
 
@@ -102,16 +118,13 @@ def transition_matrix(seq, time=1):
     >>> A = S.Alphabet(['a','b'])
     >>> seq = S.Sequence(a,A)
     >>> transition_matrix(seq)
-    [[0.70224719 0.29775281]
-     [0.73519164 0.26480836]] [712 287]
-    (array([], dtype=int64),)
     array([[0.70224719, 0.29775281],
            [0.73519164, 0.26480836]])
     """
     # Do not change: not tested (or write test...)
-    return conditional_matrix(seq[time:], seq[:-time])
+    return conditional_matrix(seq[time:], seq[:-time], smooth=smooth)
 
-def influence_matrix(seq1, seq2, time=1):
+def influence_matrix(seq1, seq2, time=1, smooth=0):
     """
     Returns the influence matrix ie P(x1(T+t)=j | x2(T)=i).
 
@@ -132,15 +145,9 @@ def influence_matrix(seq1, seq2, time=1):
     >>> seq1 = S.Sequence(a,A)
     >>> seq2 = S.Sequence(b,A)
     >>> influence_matrix(seq1, seq2)
-    [[0.70887918 0.29112082]
-     [0.71794872 0.28205128]] [687 312]
-    (array([], dtype=int64),)
     array([[0.70887918, 0.29112082],
            [0.71794872, 0.28205128]])
     """
     # Do not change: not tested (or write test...)
-    return conditional_matrix(seq1[time:], seq2[:-time])
-#
-#if __name__ == "__main__":
-#    import doctest
-#    doctest.testmod()
+    return conditional_matrix(seq1[time:], seq2[:-time], smooth=smooth)
+
