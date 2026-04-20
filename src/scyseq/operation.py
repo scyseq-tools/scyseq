@@ -2,7 +2,6 @@
 Definitons of operations some of which are just wrappers to sequences' methods.
 """
 
-import copy
 import itertools
 
 import numpy as np
@@ -13,34 +12,48 @@ from .sequence import Alphabet, Sequence
 def roll(seq, step):
     """
     Roll the sequence
+
+    >>> seq = Sequence([0, 1, 2, 0, 1], 3)
+    >>> roll(seq, 2).ivals.tolist()
+    [0, 1, 0, 1, 2]
     """
-#    newseq = copy.deepcopy(seq)
-#    newseq.roll(step)
-    return newseq.roll(step)
+    return seq.roll(step)
 
 def reverse(seq):
     """
     Reverse the sequence
+
+    >>> seq = Sequence([0, 1, 2, 0, 1], 3)
+    >>> reverse(seq).ivals.tolist()
+    [1, 0, 2, 1, 0]
     """
-#    newseq = copy.deepcopy(seq)
-#    newseq.reverse()
-    return newseq.reverse()
+    return seq.reverse()
 
 def shuffle(seq):
     """
     Shuffle the sequence
+
+    >>> seq = Sequence([0, 1, 2, 0, 1], 3)
+    >>> shuffled = shuffle(seq)
+    >>> sorted(shuffled.ivals.tolist())
+    [0, 0, 1, 1, 2]
+    >>> seq.ivals.tolist()
+    [0, 1, 2, 0, 1]
     """
-#    newseq = copy.deepcopy(seq)
-#    newseq.shuffle()
-    return newseq.shuffle()
+    shuffled = np.array(seq.ivals, copy=True)
+    np.random.shuffle(shuffled)
+
+    return Sequence(shuffled, seq.alphabet, check=False)
 
 def reduce(seq):
     """
     Returns a reduced sequence (ie only keep the transitions)
+
+    >>> seq = Sequence([0, 0, 2, 2, 2, 0, 1, 1], 3)
+    >>> reduce(seq).ivals.tolist()
+    [0, 2, 0, 1]
     """
-#    newseq = copy.deepcopy(seq)
-#    newseq.reduce()
-    return newseq.reduce()
+    return seq.reduce()
 
 #def issequence(obj):
 #    """
@@ -51,33 +64,43 @@ def reduce(seq):
 def transform(seq, correspondance, new_alphabet=None):
     """
     Transforms the initial sequence according to the correspondence iterable
+
+    >>> seq = Sequence([0, 2, 0, 1], 3)
+    >>> transform(seq, [1, 0, 0]).ivals.tolist()
+    [1, 0, 1, 0]
+    >>> alphabet = Alphabet(['low', 'high'])
+    >>> transformed = transform(seq, [1, 0, 0], alphabet)
+    >>> transformed.alphabet.svals
+    ('low', 'high')
     """
     if len(correspondance) != len(seq.alphabet):
         raise ValueError('Correspondence does not match sequence alphabet')
 
     # if (not all([type(c) is str for c in correspondance])) and \
        #(not all([type(c) is Symbol for c in correspondance])) and \
-    if (not all([type(c) is int for c in correspondance])):
+    if not all(isinstance(c, (int, np.integer)) for c in correspondance):
        # raise ValueError('Correspondences are strings, ints or Symbols.')
        raise ValueError('Correspondences are given as integers.')
 
+    correspondance = [int(c) for c in correspondance]
+    nb_symbols = len(set(correspondance))
+
+    # make sure that corresp is [0, k-1]
+    # FIXME: make a better test...
+    if min(correspondance) != 0 or max(correspondance) != nb_symbols - 1:
+         raise ValueError('Correspondence should be [0, k-1]')
+
     if new_alphabet is None:
-        alphabet = Alphabet(list(set(correspondance)))
+        alphabet = Alphabet(nb_symbols)
     else:
         if type(new_alphabet) is not Alphabet:
            raise E.AlphabetError('New alphabet should be an Alphabet object')
         elif len(set(correspondance)) != len(new_alphabet):
-           raise 
-           E.AlphabetError('Length of new alphabet does not fit the correspondance length.')
+           raise E.AlphabetError(
+               'Length of new alphabet does not fit the correspondance length.'
+           )
         else:
             alphabet = new_alphabet
-            nb_symbols = len(alphabet)
-
-    if all([type(c) is int for c in correspondance]):     
-        # make sure that corresp is [0, k-1]
-        # FIXME: make a better test... 
-        if min(correspondance) != 0 or max(correspondance) != nb_symbols - 1:
-             raise ValueError('Correspondence should be [0, k-1]') 
 
 #    if new_alphabet is not None and len(set(correspondance)) != len(new_alphabet): 
 # #        alphabet = Alphabet(new_alphabet) 
@@ -102,6 +125,17 @@ def recode(lseq, new_alphabet=False, sep='+', names=None):
        :exc:`LengthError`: when the length of the Sequences are different.
 
     :returns: a Sequence
+
+    >>> seq_a = Sequence([0, 0, 1, 1], 2)
+    >>> seq_b = Sequence([0, 1, 0, 1], 2)
+    >>> recoded = recode([seq_a, seq_b])
+    >>> recoded.ivals.tolist()
+    [0, 1, 2, 3]
+    >>> recoded.k
+    4
+    >>> named = recode([seq_a, seq_b], new_alphabet=True, names=['x', 'y'])
+    >>> named.alphabet.svals
+    ('x_0+y_0', 'x_0+y_1', 'x_1+y_0', 'x_1+y_1')
     """    
     if not all([len(seq) == len(lseq[0]) for seq in lseq]):
         raise E.LengthError("Sequence should have the same length") 
@@ -151,6 +185,13 @@ def recode(lseq, new_alphabet=False, sep='+', names=None):
 def words(seq, wlen, new_alphabet=False):
     """
     Returns a sequence encoded according to the m-words in seq
+
+    >>> seq = Sequence([0, 0, 1, 1, 0], 2)
+    >>> word_seq = words(seq, 2)
+    >>> word_seq.ivals.tolist()
+    [0, 1, 3, 2]
+    >>> word_seq.k
+    4
 
     .. todo::
         Write the doc of "words"
