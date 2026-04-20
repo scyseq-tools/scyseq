@@ -825,5 +825,3 @@ class Sequence:
         return self.count() / float(len(self))
 
 
-# Compatibility re-exports for the historical ``sequence`` module API.
-from .operation import recode, words
