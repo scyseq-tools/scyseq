@@ -5,10 +5,10 @@ Exception classes for the scyseq library.
 # FIXME: this is just to avoid forgetting the __all__ at the end... (and save
 # time for the next time...)
 _PUBLIC_API_ = [
-    "ScyseqError",
-    "SymbolError", "SymbolDefinitionError", "SymbolAccessError",
-    "AlphabetError", "AlphabetAccessError", "InvalidSymbolError", "EmptyAlphabetError",
-    "SequenceError", "SequenceParseError", "SymbolMismatchError",
+    "ScyseqError", "SymbolError", "SymbolDefinitionError", "SymbolAccessError",
+    "AlphabetError", "AlphabetAccessError", "InvalidSymbolError", 
+    "EmptyAlphabetError", "SequenceError", "SequenceParseError", "LengthError", 
+    "SymbolMismatchError",
 ]
 
 class ScyseqError(Exception):
@@ -70,6 +70,12 @@ class SequenceParseError(SequenceError):
     def __init__(self, sequence, message="Unable to parse sequence."):
         super().__init__(f"{message} Input: {sequence}")
         self.sequence = sequence
+
+
+class LengthError(SequenceError):
+    """Raised when sequence lengths do not match an operation's requirements."""
+    def __init__(self, message):
+        super().__init__(message)
 
 
 class SymbolMismatchError(SequenceError):
