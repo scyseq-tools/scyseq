@@ -172,21 +172,6 @@ def phase_cluster(data, nb_symb, target_dim=2):
     reduced_data = np.dot(data, Vt[:target_dim, :].T)
     reduced_data = reduced_data.T
 
-    # Partitionnage
-    edges = np.histogramdd(reduced_data.T, bins= nb_symb)[1]
-
-    #FIXME: this is not the place to compute entropy!!!
-    
-    # entropy_list = []
-
-#    for i in range(len(reduced_data)):
-#        edges[i][-1] = edges[i][-1] + 1
-#        seq = np.digitize(reduced_data[i], edges[i]) - 1 # symbols between 0 and k-1
-#        entropy_rate = A.lempel_ziv(S.Sequence(seq, nb_symb))
-#        entropy_list.append(entropy_rate)
-
-    # return np.array(entropy_list)
-
 
 if __name__ == "__main__":
     import doctest

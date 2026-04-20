@@ -86,7 +86,7 @@ def transform(seq, correspondance, new_alphabet=None):
     nb_symbols = len(set(correspondance))
 
     # make sure that corresp is [0, k-1]
-    # FIXME: make a better test...
+   
     if min(correspondance) != 0 or max(correspondance) != nb_symbols - 1:
          raise ValueError('Correspondence should be [0, k-1]')
 
@@ -208,48 +208,4 @@ def words(seq, wlen, new_alphabet=False):
     lseq = [seq[i:slen-wlen+i+1] for i in range(wlen)]
 
     return recode(lseq, new_alphabet=new_alphabet)
-
-#def from_iterable(val, valrange):
-#    """
-#    Map a set of values to symbolic coding (i.e. integers between 0 and k-1)
-#    """
-#    lrange = list(valrange)
-#    symb = [lrange.index(tmp) for tmp in val]
-#    return Sequence(symb, len(lrange))
-
-#def visited_states(seq, sort=True):  #, meaning=True, complete=False, ordering=True):
-#    """
-#    Returns the set of visited symbols ie those that really appear in
-#    the sequence.
-#
-#    :returns: a numpy.ndarray of integers
-#
-#    .. todo:: 
-#       should we had frequencies, etc?
-#
-#    .. todo:: 
-#       should we return a sequence, with alphabet?
-#    """
-#    freq = S.frequency()
-#    # alph_ivals = seq.alphabet.ivals
-#    # alph_svals = seq.alphabet.svals
-#    alphabet = seq.alphabet
-#    if sort:
-#        lsort = list(np.argsort(freq))
-#        lsort.reverse() # decreasing order *in place*!!!!
-#        # FIXME: lsort elements have type numpy.int64 which is not directly usable for
-#        # indexing Alphabet. See the __index__ method for that.
-#        # so here is a local hack which might be generalized if needed...
-#        # return [(alph_ivals[idx], freq[idx], alph_svals[idx]) for idx in lsort]
-#        indices = [int(i) for i in lsort]
-#        return [(alphabet[idx], freq[idx]) for idx in indices]
-#    else:
-#        return list(zip(alphabet, freq))
-#
-#    # alpha = list(range(seq.alen))
-##    if seq.alphabet is None:
-##        return [(alpha[index], frequencies[index], None) for index in lsort]
-##    else:
-##        return [(alpha[index], frequencies[index], seq.alphabet[index]) \
-##                for index in lsort]
 

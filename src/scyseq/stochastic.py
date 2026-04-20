@@ -82,8 +82,7 @@ def conditional_matrix(seq1, seq2):
     p_cond[nulls] = 1
     testing.assert_allclose(np.sum(p_cond, 1), 1)
 
-    # FIXME: add a warning for Borel-Kolmogorov paradox
-    
+   
     return np.matrix(p_cond)
 
 def transition_matrix(seq, time=1):

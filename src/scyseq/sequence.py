@@ -210,9 +210,7 @@ class Alphabet(tuple):
         self._ivals = tuple(s.ival for s in self)
         self._svals = tuple(s.sval for s in self)
         self._symbols = tuple(s for s in self)
-        # FIXME: Not sure this is useful
-        # When an alphabet is associated to a sequence it cannot be modified.
-        # self._islinked = False
+
 
     def __str__(self):
         return '('+', '.join([s.__str__() for s in self])+')'
@@ -386,39 +384,7 @@ class Sequence:
 
         return instance
 
-#        # 4. Création de l'objet
-#        instance = super().__new__(cls)
-#        instance._array = array
-#        return instance
-#
-##        if dtype not in DTYPES:
-##            raise TypeError(\
-##                    'Wrong dtype. Maybe you entered both alphabet and its length.')
-##        # symbols = np.array(symbols)
-##        # Check if data can be represented in the dtype
-##        if np.any(symbols < np.iinfo(dtype).min) or \
-##           np.any(symbols > np.iinfo(dtype).max):
-##            raise E.SymbolError(\
-##                  'Data can not be represented in %s' % str(dtype))
-##        # Check the dimension of the data
-##        if len(symbols.shape) != 1: # 1D sequences for now
-##            raise E.ShapeError(\
-##                  'Data shape is not one-dimensional')
-#        # self._ivals = np.asarray(symbols).astype(dtype)
-#        # Parse the alphabet
-#
-#        if isinstance(alphabet, Alphabet):
-#            self._alphabet = copy.deepcopy(alphabet)
-#
-## FIXME: is the islinked is useful?
-##                self._alphabet._islinked = True
-#
-#        elif type(alphabet) == int :
-#            # self._alphabet = Alphabet(alphabet)
-#            self._alphabet = Alphabet(alphabet)
-#        else:
-#            raise 
-# TypeError('The parameter alphabet must be an integer or a sequence.Alphabet object')
+
 
     def __init__(self, symbols, alphabet, check=True):
         """
@@ -465,39 +431,7 @@ class Sequence:
 
             del self._validalphabet, self._validivals
 
-#            if dtype not in DTYPES:
-#                raise TypeError(\
-#                        'Wrong dtype. Maybe you entered both alphabet and its length.')
-#            symbols = np.array(symbols)
-#            # Check if data can be represented in the dtype
-#            if np.any(symbols < np.iinfo(dtype).min) or \
-#               np.any(symbols > np.iinfo(dtype).max):
-#                raise E.SymbolError(\
-#                      'Data can not be represented in %s' % str(dtype))
-#            # Check the dimension of the data
-#            if len(symbols.shape) != 1: # 1D sequences for now
-#                raise E.ShapeError(\
-#                      'Data shape is not one-dimensional')
-#            self._ivals = np.asarray(symbols).astype(dtype)
-#            # Parse the alphabet
-#            if isinstance(alphabet, Alphabet):
-#                self._alphabet = copy.deepcopy(alphabet)
-#
-## FIXME: is the islinked is useful?
-##                self._alphabet._islinked = True
-#
-#            elif type(alphabet) == int :
-#                # self._alphabet = Alphabet(alphabet)
-#                self._alphabet = Alphabet(alphabet)
-#            else:
-#                raise
-# TypeError('The parameter alphabet must be an integer or a sequence.Alphabet object')
-#            # Check correspondence between symbols and alphabet
-#            if check:
-#                if (max(self._ivals) >= len(self._alphabet)):
-#                    raise E.AlphabetError("Invalid alphabet length")
 
-## Alphabet property
 
     @property
     def alphabet(self):
@@ -538,7 +472,7 @@ class Sequence:
                         copy.deepcopy(self.alphabet))
 
 # Sequences representation
-# FIXME: change the repr and str (print -> str)
+
     def __str__(self):
         """
         Defines the string representation of a Sequence.
@@ -546,7 +480,7 @@ class Sequence:
         .. todo::
            Do we need more information when we want to print a Sequence
         """
-        return self.ivals.__str__() # FIXME: need more info ??
+        return self.ivals.__str__() 
 
     def __repr__(self):
         """
@@ -581,31 +515,6 @@ class Sequence:
 
         return Sequence(tmpval, self.alphabet, check=False)
 
-# FIXME: is it useful?
-#    def __setitem__(self, key, value):
-#        """
-#        Allows to change the value of an element of a Sequence.
-#
-#        :raises:
-#           :exc:`ValueError`: if `value` is not in :math:`{0, k-1}`
-#        """
-#        if (value<0) or (value>=self._alen) or type(value) is not int:
-#            raise ValueError("%d is not allowed for alphabet length=%d" % \
-#                            (value, self._alen))
-#        self.ivals.__setitem__(key, int(value))
-#
-#    def __delitem__(self, key):
-#        """
-#        Allows to delete elements of a Sequence.
-#
-#        .. todo::
-#           Give an example of the deletion of elements of a sequence
-#        """
-#        lseq = list(self.ivals)
-#        del lseq[key]
-#        self.ivals = np.array(lseq)
-
-# Iterators
 
     def __iter__(self): # returns an iterator
         """
@@ -632,94 +541,6 @@ class Sequence:
         """
         return self.svals.__iter__()
 
-## FIXME:
-## I do not know when this is really used... for checking reversibility etc.
-#    def __reversed__(self): # returns an iterator
-#        """
-#        Returns an iterator on the Sequence in the reverse order
-#        """
-#        # return np.flipud(self.ivals).__iter__()
-#
-#        # return zip(np.flipud(self.ivals), np.flipud(self.svals))
-##        raises:
-##        AttributeError: property 'ivals' of 'Sequence' object has no setter
-
-
-# "numeric" operations
-
-#    def __add__(self, other):
-#        """
-#        Allows to add two sequences: they are concatenated
-#
-#        :raises:
-#           :exc:`ValueError`: when the alphabets are different
-#        """
-#        if (self.alphabet != other.alphabet):
-#            raise ValueError('Alphabets are different')
-#        else:
-#            return Sequence(np.concatenate((self._ivals, other._ivals)), \
-#                            self.alphabet, check=False)
-
-# Logical operations
-# FIXME:
-# np.logical_? are defined for any array. Why do we check binary?
-# This is strange to change logical_? to operators, no?
-
-#    def __and__(self, other):
-#        """
-#        Returns a binary sequence which is the result of comparison with `&`
-#
-#        .. seealso::
-#           numpy.logical_and
-#
-#        .. caution::
-#           This corresponds to the `&` operator and not the `and` keyword.
-#        """
-#        # if self._alen != 2 or other._alen != 2:
-#        if self.k != 2 or other.k != 2:
-#            raise NotImplementedError('& is defined for binary sequences only')
-#        else:
-#            seq = np.logical_and(self._ivals, other._ivals)
-#            return Sequence(seq.astype(self._ivals.dtype), Alphabet(('False', 'True')), \
-#                            check=False)
-#
-#    def __or__(self, other):
-#        """
-#        Returns a binary sequence which is the result of comparison with `|`
-#
-#        .. seealso::
-#           numpy.logical_or
-#
-#        .. caution::
-#           This corresponds to the `|` operator and not the `or` keyword.
-#        """
-#        # if self._alen != 2 or other._alen != 2:
-#        if self.k != 2 or other.k != 2:
-#            raise NotImplementedError('| is defined for binary sequences only')
-#        else:
-#            arr = np.logical_or(self._ivals, other._ivals)
-#            return Sequence(arr.astype(self._ivals.dtype), Alphabet(('False', 'True')), \
-#                            check=False)
-#
-#    def _xor_(self, other):
-#        """
-#        Returns a binary sequence which is the result of comparison with `^`
-#
-#        .. seealso::
-#           numpy.logical_xor
-#
-#        .. caution::
-#           This corresponds to the `^` operator.
-#        """
-#        # if self._alen != 2 or other._alen != 2:
-#        if self.k != 2 or other.k != 2:
-#            raise NotImplementedError('| is defined for binary sequences only')
-#        else:
-#            arr = np.logical_xor(self._ivals, other._ivals)
-#            return Sequence(arr.astype(self._ivals.dtype), Alphabet(('False', 'True')), \
-#                            check=False)
-
-# Rich comparison methods"
 
     def __mkcomp__(self, other, op): 
 

@@ -48,7 +48,6 @@ def recurrence(seq):
     # x = np.vstack((seq.svalues,seq.svalues))
     x = np.vstack((seq.ivals, seq.ivals))
     # print x.shape
-    # FIXME: test if other distance are quicker?
     dist = spdist.squareform(spdist.pdist(x.T))
     return np.array(dist==0).astype(int)
 
