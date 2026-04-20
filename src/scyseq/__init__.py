@@ -7,3 +7,4 @@ __authors__ = ["Laurent Pezard",
 
 from .sequence import Symbol, Alphabet, Sequence
 from .exceptions import *
+from .operation import recode, words, roll, reverse, shuffle, reduce
