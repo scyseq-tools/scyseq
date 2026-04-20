@@ -4,10 +4,29 @@ import itertools
 from random import uniform
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib.patches import Patch
 
 from . import sequence as S
 
-# file:///usr/share/doc/python-matplotlib-doc/html/examples/pylab_examples/ellipse_demo.html
+
+# Default colormap for consistent state coloring across all plots
+DEFAULT_COLORMAP = 'viridis'
+
+def get_state_colors(alphabet, cmap_name=DEFAULT_COLORMAP):
+    """
+    Get consistent color scheme for alphabet states.
+    Returns a colormap and normalization that ensures each state gets the same color across plots.
+    
+    :param alphabet: A symbolic Alphabet object
+    :param cmap_name: Name of matplotlib colormap (default: 'viridis')
+    :returns: Tuple of (cmap, norm) for consistent coloring
+    """
+    cmap = matplotlib.cm.get_cmap(cmap_name, len(alphabet))
+    norm = matplotlib.colors.BoundaryNorm(
+        np.arange(len(alphabet) + 1) - 0.5,
+        cmap.N
+    )
+    return cmap, norm
 
 def plot(seq, xlabel='Time', ylabel='States', title='Simple plot', labelsize=15,
         titlesize=25, color='blue', **kwargs):
@@ -24,7 +43,7 @@ def plot(seq, xlabel='Time', ylabel='States', title='Simple plot', labelsize=15,
 
     ax.set_yticks(range(len(alphabet)))
     ax.set_yticks([i-0.5 for i in range(len(alphabet)+1)], minor=True)
-    ax.set_yticklabels(alphabet.strvals, rotation=90)
+    ax.set_yticklabels(alphabet.svals, rotation=90)
 
     ax.set_xlabel(xlabel, fontsize=labelsize)
     ax.set_ylabel(ylabel, fontsize=labelsize)
@@ -36,9 +55,9 @@ def plot(seq, xlabel='Time', ylabel='States', title='Simple plot', labelsize=15,
     ax.grid(True, which='minor', axis='y')
 
 def plot_bar(seq, xlabel='Time', ylabel='States', title='Bar plot', labelsize=15,
-        titlesize=25, cmap=matplotlib.cm.jet, **kwargs):
+        titlesize=25, cmap_name=DEFAULT_COLORMAP, legend=False, legend_title='States', **kwargs):
     """
-    Plots bar code like graph.
+    Plots bar code like graph with consistent state colors.
     """
 
     alphabet = seq.alphabet
@@ -54,12 +73,15 @@ def plot_bar(seq, xlabel='Time', ylabel='States', title='Bar plot', labelsize=15
             else:
                 svals[i].append(-1)
 
-    fig, ax = plt.subplots()
-    ax.matshow(np.ma.masked_values(svals, -1), aspect='auto', cmap=cmap)
+    # Get consistent color scheme
+    cmap, norm = get_state_colors(alphabet, cmap_name)
+
+    fig, ax = plt.subplots(figsize=(12, 4))
+    ax.imshow(np.ma.masked_values(svals, -1), aspect='auto', cmap=cmap, norm=norm, interpolation='nearest')
 
     ax.set_yticks(range(len(alphabet)))
     ax.set_yticks([i-0.5 for i in range(len(alphabet)+1)], minor=True)
-    ax.set_yticklabels(alphabet.strvals, rotation=90)
+    ax.set_yticklabels(alphabet.svals, rotation=90)
 
     ax.set_xlabel(xlabel, fontsize=labelsize)
     ax.set_ylabel(ylabel, fontsize=labelsize)
@@ -68,19 +90,65 @@ def plot_bar(seq, xlabel='Time', ylabel='States', title='Bar plot', labelsize=15
     ax.set_xlim(0, max(xvals))
     ax.set_ylim(-0.5, len(alphabet)-0.5)
 
-def plot_color(seq, aspect=5, title='Sequence', xlabel='Time', labelsize=15,
-        titlesize=25, **kwargs):
+    # Add legend for state colors
+    if legend:
+        handles = [
+            Patch(facecolor=cmap(norm(idx)), edgecolor='none', label=label)
+            for idx, label in enumerate(alphabet.svals)
+        ]
+        ax.legend(
+            handles=handles,
+            title=legend_title,
+            loc='upper center',
+            bbox_to_anchor=(0.5, -0.15),
+            ncol=min(len(handles), 6),
+            frameon=False,
+            fontsize=max(labelsize - 4, 8),
+            title_fontsize=max(labelsize - 3, 9)
+        )
+
+    return fig, ax
+
+def plot_color(seq, aspect='auto', title='Sequence', xlabel='Time', labelsize=15,
+        titlesize=25, cmap_name=DEFAULT_COLORMAP, figsize=(10, 2.4), legend=True,
+        legend_title='States', **kwargs):
     """
-    Plots as ???
+    Plots a sequence as a color strip with consistent state colors.
     """
 
-    ar = np.reshape(seq.ivals, (len(seq), 1))
+    alphabet = seq.alphabet
+    ar = np.reshape(seq.ivals, (1, len(seq)))
 
-    fig, ax = plt.subplots()
-    ax.imshow(ar.T, aspect=aspect)
+    # Get consistent color scheme
+    cmap, norm = get_state_colors(alphabet, cmap_name)
+
+    fig = plt.figure(figsize=figsize)
+    ax = fig.add_axes([0.08, 0.45, 0.84, 0.14])  # thinner strip axis
+
+    ax.imshow(ar, aspect=aspect, cmap=cmap, norm=norm,
+              interpolation='nearest', **kwargs)
+
+    ax.set_yticks([])
     ax.set_xlabel(xlabel, fontsize=labelsize)
     ax.set_title(title, fontsize=titlesize)
 
+    if legend:
+        handles = [
+            Patch(facecolor=cmap(norm(idx)), edgecolor='none', label=label)
+            for idx, label in enumerate(alphabet.svals)
+        ]
+        ax.legend(
+            handles=handles,
+            title=legend_title,
+            loc='upper center',
+            bbox_to_anchor=(0.5, -1.5),
+            ncol=len(handles),
+            frameon=False,
+            fontsize=max(labelsize - 4, 8),
+            title_fontsize=max(labelsize - 3, 9)
+        )
+
+    return fig, ax
 
 
 def plot_grid(seq1, seq2, xlabel='1st sequence', ylabel='2nd Sequence',
@@ -128,11 +196,11 @@ def plot_grid(seq1, seq2, xlabel='1st sequence', ylabel='2nd Sequence',
 
     ax.set_xticks(range(len(alphabet1)))
     ax.set_xticks([i-0.5 for i in range(len(alphabet1)+1)], minor=True)
-    ax.set_xticklabels(alphabet1.strvals)
+    ax.set_xticklabels(alphabet1.svals)
 
     ax.set_yticks(range(len(alphabet2)))
     ax.set_yticks([i-0.5 for i in range(len(alphabet2)+1)], minor=True)
-    ax.set_yticklabels(alphabet2.strvals, rotation=90)
+    ax.set_yticklabels(alphabet2.svals, rotation=90)
 
     ax.set_xlabel(xlabel, fontsize=labelsize)
     ax.set_ylabel(ylabel, fontsize=labelsize)
@@ -167,14 +235,16 @@ def plot_independence(seq1, seq2, xlabel='1st sequence', ylabel='2nd Sequence',
     size = []
 
     bialphabet = list(itertools.product(alphabet1, alphabet2))
-    print(bialphabet)
 
     for n, xy in enumerate(bialphabet):
         x = xy[0].ival
         y = xy[1].ival
         xvals.append(x)
         yvals.append(y)
-        size.append(fq3[n] * math.log(fq3[n] / (fq1[x] * fq2[y])))
+        if fq3[n] == 0:
+            size.append(0)
+        else:
+            size.append(fq3[n] * math.log(fq3[n] / (fq1[x] * fq2[y])))
 
     sizes = [abs(s)*scale for s in size]
     colors = []
@@ -191,11 +261,11 @@ def plot_independence(seq1, seq2, xlabel='1st sequence', ylabel='2nd Sequence',
 
     ax.set_xticks(range(len(alphabet1)))
     ax.set_xticks([i-0.5 for i in range(len(alphabet1)+1)], minor=True)
-    ax.set_xticklabels(alphabet1.strvals)
+    ax.set_xticklabels(alphabet1.svals)
 
     ax.set_yticks(range(len(alphabet2)))
     ax.set_yticks([i-0.5 for i in range(len(alphabet2)+1)], minor=True)
-    ax.set_yticklabels(alphabet2.strvals, rotation=90)
+    ax.set_yticklabels(alphabet2.svals, rotation=90)
 
     ax.set_xlabel(xlabel, fontsize=labelsize)
     ax.set_ylabel(ylabel, fontsize=labelsize)
