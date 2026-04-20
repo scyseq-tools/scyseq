@@ -35,7 +35,7 @@ class SymbolMismatchError(SequenceError):
     """Raised when a sequence contains symbols not in the alphabet."""
     pass
 
-#FIXME: How can we get the expression that call  
+
 
 class Error(Exception):
     """
