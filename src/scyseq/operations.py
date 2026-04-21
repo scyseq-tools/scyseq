@@ -5,6 +5,7 @@ The object's methods are wrappers to these operations
 """
 
 import copy
+import itertools
 import numpy as np
 
 from .sequence import Sequence, Alphabet, Symbol
@@ -187,8 +188,9 @@ def transform(seq, correspondance, new_alphabet=None):
         if type(new_alphabet) is not Alphabet:
            raise E.AlphabetError('New alphabet should be an Alphabet object')
         elif len(set(correspondance)) != len(new_alphabet):
-           raise 
-           E.AlphabetError('Length of new alphabet does not fit the correspondence length.')
+           raise E.AlphabetError(
+               'Length of new alphabet does not fit the correspondence length.'
+           )
         else:
             alphabet = new_alphabet
     nb_symbols = len(alphabet)
@@ -275,8 +277,15 @@ def words(seq, wlen, new_alphabet=False):
     .. todo::
         Write the doc of "words"
     """
-    assert wlen > 0, 'Word length should be > 0.'
+    if not isinstance(wlen, (int, np.integer)):
+        raise ValueError("Word length should be a positive integer.")
+    if wlen <= 0:
+        raise ValueError("Word length should be > 0.")
+
     slen = len(seq)
+    if wlen > slen:
+        raise ValueError("Word length should be <= sequence length.")
+
     lseq = [seq[i:slen-wlen+i+1] for i in range(wlen)]
 
     return recode(lseq, new_alphabet=new_alphabet)

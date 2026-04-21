@@ -8,9 +8,7 @@ logarithms, so the returned values are expressed in nats.
 
 import numpy as np
 
-from .operations import recode
-
-from . import sequence as S
+import scyseq as sq
 
 
 def metric_entropy(seq):
@@ -22,8 +20,8 @@ def metric_entropy(seq):
 
     >>> np.random.seed(9)
     >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq = S.Sequence(a, alpha)
+    >>> alpha = sq.Alphabet(["a", "b"])
+    >>> seq = sq.Sequence(a, alpha)
     >>> metric_entropy(seq)
     0.6003511877776578
     """
@@ -45,8 +43,8 @@ def topological_entropy(seq):
 
     >>> np.random.seed(9)
     >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq = S.Sequence(a, alpha)
+    >>> alpha = sq.Alphabet(["a", "b"])
+    >>> seq = sq.Sequence(a, alpha)
     >>> topological_entropy(seq)
     0.6931471805599453
     """
@@ -68,8 +66,8 @@ def renyi_entropy(seq, coef):
 
     >>> np.random.seed(9)
     >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq = S.Sequence(a, alpha)
+    >>> alpha = sq.Alphabet(["a", "b"])
+    >>> seq = sq.Sequence(a, alpha)
     >>> renyi_entropy(seq, 0.9)
     0.6088567303148161
     """
@@ -92,12 +90,12 @@ def block_entropy(seq, wlen):
 
     >>> np.random.seed(9)
     >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq = S.Sequence(a, alpha)
+    >>> alpha = sq.Alphabet(["a", "b"])
+    >>> seq = sq.Sequence(a, alpha)
     >>> block_entropy(seq, 6)
     3.577559335188841
     """
-    nwords = S.words(seq, wlen)
+    nwords = sq.words(seq, wlen)
     return H(nwords)
 
 
@@ -115,8 +113,8 @@ def entropy_rate(seq, wlen, method='average'):
 
     >>> np.random.seed(9)
     >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq = S.Sequence(a, alpha)
+    >>> alpha = sq.Alphabet(["a", "b"])
+    >>> seq = sq.Sequence(a, alpha)
     >>> entropy_rate(seq, 6)
     0.5962598891981402
     >>> entropy_rate(seq, 6, method="difference")
@@ -141,8 +139,8 @@ def effective_complexity(seq, n_max):
 
     >>> np.random.seed(9)
     >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq = S.Sequence(a, alpha)
+    >>> alpha = sq.Alphabet(["a", "b"])
+    >>> seq = sq.Sequence(a, alpha)
     >>> effective_complexity(seq, 6)
     0.05784767682768299
     """
@@ -165,13 +163,13 @@ def mutual_information(seq1, seq2):
     >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
     >>> np.random.seed(6)
     >>> b = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq1 = S.Sequence(a, alpha)
-    >>> seq2 = S.Sequence(b, alpha)
+    >>> alpha = sq.Alphabet(["a", "b"])
+    >>> seq1 = sq.Sequence(a, alpha)
+    >>> seq2 = sq.Sequence(b, alpha)
     >>> mutual_information(seq1, seq2)
     0.0002988020334349084
     """
-    seq12 = recode([seq1, seq2])
+    seq12 = sq.recode([seq1, seq2])
     return H(seq1) + H(seq2) - H(seq12)
 
 
@@ -191,17 +189,17 @@ def multi_information(seq1, seq2, seq3):
     >>> b = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
     >>> np.random.seed(3)
     >>> c = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq1 = S.Sequence(a, alpha)
-    >>> seq2 = S.Sequence(b, alpha)
-    >>> seq3 = S.Sequence(c, alpha)
+    >>> alpha = sq.Alphabet(["a", "b"])
+    >>> seq1 = sq.Sequence(a, alpha)
+    >>> seq2 = sq.Sequence(b, alpha)
+    >>> seq3 = sq.Sequence(c, alpha)
     >>> multi_information(seq1, seq2, seq3)
     -4.8757282800737656e-05
     """
-    seq12 = S.recode([seq1, seq2])
-    seq13 = S.recode([seq1, seq3])
-    seq23 = S.recode([seq2, seq3])
-    seq123 = S.recode([seq1, seq2, seq3])
+    seq12 = sq.recode([seq1, seq2])
+    seq13 = sq.recode([seq1, seq3])
+    seq23 = sq.recode([seq2, seq3])
+    seq123 = sq.recode([seq1, seq2, seq3])
 
     return H(seq1) + H(seq2) + H(seq3) + H(seq123) - H(seq12) - H(seq13) - H(seq23)
 
@@ -223,15 +221,15 @@ def transfer_entropy(seq1, seq1p, seq2):
     >>> a = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
     >>> np.random.seed(6)
     >>> b = np.random.choice([0, 1], 1000, replace=True, p=[0.7, 0.3])
-    >>> alpha = S.Alphabet(["a", "b"])
-    >>> seq1 = S.Sequence(a, alpha)
-    >>> seq2 = S.Sequence(b, alpha)
+    >>> alpha = sq.Alphabet(["a", "b"])
+    >>> seq1 = sq.Sequence(a, alpha)
+    >>> seq2 = sq.Sequence(b, alpha)
     >>> transfer_entropy(seq1[:-1], seq1[1:], seq2[:-1])
     0.00019242807727182232
     """
-    seq1p21 = S.recode([seq1p, seq2, seq1])
-    seq21 = S.recode([seq2, seq1])
-    seq1p1 = S.recode([seq1p, seq1])
+    seq1p21 = sq.recode([seq1p, seq2, seq1])
+    seq21 = sq.recode([seq2, seq1])
+    seq1p1 = sq.recode([seq1p, seq1])
 
     return -H(seq1p21) + H(seq21) + H(seq1p1) - H(seq1)
 
