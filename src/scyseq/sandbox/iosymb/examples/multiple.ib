@@ -1,0 +1,77 @@
+# Blank lines or lines beginning with # are ignored by the parser.
+# They can be added wherever you want.
+
+# Comments:
+# Date: hier
+# Cotateur: Albert
+# etc.
+
+#-------------------------------------------------------------
+% Code specification version 0.2
+#-------------------------------------------------------------
+
+# The first percent sign tells the parser that code specification starts
+
+# !!! Warning !!!
+
+# 1. The order of the type of encoding defines the order in which
+#    they will be used in the data: the first defined is the left one
+#    and the last cited is the right one.
+
+# 2. There is neither space between interger:meaning nor between words 
+#    in the TypeNames or MeaningNames.
+
+# 3. The percent sign should be used ONLY for telling the parser that
+#    specifications start and stop
+
+# 4. We advice that those lines should be kept at the beginning of each 
+#    data file unless you and all the people working with you in the 
+#    next 25 years know exactly what you/they do.
+
+#-------------------------------------------------------------
+:regular: True
+:period: 5
+:t_unit: second
+
+:participants:
+[John]
+verbal 0:silence 1:onomatopoeia 2:question 3:sentence
+nonverbal 0:grimace 1:smile
+
+[Bob]
+code0 0:a 1:b 2:c
+code1 0:D 1:E 2:F 3:G
+
+[Mary]
+codeM0 0:m0 1:m1 2:m2 3:m3,
+codeM1 0:M0 1:M1
+
+[Gertrude]
+codeG0 0:G 1:H
+codeGA 0:I 1:J 2:K
+#-------------------------------------------------------------
+% End of the encoding specification
+#-------------------------------------------------------------
+# data
+
+01 00 01 00
+# Comments possible here
+01 00 01 00
+01 00 01 00
+01 00 01 00
+01 00 01 00
+# Or empty lines
+
+00 20 01 00
+00 10 01 00
+01 00 01 00
+00 20 01 00
+
+# Add comments
+# such as timing
+# 0 min.
+
+00 10 01 00
+00 00 01 00
+00 20 01 00
+00 10 01 00

@@ -85,6 +85,22 @@ def conditional_matrix(dependent, conditioning, smooth=0):
     testing.assert_allclose(np.sum(p_cond, 1), 1)
     return p_cond
 
+#    ind0 = np.where(p_marg == 0.)
+#    p_marg[ind0] = 1 # avoid divide by zero
+#    p_cond = p_join / p_marg
+#    # print(p_cond, fq_marg)
+#    # set nulls -> nulls transitions / conditions = 1
+#    nulls = np.where(fq_marg==0.)
+#    # p_cond[nulls[0], nulls[0]] = 1
+#    #print(nulls)
+#    p_cond[nulls] = 1
+#    print(p_cond)
+#    testing.assert_allclose(np.sum(p_cond, 1), 1)
+#
+#    # FIXME: add a warning for P(x) = 0 and / or P(x,y)=0 P(y)=0
+#    
+#    return np.array(p_cond)
+
 def transition_matrix(seq, time=1, smooth=0):
     """
     Returns the transition matrix.

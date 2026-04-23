@@ -1,14 +1,20 @@
-#!/usr/bin/env python
-#-*- coding:Utf-8 -*-
+"""
+This module contains the functions for symbolic recurrence plots quantification.
 
-# from scikits.symbolic.sequence import *
+Some references are:
+
+Faure and Lesne (2010) Recurrence plots for symbolic sequence. International
+Journal of Bifurcation and Chaos
+
+Zou et al. (2015) Identifying coupling directions by recurrences. In Recurrence
+Quantification Analysis.
+"""
+
 import numpy as np
-import scipy.spatial.distance as spdist
+# import scipy.spatial.distance as spdist
 import warnings
 import copy
 
-# 
-#=====================
 
 #def mwords_recurrence(seq_tuple):
 #    """
@@ -45,11 +51,14 @@ def recurrence(seq):
     """
     Compute recurrence plot
     """
-    # x = np.vstack((seq.svalues,seq.svalues))
-    x = np.vstack((seq.ivals, seq.ivals))
-    # print x.shape
-    dist = spdist.squareform(spdist.pdist(x.T))
-    return np.array(dist==0).astype(int)
+    return np.equal.outer(seq.ivals, seq.ivals).astype(int)
+
+#    # x = np.vstack((seq.svalues,seq.svalues))
+#    x = np.vstack((seq.ivals, seq.ivals))
+#    # print x.shape
+#    # FIXME: test if other distance are quicker?
+#    dist = spdist.squareform(spdist.pdist(x.T))
+#    return np.array(dist==0).astype(int)
 
 def joint_recurrence(x, y):
     assert(len(x)==len(y))

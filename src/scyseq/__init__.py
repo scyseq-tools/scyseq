@@ -1,3 +1,7 @@
+# FIXME: I do not understand how to manage version
+
+# from version import __version__
+
 __authors__ = ["Laurent Pezard", 
                "Jean-Luc Blanc", 
                "Noelia Montejo-Cervera", 
@@ -7,4 +11,4 @@ __authors__ = ["Laurent Pezard",
 
 from .sequence import Symbol, Alphabet, boolean_alphabet, binary_alphabet, Sequence
 from .exceptions import *
-from .operation import recode, words, roll, reverse, shuffle, reduce
+from .operation import recode, words
