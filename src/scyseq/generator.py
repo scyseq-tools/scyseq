@@ -2,7 +2,8 @@
 Generation of specified symbolic sequences
 """
 import numpy as np
-from scyseq import Sequence
+
+from .sequence import Sequence, boolean_alphabet
 
 # Sequences generators
 #=====================
@@ -70,8 +71,11 @@ def uniform_sequence(length, alen):
 
     :returns: a Sequence object
     """
-    return Sequence(np.random.randint(low=0, high=alen, size=length), \
-                      alen, check=False) 
+    return Sequence(
+        np.random.randint(low=0, high=alen, size=length),
+        alen,
+        check=False,
+    )
 
 def binary_map1d_sequence(length, map1d, xinit, threshold=0.5, skip=100):
     """
@@ -90,7 +94,7 @@ def binary_map1d_sequence(length, map1d, xinit, threshold=0.5, skip=100):
         seq.append(map1d(seq[step-1]))
     bseq = np.array(seq[skip:]) > threshold
 
-    return Sequence(bseq.astype(S.DEFAULT_DTYPE), (False, True), check=False)
+    return Sequence(bseq.astype(np.bool_), boolean_alphabet, check=False)
 
 def binary_logistic_sequence(length, param, xinit, threshold=0.5, skip=100):
     """

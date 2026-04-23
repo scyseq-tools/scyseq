@@ -405,7 +405,7 @@ class Sequence:
     Defines a symbolic sequence coded using integers in :math:`{0,
     k-1}` and their methods.
     """
-    def __new__(cls, symbols, alphabet): #, check=True):
+    def __new__(cls, symbols, alphabet, check=True):
         """
         Creates a Sequence object.
         """
@@ -417,18 +417,21 @@ class Sequence:
         if array.ndim != 1:
             raise ValueError("The symbols argument should be unidimensional (1D).")
 
-        if array.dtype == np.bool:
+        if np.issubdtype(array.dtype, np.bool_):
             array = array.astype(np.uint8)
             alpha = boolean_alphabet
 
         elif np.issubdtype(array.dtype, np.integer):
             if np.any(array < 0):
                 raise ValueError("All values should be >=0")
-            dtype = U.choose_uint_dtype(array)
+            if array.size == 0:
+                dtype = np.uint8
+            else:
+                dtype = U.choose_uint_dtype(array)
             array = array.astype(dtype)
             array.flags.writeable = False
             alpha = Alphabet(alphabet)
-            if max(array) >= len(alpha):
+            if check and array.size > 0 and max(array) >= len(alpha):
                 raise E.AlphabetError("Invalid alphabet length")
         else:
             raise TypeError("Symbols should be convertible into unsigned integers")

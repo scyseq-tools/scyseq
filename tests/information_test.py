@@ -98,8 +98,8 @@ def test_information_routes_through_sequence_module_helpers(monkeypatch):
     seq1, seq2, _ = make_reference_triplet()
     calls = {"words": 0, "recode": 0}
 
-    original_words = I.S.words
-    original_recode = I.S.recode
+    original_words = I.sq.words
+    original_recode = I.sq.recode
 
     def tracked_words(*args, **kwargs):
         calls["words"] += 1
@@ -109,8 +109,8 @@ def test_information_routes_through_sequence_module_helpers(monkeypatch):
         calls["recode"] += 1
         return original_recode(*args, **kwargs)
 
-    monkeypatch.setattr(I.S, "words", tracked_words)
-    monkeypatch.setattr(I.S, "recode", tracked_recode)
+    monkeypatch.setattr(I.sq, "words", tracked_words)
+    monkeypatch.setattr(I.sq, "recode", tracked_recode)
 
     I.block_entropy(seq, 6)
     I.mutual_information(seq1, seq2)

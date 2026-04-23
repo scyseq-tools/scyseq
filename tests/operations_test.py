@@ -4,6 +4,7 @@ import copy
 import numpy as np
 import scyseq as sq
 
+
 @pytest.fixture
 def init_sequence():
     return sq.Sequence([1,0,0,0,1], 2)

@@ -5,6 +5,7 @@ The object's methods are wrappers to these operations
 """
 
 import copy
+import itertools
 import numpy as np
 
 from .sequence import Sequence, Alphabet, Symbol
@@ -79,16 +80,13 @@ def rename(obj, replacement):
 
 def roll(obj, step):
     """
-    Return a "rolled" sequence
+    Roll the sequence
 
-    >>> seq = Sequence(
-
-    See also:
-    ---------
-
-    scyseq.operations.roll : the implementation
-    numpy.roll : the underlying function
+    >>> seq = Sequence([0, 1, 2, 0, 1], 3)
+    >>> roll(seq, 2).ivals.tolist()
+    [0, 1, 0, 1, 2]
     """
+    
     if isinstance(obj, Sequence):
         return Sequence(np.roll(obj.ivals, step), obj.alphabet)
     else:
@@ -96,7 +94,11 @@ def roll(obj, step):
 
 def reverse(obj):
     """
-    Return a "reversed" the sequence
+    Reverse the sequence
+
+    >>> seq = Sequence([0, 1, 2, 0, 1], 3)
+    >>> reverse(seq).ivals.tolist()
+    [1, 0, 2, 1, 0]
     """
     if isinstance(obj, Sequence):
         return Sequence(np.flipud(obj.ivals), obj.alphabet)
@@ -105,7 +107,14 @@ def reverse(obj):
 
 def shuffle(obj):
     """
-    Return a "shuffled" sequence
+    Shuffle the sequence
+
+    >>> seq = Sequence([0, 1, 2, 0, 1], 3)
+    >>> shuffled = shuffle(seq)
+    >>> sorted(shuffled.ivals.tolist())
+    [0, 0, 1, 1, 2]
+    >>> seq.ivals.tolist()
+    [0, 1, 2, 0, 1]
     """
     if isinstance(obj, Sequence):
         tmp = copy.copy(obj.ivals)
@@ -116,7 +125,11 @@ def shuffle(obj):
 
 def reduce(obj):
     """
-    Delete the repetitions of symbols in a sequence
+    Returns a reduced sequence (ie Delete the repetitions of symbols in a sequence)
+
+    >>> seq = Sequence([0, 0, 2, 2, 2, 0, 1, 1], 3)
+    >>> reduce(seq).ivals.tolist()
+    [0, 2, 0, 1]
     """
     if isinstance(obj, Sequence):
         diff = np.ediff1d(obj.ivals)
@@ -167,9 +180,13 @@ def transform(seq, correspondance, new_alphabet=None):
     """
     Transforms the initial sequence according to the correspondence iterable
 
-    The correspondence defines how the ivals from sequence should be grouped in
-    the new alphabet: this is not a simple rename.
-
+    >>> seq = Sequence([0, 2, 0, 1], 3)
+    >>> transform(seq, [1, 0, 0]).ivals.tolist()
+    [1, 0, 1, 0]
+    >>> alphabet = Alphabet(['low', 'high'])
+    >>> transformed = transform(seq, [1, 0, 0], alphabet)
+    >>> transformed.alphabet.svals
+    ('low', 'high')
     """
     if len(correspondance) != len(seq.alphabet):
         raise ValueError('Correspondence does not match sequence alphabet')
@@ -187,8 +204,9 @@ def transform(seq, correspondance, new_alphabet=None):
         if type(new_alphabet) is not Alphabet:
            raise E.AlphabetError('New alphabet should be an Alphabet object')
         elif len(set(correspondance)) != len(new_alphabet):
-           raise 
-           E.AlphabetError('Length of new alphabet does not fit the correspondence length.')
+           raise E.AlphabetError(
+               'Length of new alphabet does not fit the correspondence length.'
+           )
         else:
             alphabet = new_alphabet
     nb_symbols = len(alphabet)
@@ -214,7 +232,7 @@ def recode(lseq, new_alphabet=False, sep='+', names=None):
     """
     Recodes a list of sequences with (possibly) different alphabets but
     with the same length (This is an error to pass Sequences with different
-    length.) A new dictionary is built for the new sequence.
+    length.) A new dictionnary is built for the new sequence.
 
     :param lseq: a list of Sequences
 
@@ -222,7 +240,18 @@ def recode(lseq, new_alphabet=False, sep='+', names=None):
        :exc:`LengthError`: when the length of the Sequences are different.
 
     :returns: a Sequence
-    """    
+
+    >>> seq_a = Sequence([0, 0, 1, 1], 2)
+    >>> seq_b = Sequence([0, 1, 0, 1], 2)
+    >>> recoded = recode([seq_a, seq_b])
+    >>> recoded.ivals.tolist()
+    [0, 1, 2, 3]
+    >>> recoded.k
+    4
+    >>> named = recode([seq_a, seq_b], new_alphabet=True, names=['x', 'y'])
+    >>> named.alphabet.svals
+    ('x_0+y_0', 'x_0+y_1', 'x_1+y_0', 'x_1+y_1')
+    """     
     if not all([len(seq) == len(lseq[0]) for seq in lseq]):
         raise E.LengthError("Sequence should have the same length") 
 
@@ -272,11 +301,22 @@ def words(seq, wlen, new_alphabet=False):
     """
     Returns a sequence encoded according to the m-words in seq
 
-    .. todo::
-        Write the doc of "words"
+    >>> seq = Sequence([0, 0, 1, 1, 0], 2)
+    >>> word_seq = words(seq, 2)
+    >>> word_seq.ivals.tolist()
+    [0, 1, 3, 2]
+    >>> word_seq.k
+    4
     """
-    assert wlen > 0, 'Word length should be > 0.'
+    if not isinstance(wlen, (int, np.integer)):
+        raise ValueError("Word length should be a positive integer.")
+    if wlen <= 0:
+        raise ValueError("Word length should be > 0.")
+
     slen = len(seq)
+    if wlen > slen:
+        raise ValueError("Word length should be <= sequence length.")
+
     lseq = [seq[i:slen-wlen+i+1] for i in range(wlen)]
 
     return recode(lseq, new_alphabet=new_alphabet)

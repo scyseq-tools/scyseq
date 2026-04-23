@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.patches import Patch
 
-from . import sequence as S
+import scyseq as sq
 
 
 # Default colormap for consistent state coloring across all plots
@@ -226,8 +226,8 @@ def plot_independence(seq1, seq2, xlabel='1st sequence', ylabel='2nd Sequence',
     fq1 = seq1.frequency()
     fq2 = seq2.frequency()
     
-    seq3 = S.recode([seq1, seq2], new_alphabet=False)
-    # visited = S.visited_states(seq3, sort=False)
+    seq3 = sq.recode([seq1, seq2], new_alphabet=False)
+    # visited = sq.visited_states(seq3, sort=False)
     fq3 = seq3.frequency()
 
     xvals = []
