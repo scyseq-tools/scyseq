@@ -144,7 +144,7 @@ def _complexity_from_phrases(dotcount, alphabet_length, sequence_length):
     """
     Return the normalized Lempel-Ziv score for a phrase count.
     """
-    return dotcount * (np.log(dotcount) / np.log(alphabet_length) + 1.0) / sequence_length
+    return float(dotcount * (np.log(dotcount) / np.log(alphabet_length) + 1.0) / sequence_length)
 
 
 def lempel_ziv(seq, parsing='lz76', norm=False, nbsur=None):
@@ -188,7 +188,7 @@ def lempel_ziv(seq, parsing='lz76', norm=False, nbsur=None):
     lz_min = _complexity_from_phrases(c_min, seq.k, seqlen)
     lz_max = _complexity_from_phrases(c_max, seq.k, seqlen)
 
-    return (lz_raw - lz_min) / (lz_max - lz_min)
+    return float((lz_raw - lz_min) / (lz_max - lz_min))
 
 
 if __name__ == "__main__":

@@ -50,7 +50,7 @@ def topological_entropy(seq):
     0.6931471805599453
     """
     nb_visit = np.sum(seq.count() > 0)
-    return np.log(float(nb_visit))
+    return float(np.log(float(nb_visit)))
 
 
 # shortcut for topological entropy
@@ -73,7 +73,7 @@ def renyi_entropy(seq, coef):
     0.6088567303148161
     """
     prob = seq.frequency()
-    return np.log(np.sum(prob[prob > 0] ** coef)) / (1 - coef)
+    return float(np.log(np.sum(prob[prob > 0] ** coef)) / (1 - coef))
 
 
 # shortcut for Renyi entropy
@@ -148,7 +148,7 @@ def effective_complexity(seq, n_max):
     blocks = [block_entropy(seq, wlen) for wlen in range(1, n_max + 1)]
     rates = np.diff(blocks)
     drate = np.diff(np.flipud(rates))
-    return np.sum(np.arange(2, len(drate) + 2) * np.flipud(drate))
+    return float(np.sum(np.arange(2, len(drate) + 2) * np.flipud(drate)))
 
 
 def mutual_information(seq1, seq2):
@@ -171,7 +171,7 @@ def mutual_information(seq1, seq2):
     0.0002988020334349084
     """
     seq12 = sq.recode([seq1, seq2])
-    return H(seq1) + H(seq2) - H(seq12)
+    return float(H(seq1) + H(seq2) - H(seq12))
 
 
 def multi_information(seq1, seq2, seq3):
@@ -202,7 +202,7 @@ def multi_information(seq1, seq2, seq3):
     seq23 = sq.recode([seq2, seq3])
     seq123 = sq.recode([seq1, seq2, seq3])
 
-    return H(seq1) + H(seq2) + H(seq3) + H(seq123) - H(seq12) - H(seq13) - H(seq23)
+    return float(H(seq1) + H(seq2) + H(seq3) + H(seq123) - H(seq12) - H(seq13) - H(seq23))
 
 
 def transfer_entropy(seq1, seq1p, seq2):
@@ -232,7 +232,7 @@ def transfer_entropy(seq1, seq1p, seq2):
     seq21 = sq.recode([seq2, seq1])
     seq1p1 = sq.recode([seq1p, seq1])
 
-    return -H(seq1p21) + H(seq21) + H(seq1p1) - H(seq1)
+    return float(-H(seq1p21) + H(seq21) + H(seq1p1) - H(seq1))
 
 
 if __name__ == "__main__":

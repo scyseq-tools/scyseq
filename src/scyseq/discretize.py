@@ -61,18 +61,18 @@ def partition(arr, method='histogram', nbin=10, d=None):
     >>> seq = partition(x, method='histogram', nbin=6)
     >>> seq
     Sequence: [0 0 1 1 2 3 3 4 4 5 5]
-    Alphabet[State(0 | 0), State(1 | 1), State(2 | 2), State(3 | 3), State(4 | 4), State(5 | 5)]
+    Alphabet(Symbol(0 | 0), Symbol(1 | 1), Symbol(2 | 2), Symbol(3 | 3), Symbol(4 | 4), Symbol(5 | 5))
     N = 11 ; k = 6
     >>> seq = partition(x, method='marginal_equiquantization',nbin=6)
     >>> seq
     Sequence: [0 0 1 1 2 2 3 3 4 4 5]
-    Alphabet[State(0 | 0), State(1 | 1), State(2 | 2), State(3 | 3), State(4 | 4), State(5 | 5)]
+    Alphabet(Symbol(0 | 0), Symbol(1 | 1), Symbol(2 | 2), Symbol(3 | 3), Symbol(4 | 4), Symbol(5 | 5))
     N = 11 ; k = 6
 
     """
 
     if (method == 'histogram'):
-        lag = np.array(arr).ptp() / float(nbin) # ptp: peak-to-peak=max-min
+        lag = np.ptp(np.array(arr)) / float(nbin) # ptp: peak-to-peak=max-min
         bins = np.min(arr) + np.arange(nbin) * lag
         seq = np.digitize(arr, bins) - 1 # symbols between 0 and k-1
 
