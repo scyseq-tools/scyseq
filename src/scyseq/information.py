@@ -26,7 +26,8 @@ def metric_entropy(seq):
     0.6003511877776578
     """
     prob = seq.frequency()
-    return -np.sum(prob[prob > 0] * np.log(prob[prob > 0]))
+    entropy = -np.sum(prob[prob > 0] * np.log(prob[prob > 0]))
+    return float(entropy)
 
 
 # shortcuts for Shannon (metric) entropy
