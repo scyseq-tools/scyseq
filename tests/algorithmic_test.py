@@ -12,6 +12,13 @@ def test_contains_sublist_cases():
     assert contains_sublist([], [1]) is False
 
 
+def test_contains_sublist_legacy_cases():
+    values = [1, 2, 3, 4, 5]
+
+    assert contains_sublist(values, [2, 3]) is True
+    assert contains_sublist(values, [2, 4]) is False
+
+
 def test_lz76_and_lz77_share_reference_history():
     arr = np.array([0, 0, 1, 0, 1, 1], dtype=np.uint8)
     expected = (3, [[0], [0, 1], [0, 1, 1]])
@@ -27,6 +34,32 @@ def test_lz76_and_lz77_differ_on_alternating_sequence():
 
     assert lz76(arr, summary=True) == (4, [[0], [1], [0, 1, 0], [1]])
     assert lz77(arr, summary=True) == (4, [[0], [1], [0, 1], [0, 1]])
+
+
+def test_lz_parsers_on_binary_legacy_sequence():
+    values = [0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0]
+
+    assert lz77(values, summary=True) == (
+        8,
+        [[0], [1], [1, 1], [0, 1], [0, 1, 0], [0, 0], [1, 1, 1], [0]],
+    )
+    assert lz76(values, summary=True) == (
+        6,
+        [[0], [1], [1, 1], [0, 1, 0], [1, 0, 0], [0, 1, 1, 1, 0]],
+    )
+
+
+def test_lz_parsers_on_general_legacy_alphabet_values():
+    values = [0, 10, 11, 1, 10, 11, 0, 1, 10, 0, 0, 11, 1, 11, 10]
+
+    assert lz77(values, summary=True) == (
+        10,
+        [[0], [10], [11], [1], [10, 11], [0, 1], [10, 0], [0, 11], [1, 11], [10]],
+    )
+    assert lz76(values, summary=True) == (
+        9,
+        [[0], [10], [11], [1], [10, 11, 0], [1, 10, 0], [0, 11], [1, 11], [10]],
+    )
 
 
 @pytest.mark.parametrize("parsing", ["lz76", "lz77"])
