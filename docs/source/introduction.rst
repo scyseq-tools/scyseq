@@ -3,7 +3,7 @@ Introduction
 
 Symbolic dynamics provides a mathematical framework for representing complex
 systems as sequences of discrete symbols. As described by Marcus and Williams
-:cite:`MarcusEtWilliams08`:
+[MaWi08]_:
 
     “Symbolic Dynamics is the study of shift spaces, which consist of infinite or
     bi-infinite sequences defined by a shift-invariant constraint on the
