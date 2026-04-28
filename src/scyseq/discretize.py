@@ -14,7 +14,7 @@ def symbolize(arr, bins, d=None):
        Qu'est-ce que nbin ? Peut-être d ?
 
     """
-    if np.any(arr < nbin[0]):
+    if np.any(arr < bins[0]):
         seq = np.digitize(arr, bins)
     else:
         seq = np.digitize(arr, bins) - 1
