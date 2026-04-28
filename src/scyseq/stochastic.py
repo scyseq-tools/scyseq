@@ -17,9 +17,9 @@ def conditional_matrix(dependent, conditioning, smooth=0):
 
     P(x) = 0 is dealt with add-k smoothing:
 
-    P(y | x) = (P(x,y) + k) / (P(x) + k * |Ay|)
+    :math:`P(y \\mid x) = (P(x,y) + k) / (P(x) + k |A_y|)`
 
-    with |Ay| the alphabet length of the dependent sequence
+    with :math:`|A_y|` the alphabet length of the dependent sequence
 
     This is estimated using the maximum likelihood estimator.
 
