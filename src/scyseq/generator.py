@@ -57,7 +57,8 @@ def generate(method, N, k, *args):
     
     elif method.lower() == "binary_logistic":
         mu = args[0]
-        return binary_logistic_sequence(int(N), mu)
+        xinit = args[1]
+        return binary_logistic_sequence(int(N), mu, xinit)
 
     else:
         raise NotImplementedError("The method %s is not implemented." % method)
