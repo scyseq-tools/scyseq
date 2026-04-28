@@ -12,3 +12,4 @@ __authors__ = ["Laurent Pezard",
 from .sequence import Symbol, Alphabet, boolean_alphabet, binary_alphabet, Sequence
 from .exceptions import *
 from .operations import recode, words, rename, roll, reverse, shuffle, reduce, count, frequency, transform
+from .io import read_codix, write_codix
