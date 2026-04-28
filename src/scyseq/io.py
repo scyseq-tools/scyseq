@@ -48,10 +48,10 @@ def write_codix(fname, seqs, info=None):
             tmpdata.update({site: {}})
         for code, seq in seqs[site]: 
             if code not in tmpcodes['codes']:
-                alpha = list(seq.alphabet.strvals)
+                alpha = list(seq.alphabet.svals)
                 tmpcodes['codes'].update({code: alpha})
             if code not in tmpdata[site]:
-                tmpdata[site].update({code: seq.ivals})
+                tmpdata[site].update({code: seq.ivals.tolist()})
 
     container['code'] = tmpcodes
     container['data'] = tmpdata
