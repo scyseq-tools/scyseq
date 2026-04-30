@@ -192,7 +192,6 @@ def plot_grid(seq1, seq2, xlabel='1st sequence', ylabel='2nd Sequence',
 
     fig, ax = plt.subplots()
     ax.scatter(xvals, yvals, c=color, s=size, alpha=alpha)
-    ax.plot(xvals, yvals)
 
     ax.set_xticks(range(len(alphabet1)))
     ax.set_xticks([i-0.5 for i in range(len(alphabet1)+1)], minor=True)
@@ -210,6 +209,8 @@ def plot_grid(seq1, seq2, xlabel='1st sequence', ylabel='2nd Sequence',
     ax.set_ylim(-0.5, len(alphabet2)-0.5)
 
     ax.grid(True, which='minor')
+
+    return fig, ax
 
 def plot_independence(seq1, seq2, xlabel='1st sequence', ylabel='2nd Sequence',
               title='Independence plot', labelsize=15, titlesize=25,
