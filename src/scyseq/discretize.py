@@ -9,9 +9,21 @@ from scyseq import algorithmic as A
 
 def symbolize(arr, bins, d=None):
     """
-    .. todo:: 
-       is this funtion `symbolize` useful? (duplicate numpy.digitize?)
-       Qu'est-ce que nbin ? Peut-être d ?
+    Convert an array of continuous values into a symbolic sequence using bins.
+
+    Parameters
+    ----------
+    arr : numpy.ndarray
+        Array of continuous values.
+    bins : array_like
+        Array of bin edges.
+    d : dict, optional
+        Optional dictionary (param kept for compatibility).
+
+    Returns
+    -------
+    Sequence
+        A generated symbolic sequence based on the bins.
 
     """
     if np.any(arr < bins[0]):
@@ -36,15 +48,26 @@ def partition(arr, method='histogram', nbin=10, d=None):
        marginal equiquantization ie does its best to let equal number of
        observation in each bin. 
 
-    :param x: a continuous series
-    :param method: a string in `["histogram", "marginal_equiquantization"]`
-    :param nbin: the number of bins ie the length of the alphabet
-    :param d: a dictionary
+    Parameters
+    ----------
+    arr : numpy.ndarray
+        A continuous series of values.
+    method : str
+        A string in `["histogram", "marginal_equiquantization"]`.
+    nbin : int
+        The number of bins ie the length of the alphabet.
+    d : dict, optional
+        A dictionary.
 
-    :raises:
-       :exc:`NotImplementedError`  if method is not in the list above.
+    Raises
+    ------
+    NotImplementedError
+        If method is not in the list above.
 
-    :returns: A symbolic Sequence
+    Returns
+    -------
+    Sequence
+        A symbolic Sequence.
 
 
     .. todo:: 
@@ -91,9 +114,9 @@ def partition(arr, method='histogram', nbin=10, d=None):
 
 def subdivision(data, iter_max):
     """
-    Ulam method
-    Adaptive subdivision technique based on:
+    Ulam method. Adaptive subdivision technique.
 
+    Based on:
     Set oriented numerical methods for dynamical systems
     Dellnitz M. and Junge O.  Handbook of dynamical systems vol. 2 p. 221-264
     Elsevier 2002.
@@ -104,10 +127,17 @@ def subdivision(data, iter_max):
     Keller H. and Ochs G. in "Stochastic dynamics" Crauel H. and Gundlach M. Eds
     Springer 1999. p. 93-115
 
-    :input:
+    Parameters
+    ----------
+    data : numpy.ndarray
+        The input matrix/array to subdivide. 
+    iter_max : int
+        Maximum number of box iterations.
 
-    ``x``: numpy array
-    ``kmax``: integer, maximum number of boxes
+    Returns
+    -------
+    tuple
+        A tuple containing (boxes, refs).
     """
     # we consider that lines=time columns=dims ie. [line, col]
     nb_time, nb_dim = data.shape
@@ -155,16 +185,22 @@ def phase_cluster(data, nb_symb, target_dim=2):
     based on the clusterisation of the "phase space" of the channels of MEG
     temporal signal 
 
+    Parameters
+    ----------
+    data : numpy.ndarray
+        The input matrix, the lines are the channels and the columns
+        are the time, must be an array.
+    nb_symb : int
+        The number of bins used for the clusterisation i.e. the
+        number of symbols of the symbolic sequences that will be created.
+    target_dim : int, optional
+        The number of eigen vectors that we want to conserve to
+        project our data on it.
 
-    :param data: The input matrix, the lines are the channels and the columns
-           are the time, must be an array
-
-    :param nb_symb: The number of bins used for the clusterisation i.e. the
-           number of symbols of the symbolic sequences that will be created
-
-    :param nb_vp : The number of eigen vectors that we want to conserve to
-           project our data on it
-
+    Returns
+    -------
+    numpy.ndarray
+        Return computed value (the clusterization result arrays).
     """
     # SVD
     data = data.T

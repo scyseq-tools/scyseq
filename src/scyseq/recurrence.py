@@ -49,7 +49,17 @@ import copy
 
 def recurrence(seq):
     """
-    Compute recurrence plot
+    Compute a recurrence plot for the given sequence.
+
+    Parameters
+    ----------
+    seq : Sequence
+        The input symbolic sequence to calculate recurrence for.
+
+    Returns
+    -------
+    numpy.ndarray
+        A 2D array representing the recurrence plot.
     """
     return np.equal.outer(seq.ivals, seq.ivals).astype(int)
 

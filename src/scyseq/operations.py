@@ -147,9 +147,19 @@ def reduce(obj):
 def count(obj, value=None):
     """
     Counts the number of each symbol in :math:`{0, k-1}` if code is None
-    or the number of the code symbol
+    or the number of the code symbol.
 
-    :returns: a numpy.ndarray of integers
+    Parameters
+    ----------
+    obj : Sequence
+        The sequence object to count symbols in.
+    value : int or str, optional
+        The specific symbol value to count. If None, counts all symbols.
+
+    Returns
+    -------
+    numpy.ndarray or int
+        An array of counts for each symbol, or a single integer count if value is provided.
     """
     if isinstance(obj, Sequence):
         if value is None:
@@ -167,9 +177,19 @@ def count(obj, value=None):
 
 def frequency(obj, value=None):
     """
-    Returns the probability of each symbol in :math:`{0, k-1}`
+    Returns the probability of each symbol in :math:`{0, k-1}`.
 
-    :returns: a numpy.ndarray of floats
+    Parameters
+    ----------
+    obj : Sequence
+        The sequence object.
+    value : int or str, optional
+        The specific symbol value to find the probability of. If None, computes probabilities for all symbols.
+
+    Returns
+    -------
+    numpy.ndarray or float
+        An array of floats representing probabilities, or a single float if value is provided.
     """
     if isinstance(obj, Sequence):
         return obj.count(value) / float(len(obj))
@@ -178,7 +198,21 @@ def frequency(obj, value=None):
 
 def transform(seq, correspondance, new_alphabet=None):
     """
-    Transforms the initial sequence according to the correspondence iterable
+    Transforms the initial sequence according to the correspondence iterable.
+
+    Parameters
+    ----------
+    seq : Sequence
+        The sequence to transform.
+    correspondance : iterable
+        A list or array representing correspondence to transfer current symbols.
+    new_alphabet : Alphabet, optional
+        A new alphabet obj to use for the transformed sequence.
+
+    Returns
+    -------
+    Sequence
+        The new mathematically transformed Sequence.
 
     >>> seq = Sequence([0, 2, 0, 1], 3)
     >>> transform(seq, [1, 0, 0]).ivals.tolist()
@@ -234,12 +268,26 @@ def recode(lseq, new_alphabet=False, sep='+', names=None):
     with the same length (This is an error to pass Sequences with different
     length.) A new dictionnary is built for the new sequence.
 
-    :param lseq: a list of Sequences
+    Parameters
+    ----------
+    lseq : list
+        A list of Sequence objects.
+    new_alphabet : bool, optional
+        Whether to generate a new alphabet instead of integers, defaults to False.
+    sep : str, optional
+        Separator to use if new_alphabet is True, defaults to '+'.
+    names : list, optional
+        Optional names for the new alphabets.
 
-    :raises:
-       :exc:`LengthError`: when the length of the Sequences are different.
+    Raises
+    ------
+    LengthError
+        When the length of the Sequences are different.
 
-    :returns: a Sequence
+    Returns
+    -------
+    Sequence
+        A newly recoded Sequence object.
 
     >>> seq_a = Sequence([0, 0, 1, 1], 2)
     >>> seq_b = Sequence([0, 1, 0, 1], 2)
