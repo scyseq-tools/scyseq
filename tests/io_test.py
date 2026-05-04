@@ -2,6 +2,7 @@ import json
 
 import numpy as np
 
+from scyseq.generator import generate
 from scyseq.io import read_codix, write_codix
 from scyseq.sequence import Alphabet, Sequence
 
@@ -81,3 +82,44 @@ def test_write_codix_creates_readable_new_codix_file(tmp_path):
     data = read_codix(path)
     np.testing.assert_array_equal(data["infant"]["gaze"].ivals, seq.ivals)
     assert data["infant"]["gaze"].alphabet == seq.alphabet
+
+
+def assert_roundtrip_matches(original, roundtrip):
+    assert len(roundtrip) == len(original)
+    assert roundtrip.alphabet == original.alphabet
+    np.testing.assert_array_equal(roundtrip.ivals, original.ivals)
+
+
+def test_generated_sequences_can_roundtrip_through_codix(tmp_path):
+    path = tmp_path / "generated_methods.cdx"
+
+    np.random.seed(123)
+    markov_matrix = np.array(
+        [
+            [0.85, 0.15],
+            [0.20, 0.80],
+        ]
+    )
+
+    generated = {
+        "uniform_state": Sequence(
+            generate("uniform", 20, 3).ivals,
+            Alphabet(["low", "mid", "high"]),
+        ),
+        "markov_state": Sequence(
+            generate("markov", 20, 2, markov_matrix, 1).ivals,
+            Alphabet(["rest", "active"]),
+        ),
+        "binary_logistic_state": Sequence(
+            generate("binary_logistic", 20, 2, 4.0, 0.2).ivals,
+            Alphabet(["below_threshold", "above_threshold"]),
+        ),
+    }
+
+    write_codix(path, {"synthetic": list(generated.items())})
+
+    roundtrip = read_codix(path)["synthetic"]
+
+    assert set(roundtrip) == set(generated)
+    for code, sequence in generated.items():
+        assert_roundtrip_matches(sequence, roundtrip[code])
