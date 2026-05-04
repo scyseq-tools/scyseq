@@ -43,7 +43,7 @@ autoclass_content = "class" # can be "class", "init", "both"
 autodoc_member_order = 'bysource'
 
 # Display todos by setting to True
-todo_include_todos = True
+todo_include_todos = False
 html_show_sourcelink = True
 
 
