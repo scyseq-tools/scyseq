@@ -39,7 +39,7 @@ def plot(seq, xlabel='Time', ylabel='States', title='Simple plot', labelsize=15,
     xvals = list(range(len(seq)))
 
     fig, ax = plt.subplots()
-    ax.plot(xvals, yvals, color=color)
+    ax.scatter(xvals, yvals, c=color, **kwargs)
 
     ax.set_yticks(range(len(alphabet)))
     ax.set_yticks([i-0.5 for i in range(len(alphabet)+1)], minor=True)
@@ -192,6 +192,7 @@ def plot_grid(seq1, seq2, xlabel='1st sequence', ylabel='2nd Sequence',
 
     fig, ax = plt.subplots()
     ax.scatter(xvals, yvals, c=color, s=size, alpha=alpha)
+    ax.plot(xvals, yvals)
 
     ax.set_xticks(range(len(alphabet1)))
     ax.set_xticks([i-0.5 for i in range(len(alphabet1)+1)], minor=True)
