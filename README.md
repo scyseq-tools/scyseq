@@ -91,12 +91,8 @@ This will open a web interface where you can navigate to the `docs/source/notebo
 
 # Tools used in this package:
 
-[sphinx](https://www.sphinx-doc.org) for the documentation
-
-[pytest](https://docs.pytest.org) for testing
-
-[hatch](https://hatch.pypa.io) for project management
-
-[doctest](https://docs.python.org/3/library/doctest.html) for inserting tests in
-docstrings
+[![Sphinx](https://img.shields.io/badge/docs-Sphinx-blue)](https://www.sphinx-doc.org/)
+[![pytest](https://img.shields.io/badge/tests-pytest-blue)](https://docs.pytest.org/)
+[![Hatch](https://img.shields.io/badge/project-Hatch-blue)](https://hatch.pypa.io/latest/)
+[![doctest](https://img.shields.io/badge/tests-doctest-blue)](https://docs.python.org/3/library/doctest.html)
 
