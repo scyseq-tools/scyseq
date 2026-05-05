@@ -36,7 +36,15 @@ exit
 
 ## Building Documentation
 
-To generate HTML documentation, first activate the Hatch environment:
+To generate HTML documentation from the repository root, run:
+
+```bash
+hatch run docs:build
+```
+
+The generated HTML documentation will be available in `docs/build/html/`. Open `docs/build/html/index.html` in your browser to view the documentation.
+
+You can also build the documentation manually by first activating the Hatch environment:
 
 ```bash
 hatch shell

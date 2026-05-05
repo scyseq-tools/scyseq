@@ -25,3 +25,9 @@ packages = ["src/scyseq"]
 
 [tool.hatch.envs.default]
 features = ["dev", "docs"]
+
+[tool.hatch.envs.docs]
+features = ["docs"]
+
+[tool.hatch.envs.docs.scripts]
+build = "python -m sphinx -b html docs/source docs/build/html"
