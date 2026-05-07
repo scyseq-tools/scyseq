@@ -1,3 +1,14 @@
+`scyseq` is a `Python` package for generating, defining, manipulating, characterizing and
+plotting _symbolic sequences_ which are defined as successive occurrences of
+symbols (or states) taken from a finite-length alphabet (set of states).
+
+# Tools used in this package:
+
+[![Sphinx](https://img.shields.io/badge/docs-Sphinx-blue)](https://www.sphinx-doc.org/)
+[![pytest](https://img.shields.io/badge/tests-pytest-blue)](https://docs.pytest.org/)
+[![Hatch](https://img.shields.io/badge/project-Hatch-blue)](https://hatch.pypa.io/latest/)
+[![doctest](https://img.shields.io/badge/tests-doctest-blue)](https://docs.python.org/3/library/doctest.html)
+
 # For development, [hatch](https://hatch.pypa.io/latest/why/) is used to manage the virtual environment and dependencies.
 
 Make sure you have hatch installed in your default Python environment:
@@ -88,11 +99,4 @@ jupyter notebook
 
 This will open a web interface where you can navigate to the `docs/source/notebooks` directory and open the tutorial notebooks to run them interactively.
 
-
-# Tools used in this package:
-
-[![Sphinx](https://img.shields.io/badge/docs-Sphinx-blue)](https://www.sphinx-doc.org/)
-[![pytest](https://img.shields.io/badge/tests-pytest-blue)](https://docs.pytest.org/)
-[![Hatch](https://img.shields.io/badge/project-Hatch-blue)](https://hatch.pypa.io/latest/)
-[![doctest](https://img.shields.io/badge/tests-doctest-blue)](https://docs.python.org/3/library/doctest.html)
 

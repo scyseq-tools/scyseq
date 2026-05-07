@@ -214,6 +214,9 @@ def transform(seq, correspondance, new_alphabet=None):
     Sequence
         The new mathematically transformed Sequence.
 
+    Example
+    -------
+
     >>> seq = Sequence([0, 2, 0, 1], 3)
     >>> transform(seq, [1, 0, 0]).ivals.tolist()
     [1, 0, 1, 0]
@@ -288,6 +291,9 @@ def recode(lseq, new_alphabet=False, sep='+', names=None):
     -------
     Sequence
         A newly recoded Sequence object.
+
+    Example
+    -------
 
     >>> seq_a = Sequence([0, 0, 1, 1], 2)
     >>> seq_b = Sequence([0, 1, 0, 1], 2)

@@ -52,3 +52,5 @@ html_show_sourcelink = True
 
 html_theme = 'alabaster'
 html_static_path = ['_static']
+html_logo = "_static/logo_3-200px.png"
+html_favicon = "_static/logo_3-favicon.png"

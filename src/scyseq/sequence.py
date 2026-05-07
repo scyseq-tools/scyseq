@@ -11,10 +11,7 @@ called `ivals` (for Integer VALueS) and all the computations use
 this representation. For human readability, there is also a string value (named
 `svals`) which is associated with the integer representation when needed.
 
-An `Alphabet` behaves like bidirectional dictionaries with restrictions to avoid
-problems.
-
-also provides two specific alphabets:
+This module also provides two specific alphabets:
 
 >>> boolean_alphabet
 Alphabet(Symbol(0 | False), Symbol(1 | True))
@@ -56,10 +53,14 @@ class Symbol:
         >>> Symbol('One')
         Symbol(- | One)
 
-        The integer value (ival) of a symbol is only attributed once the symbol is
-        inserted in an alphabet.
+        It has two properties: a string value named sval and an integer value
+        named ival which is only attributed once the symbol is inserted in an alphabet.
 
-        It has two properties: ival and sval
+        >>> my_symbol = Symbol('me')
+        >>> my_symbol.sval
+        'me'
+        >>> my_symbol.ival # returns None
+
         """
         if not isinstance(value, (str, int)):
             raise E.SymbolDefinitionError(value, "Value must be an integer or a string")
@@ -164,6 +165,9 @@ class Symbol:
 class Alphabet(tuple):
     """
     The set of symbols that can be visited in a Sequence.
+
+    An `Alphabet` behaves like bidirectional dictionaries with restrictions to
+    avoid problems.
     """
     def __new__(cls, symbols):
         """
@@ -247,7 +251,8 @@ class Alphabet(tuple):
         >>> alpha
         Alphabet(Symbol(0 | One), Symbol(1 | Deux), Symbol(2 | Three))
 
-        Alphabet's symbols can be changed using a dictionary representation.
+        Alphabet's symbols can be changed using a dictionary representation
+        using the rename method.
 
         >>> alpha.rename({0 : 'Uno', 2 : 'Tre'})
         >>> alpha
@@ -260,11 +265,6 @@ class Alphabet(tuple):
         self._ivals = tuple(s.ival for s in self)
         self._svals = tuple(s.sval for s in self)
         self._symbols = tuple(s for s in self)
-
-        # FIXME: Not sure this is useful
-        # When an alphabet is associated to a sequence it cannot be modified.
-        # self._islinked = False
-# This not useful since only the sval of symbols can be modified.
 
     def __str__(self):
         return '('+', '.join([s.__str__() for s in self])+')'
@@ -332,16 +332,7 @@ class Alphabet(tuple):
         >>> alpha_a.svals
         ('a', 'b', 'c')
         """
-        # return self._svals
         return tuple(s.sval for s in self)
-
-#    @svals.setter
-#    def svals(self, value):
-#        self._sval = str(value)
-
-#    @svals.deleter
-#    def svals(self):
-#        raise KeyError("Cannot delete the name of a symbol")
 
     @property
     def ivals(self):
@@ -353,14 +344,6 @@ class Alphabet(tuple):
         (0, 1, 2)
         """
         return self._ivals
-
-#    @ivals.setter
-#    def ivals(self, value):
-#        raise TypeError("Cannot change the ival of a symbol")
-#
-#    @ivals.deleter
-#    def ivalself):
-#        raise TypeError("Cannot delete the ival of a symbol")
 
     def items(self):
         """
@@ -378,10 +361,14 @@ class Alphabet(tuple):
 
     def rename(self, replacement):
         """
-        Rename the svals of the alphabet according to a dictionary.
+        Rename the svals of the alphabet according to a dictionary with integers
+        as keys and stings as values.
+
+        :param replacement: the new correspondence between ivals and svals.
+        :type replacement: dictionary
 
         See also:
-        ---------
+
         The implementation in the operations module: :func:`~scyseq.operations.rename`
         """
         from .operations import rename as _rename
@@ -442,40 +429,6 @@ class Sequence:
 
         return instance
 
-#        # 4. Création de l'objet
-#        instance = super().__new__(cls)
-#        instance._array = array
-#        return instance
-#
-##        if dtype not in DTYPES:
-##            raise TypeError(\
-##                    'Wrong dtype. Maybe you entered both alphabet and its length.')
-##        # symbols = np.array(symbols)
-##        # Check if data can be represented in the dtype
-##        if np.any(symbols < np.iinfo(dtype).min) or \
-##           np.any(symbols > np.iinfo(dtype).max):
-##            raise E.SymbolError(\
-##                  'Data can not be represented in %s' % str(dtype))
-##        # Check the dimension of the data
-##        if len(symbols.shape) != 1: # 1D sequences for now
-##            raise E.ShapeError(\
-##                  'Data shape is not one-dimensional')
-#        # self._ivals = np.asarray(symbols).astype(dtype)
-#        # Parse the alphabet
-#
-#        if isinstance(alphabet, Alphabet):
-#            self._alphabet = copy.deepcopy(alphabet)
-#
-## FIXME: is the islinked is useful?
-##                self._alphabet._islinked = True
-#
-#        elif type(alphabet) == int :
-#            # self._alphabet = Alphabet(alphabet)
-#            self._alphabet = Alphabet(alphabet)
-#        else:
-#            raise
-# TypeError('The parameter alphabet must be an integer or a sequence.Alphabet object')
-
     def __init__(self, symbols, alphabet, check=True):
         """
         Initializes a Sequence object.
@@ -506,11 +459,11 @@ class Sequence:
 
         :returns: a Sequence object with attribute `s`, `k` and `d`
 
-        >>> seqA = Sequence([1, 0, 0, 2, 0, 0, 0, 2, 2, 0, 2, 2, 0, 0, 1], 3)
+        >>> seqA = Sequence([1, 0, 0, 2, 0, 0, 0, 2, 2, 0], 3)
         >>> seqA
-        Sequence: [1 0 0 2 0 0 0 2 2 0 2 2 0 0 1]
+        Sequence: [1 0 0 2 0 0 0 2 2 0]
         Alphabet(Symbol(0 | 0), Symbol(1 | 1), Symbol(2 | 2))
-        N = 15 ; k = 3
+        N = 10 ; k = 3
         """
         if isinstance(symbols, Sequence):
             pass # everything has been done in __new__

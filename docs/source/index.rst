@@ -13,8 +13,8 @@ Welcome to scyseq's documentation!
    introduction
    notebooks/tutorial
    library
-   contributors
    notebooks/infant-mother
+   contributors
    references
 
 Indices and tables
