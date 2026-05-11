@@ -3,7 +3,7 @@ name: Pages
 on:
   push:
     branches:
-      - dev_mith
+      - master
   workflow_dispatch:
 
 permissions:
