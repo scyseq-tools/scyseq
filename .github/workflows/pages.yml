@@ -36,6 +36,9 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
+      - name: Install pandoc
+        uses: pandoc/actions/setup@v1
+
       - name: Build HTML documentation
         run: hatch run docs:build
 
