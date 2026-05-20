@@ -11,7 +11,7 @@ authors = [
     { name = "Laurent Pezard", email = "laurent.pezard@univ-amu.fr" },
     { name = "Jean-Luc Blanc", email = "jean-luc.blanc@univ-amu.fr" }
 ]
-license = { text = "MIT" }
+license = { text = "BSD-3" }
 requires-python = ">=3.8"
 dependencies = ["numpy", "matplotlib", "scipy"]
 
