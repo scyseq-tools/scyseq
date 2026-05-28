@@ -315,9 +315,9 @@ class Alphabet(tuple):
             if isinstance(key, str):
                 idx = self.svals.index(key)
                 return self._symbols[idx]
-        except:
-            msg = "Key not in alphabet"
-            raise E.AlphabetAccessError(msg)
+        except (IndexError, ValueError) as e:
+            msg = f"The {type(key).__name__} {key} is not in the alphabet ({type(e).__name__})."
+            raise E.AlphabetAccessError(msg) from None
 
     def __setitem__(self, key, value):
         msg = "'Alphabet' object does not support item assignment"

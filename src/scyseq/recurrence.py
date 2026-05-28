@@ -105,8 +105,8 @@ def diagonal_distribution(rp):
     ct = 0
 
     for i in range(N):
-        for l in range(N - i):
-            if rp[i + l, l] == 0:
+        for j in range(N - i):
+            if rp[i + j, j] == 0:
                 HD.append(ct)
                 ct = 0
             else:
@@ -141,7 +141,7 @@ def determinism(rp, dmin=2):
     return np.sum(lvec * dd) / np.sum(rp)
 
 
-def max_line_length(rep):
+def max_line_length(rp):
     dd = diagonal_distribution(rp)
     lvec = np.arange(1, len(dd) + 1)
     idx = np.which(dd != 0)
