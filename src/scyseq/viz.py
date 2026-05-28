@@ -2,7 +2,7 @@ import itertools
 import math
 from random import uniform
 
-import matplotlib
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Patch
@@ -22,8 +22,8 @@ def get_state_colors(alphabet, cmap_name=DEFAULT_COLORMAP):
     :param cmap_name: Name of matplotlib colormap (default: 'viridis')
     :returns: Tuple of (cmap, norm) for consistent coloring
     """
-    cmap = matplotlib.cm.get_cmap(cmap_name, len(alphabet))
-    norm = matplotlib.colors.BoundaryNorm(np.arange(len(alphabet) + 1) - 0.5, cmap.N)
+    cmap = mpl.cm.get_cmap(cmap_name, len(alphabet))
+    norm = mpl.colors.BoundaryNorm(np.arange(len(alphabet) + 1) - 0.5, cmap.N)
     return cmap, norm
 
 

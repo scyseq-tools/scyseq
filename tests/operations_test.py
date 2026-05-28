@@ -57,7 +57,9 @@ def test_sequence():
     return sq.Sequence([1, 0, 3, 2, 3, 3, 2, 0, 2, 1, 0, 1], 4)
 
 
-def test_transform(test_sequence, corr=[0, 0, 1, 1]):
+def test_transform(test_sequence, corr=None):
+    if corr is None:
+        corr = [0, 0, 1, 1]
     tseq = sq.transform(test_sequence, corr)
     assert all(tseq.ivals == np.array([0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0]))
 

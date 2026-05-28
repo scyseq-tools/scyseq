@@ -12,18 +12,7 @@ __authors__ = [
     "Dewmith Weerasena",
 ]
 
-from .exceptions import *
-from .io import read_codix, write_codix
-from .operations import (
-    count,
-    frequency,
-    recode,
-    reduce,
-    rename,
-    reverse,
-    roll,
-    shuffle,
-    transform,
-    words,
-)
-from .sequence import Alphabet, Sequence, Symbol, binary_alphabet, boolean_alphabet
+from scyseq.exceptions import *
+from scyseq.io import read_codix, write_codix
+from scyseq.operations import count, frequency, recode, reduce, rename, reverse, roll, shuffle, transform, words
+from scyseq.sequence import Alphabet, Sequence, Symbol, binary_alphabet, boolean_alphabet

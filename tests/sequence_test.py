@@ -151,7 +151,7 @@ def test_transform_function_legacy_cases_with_current_alphabet_api():
 
 
 @pytest.mark.parametrize(
-    "correspondence,new_alphabet,error",
+    ("correspondence", "new_alphabet", "error"),
     [
         ([0, 1], None, ValueError),
         ([0, 1, 1, 0], None, ValueError),

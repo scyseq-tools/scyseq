@@ -24,10 +24,7 @@ def symbolize(arr, bins, d=None):
         A generated symbolic sequence based on the bins.
 
     """
-    if np.any(arr < bins[0]):
-        seq = np.digitize(arr, bins)
-    else:
-        seq = np.digitize(arr, bins) - 1
+    seq = np.digitize(arr, bins) if np.any(arr < bins[0]) else np.digitize(arr, bins) - 1
 
     alen = len(np.unique(seq))
     return S.Sequence(seq, alen)
@@ -106,7 +103,8 @@ def partition(arr, method="histogram", nbin=10, d=None):
         seq = np.digitize(arr, np.array(bins)) - 1
 
     else:
-        raise NotImplementedError("The method is not impleneted")
+        msg = "The method is not impleneted"
+        raise NotImplementedError(msg)
 
     # return Sequence(s=S, k=nbin, d=d)
     return S.Sequence(seq, nbin)
@@ -144,12 +142,10 @@ def subdivision(data, iter_max):
     boxes = np.zeros(nb_time).astype(int)
     no_iter = 0
     refs = []
-    mins = []
-    maxs = []
 
     while no_iter < iter_max:
         box_indice = np.unique(boxes)
-        nb_box = len(box_indice)
+        len(box_indice)
         # Step 0ne: split the boxes
         no_dim = no_iter % nb_dim
         lref = []
@@ -159,7 +155,7 @@ def subdivision(data, iter_max):
         for no_box in box_indice:
             databox = data[boxes == no_box, :]
             min_value = np.min(databox, axis=0)
-            max_value = np.min(databox, axis=0)
+            np.min(databox, axis=0)
             diameter = np.max(databox, axis=0) - min_value
             ref_value = min_value + diameter / 2.0
             lref.append(ref_value[no_dim])
@@ -209,7 +205,7 @@ def phase_cluster(data, nb_symb, target_dim=2):
     reduced_data = reduced_data.T
 
     # Partitionnage
-    edges = np.histogramdd(reduced_data.T, bins=nb_symb)[1]
+    np.histogramdd(reduced_data.T, bins=nb_symb)[1]
 
     # FIXME: this is not the place to compute entropy!!!
 

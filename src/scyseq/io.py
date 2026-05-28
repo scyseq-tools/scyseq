@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-from . import sequence as S
+from scyseq import sequence as S
 
 
 def read_codix(fname, data_only=True):
@@ -15,7 +15,7 @@ def read_codix(fname, data_only=True):
     with open(fname) as datafile:
         record = json.load(datafile)
 
-    if "version" in record.keys():
+    if "version" in record:
         # new codix suite format
         retval = __parse_new_codix__(record)
     else:
@@ -46,7 +46,7 @@ def write_codix(fname, seqs, info=None):
     tmpcodes = {"codes": {}, "sites": {}}
     tmpdata = {}
 
-    for site in seqs.keys():
+    for site in seqs:
         if site not in tmpcodes["sites"]:
             tmpcodes["sites"].update({site: []})
         if site not in tmpdata:
@@ -73,10 +73,10 @@ def __parse_old_codix__(record):
     data = record["data"]
     new_data = {}
 
-    for channel in data.keys():
+    for channel in data:
         new_data[channel] = {}
 
-        for coding in data[channel].keys():
+        for coding in data[channel]:
             tmp_seq = data[channel][coding]["seq"]
             tmp_dico = data[channel][coding]["dico"]
 
@@ -100,9 +100,9 @@ def __parse_new_codix__(record):
     alphabets = {k: S.Alphabet(v) for k, v in code["codes"].items()}
 
     new_data = {}
-    for site in data.keys():
+    for site in data:
         new_data[site] = {}
-        for cod in data[site].keys():
+        for cod in data[site]:
             tmp_seq = data[site][cod]
             alpha = alphabets[cod]
             new_data[site][cod] = S.Sequence(tmp_seq, alpha)

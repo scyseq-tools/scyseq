@@ -13,8 +13,8 @@ __docformat__ = "reStructuredText"
 
 import numpy as np
 
-from . import sequence as S
-from .generator import uniform_sequence
+from scyseq import sequence as S
+from scyseq.generator import uniform_sequence
 
 
 def contains_sublist(lst, sublst):
@@ -138,8 +138,9 @@ def _get_parser(parsing):
     try:
         return parsers[parsing]
     except KeyError as exc:
+        msg = f"The parsing {parsing} is not implemented"
         raise NotImplementedError(
-            "The parsing %s is not implemented" % parsing
+            msg
         ) from exc
 
 
@@ -182,7 +183,8 @@ def lempel_ziv(seq, parsing="lz76", norm=False, nbsur=None):
         return lz_raw
 
     if nbsur is None:
-        raise ValueError("You should give the number of surrogate data")
+        msg = "You should give the number of surrogate data"
+        raise ValueError(msg)
 
     zero_ivals = np.zeros(seqlen, dtype=seq.ivals.dtype)
     c_min = algorithm(S.Sequence(zero_ivals, seq.k).ivals)

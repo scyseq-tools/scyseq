@@ -127,7 +127,8 @@ def entropy_rate(seq, wlen, method="average"):
     if method.lower() == "difference":
         return block_entropy(seq, wlen + 1) - block_entropy(seq, wlen)
 
-    raise NotImplementedError("The %s entropy rate is not implemented" % method)
+    msg = f"The {method} entropy rate is not implemented"
+    raise NotImplementedError(msg)
 
 
 def effective_complexity(seq, n_max):

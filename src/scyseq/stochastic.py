@@ -5,7 +5,7 @@ Defines stochastic matrices
 import numpy as np
 from numpy import testing
 
-from . import operations as O
+from scyseq import operations as O
 
 # import warnings
 
@@ -86,13 +86,15 @@ def conditional_matrix(dependent, conditioning, smooth=None):
         return p_cond
 
     elif smooth == 0 and any(cseq.count() == 0):
+        msg = "Cannot compute conditional probabilities with null marginals and zero smoothing"
         raise ValueError(
-            "Cannot compute conditional probabilities with null marginals and zero smoothing"
+            msg
         )
 
     else:
         if smooth < 0:
-            raise ValueError("smooth should be positive")
+            msg = "smooth should be positive"
+            raise ValueError(msg)
 
         # Add-k smoothing
         p_cond = (p_join + smooth) / (p_marg + smooth * d_alen)

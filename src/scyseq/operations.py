@@ -9,8 +9,8 @@ import itertools
 
 import numpy as np
 
-from . import exceptions as E
-from .sequence import Alphabet, Sequence
+from scyseq import exceptions as E
+from scyseq.sequence import Alphabet, Sequence
 
 
 def rename(obj, replacement):
@@ -60,17 +60,20 @@ def rename(obj, replacement):
 
     elif isinstance(obj, Alphabet):
         if not isinstance(replacement, dict):
-            raise TypeError("The input must be a dictionary")
+            msg = "The input must be a dictionary"
+            raise TypeError(msg)
 
         if not all(
             isinstance(k, int) and isinstance(v, str) for k, v in replacement.items()
         ):
+            msg = "Replacements should be {integer : string, ...}"
             raise E.AlphabetAccessError(
-                "Replacements should be {integer : string, ...}"
+                msg
             )
 
-        if not len(set(replacement.values())) == len(replacement):
-            raise E.AlphabetAccessError("Replacement values should all be different.")
+        if len(set(replacement.values())) != len(replacement):
+            msg = "Replacement values should all be different."
+            raise E.AlphabetAccessError(msg)
 
         for k, v in replacement.items():
             # symbol.sval setter takes care of the unicity of the symbol in
@@ -79,7 +82,8 @@ def rename(obj, replacement):
     #        return obj
 
     else:
-        raise ValueError(f"Cannot rename an object of type {type(obj)}.")
+        msg = f"Cannot rename an object of type {type(obj)}."
+        raise ValueError(msg)
 
 
 def roll(obj, step):
@@ -94,7 +98,8 @@ def roll(obj, step):
     if isinstance(obj, Sequence):
         return Sequence(np.roll(obj.ivals, step), obj.alphabet)
     else:
-        raise ValueError(f"Cannot roll from object of type {type(obj)}.")
+        msg = f"Cannot roll from object of type {type(obj)}."
+        raise ValueError(msg)
 
 
 def reverse(obj):
@@ -108,7 +113,8 @@ def reverse(obj):
     if isinstance(obj, Sequence):
         return Sequence(np.flipud(obj.ivals), obj.alphabet)
     else:
-        raise ValueError(f"Cannot roll from object of type {type(obj)}.")
+        msg = f"Cannot roll from object of type {type(obj)}."
+        raise ValueError(msg)
 
 
 def shuffle(obj):
@@ -127,7 +133,8 @@ def shuffle(obj):
         np.random.shuffle(tmp)
         return Sequence(tmp, obj.alphabet)
     else:
-        raise ValueError(f"Cannot roll from object of type {type(obj)}.")
+        msg = f"Cannot roll from object of type {type(obj)}."
+        raise ValueError(msg)
 
 
 def reduce(obj):
@@ -146,7 +153,8 @@ def reduce(obj):
         return Sequence(reduced, obj.alphabet)
 
     else:
-        raise ValueError(f"Cannot reduce from object of type {type(obj)}.")
+        msg = f"Cannot reduce from object of type {type(obj)}."
+        raise ValueError(msg)
 
 
 # Methods that compute characteristics of the sequence
@@ -179,9 +187,11 @@ def count(obj, value=None):
         if isinstance(value, str):
             return np.sum(obj.svals == value)
 
-        raise ValueError("Value should be an integer or a string")
+        msg = "Value should be an integer or a string"
+        raise ValueError(msg)
     else:
-        raise ValueError(f"Cannot count from object of type {type(obj)}.")
+        msg = f"Cannot count from object of type {type(obj)}."
+        raise ValueError(msg)
 
 
 def frequency(obj, value=None):
@@ -203,7 +213,8 @@ def frequency(obj, value=None):
     if isinstance(obj, Sequence):
         return obj.count(value) / float(len(obj))
     else:
-        raise ValueError(f"Cannot compute frequency from object of type {type(obj)}.")
+        msg = f"Cannot compute frequency from object of type {type(obj)}."
+        raise ValueError(msg)
 
 
 def transform(seq, correspondance, new_alphabet=None):
@@ -236,32 +247,37 @@ def transform(seq, correspondance, new_alphabet=None):
     ('low', 'high')
     """
     if len(correspondance) != len(seq.alphabet):
-        raise ValueError("Correspondence does not match sequence alphabet")
+        msg = "Correspondence does not match sequence alphabet"
+        raise ValueError(msg)
 
     # if (not all([type(c) is str for c in correspondance])) and \
     # (not all([type(c) is Symbol for c in correspondance])) and \
 
-    if not all([type(c) is int for c in correspondance]):
+    if not all(type(c) is int for c in correspondance):
         # raise ValueError('Correspondences are strings, ints or Symbols.')
-        raise ValueError("Correspondences are given as integers.")
+        msg = "Correspondences are given as integers."
+        raise ValueError(msg)
 
     if new_alphabet is None:
         alphabet = Alphabet([str(i) for i in list(set(correspondance))])
     elif type(new_alphabet) is not Alphabet:
-        raise E.AlphabetError("New alphabet should be an Alphabet object")
+        msg = "New alphabet should be an Alphabet object"
+        raise E.AlphabetError(msg)
     elif len(set(correspondance)) != len(new_alphabet):
+        msg = "Length of new alphabet does not fit the correspondence length."
         raise E.AlphabetError(
-            "Length of new alphabet does not fit the correspondence length."
+            msg
         )
     else:
         alphabet = new_alphabet
     nb_symbols = len(alphabet)
 
-    if all([type(c) is int for c in correspondance]):
+    if all(type(c) is int for c in correspondance):
         # make sure that corresp is [0, k-1]
         # FIXME: make a better test...
         if min(correspondance) != 0 or max(correspondance) != nb_symbols - 1:
-            raise ValueError("Correspondence should be [0, k-1]")
+            msg = "Correspondence should be [0, k-1]"
+            raise ValueError(msg)
 
     #    if new_alphabet is not None and len(set(correspondance)) != len(new_alphabet):
     # #        alphabet = Alphabet(new_alphabet)
@@ -316,8 +332,9 @@ def recode(lseq, new_alphabet=False, sep="+", names=None):
     >>> named.alphabet.svals
     ('x_0+y_0', 'x_0+y_1', 'x_1+y_0', 'x_1+y_1')
     """
-    if not all([len(seq) == len(lseq[0]) for seq in lseq]):
-        raise E.LengthError("Sequence should have the same length")
+    if not all(len(seq) == len(lseq[0]) for seq in lseq):
+        msg = "Sequence should have the same length"
+        raise E.LengthError(msg)
 
     # The alphabet size of the recoded sequence is an extension of the alphabet
     # within the original sequences list. This is equivalent to numbering
@@ -342,15 +359,16 @@ def recode(lseq, new_alphabet=False, sep="+", names=None):
     #    # construction of the new alphabet
     if new_alphabet:  # and all([type(alpha) is not int for alpha in alld]):
         if names is None:
-            raise ValueError("Names should be the same length as lseq")
+            msg = "Names should be the same length as lseq"
+            raise ValueError(msg)
         else:
             alld = []
             for seq, name in zip(lseq, names):
-                alld.append(["_".join((name, anitem.sval)) for anitem in seq.alphabet])
+                alld.append([f"{name}_{anitem.sval}" for anitem in seq.alphabet])
         #
         new_alphabet = []
         for pp in itertools.product(*alld):
-            strlist = [jj for jj in pp]
+            strlist = list(pp)
             new_alphabet.append(sep.join(strlist))
         #
         # return Sequence(new_s, new_alphabet, check=False)
@@ -373,13 +391,16 @@ def words(seq, wlen, new_alphabet=False):
     4
     """
     if not isinstance(wlen, (int, np.integer)):
-        raise ValueError("Word length should be a positive integer.")
+        msg = "Word length should be a positive integer."
+        raise ValueError(msg)
     if wlen <= 0:
-        raise ValueError("Word length should be > 0.")
+        msg = "Word length should be > 0."
+        raise ValueError(msg)
 
     slen = len(seq)
     if wlen > slen:
-        raise ValueError("Word length should be <= sequence length.")
+        msg = "Word length should be <= sequence length."
+        raise ValueError(msg)
 
     lseq = [seq[i : slen - wlen + i + 1] for i in range(wlen)]
 

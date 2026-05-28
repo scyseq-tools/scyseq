@@ -27,8 +27,8 @@ import warnings
 
 import numpy as np
 
-from . import exceptions as E
-from . import utils as U
+from scyseq import exceptions as E
+from scyseq import utils as U
 
 # from . import operations as O
 
@@ -87,23 +87,24 @@ class Symbol:
         if not isinstance(value, str):
             raise E.SymbolDefinitionError(value, "Value must be a string")
 
-        if self._alphabet is not None:
-            if value in self._alphabet.svals:
-                if value == self.sval:
-                    warnings.warn(
-                        f"'{value}' is already the sval of Symbol {self.ival}.",
-                        UserWarning,
-                        stacklevel=3,
-                    )
-                else:
-                    raise E.AlphabetAccessError(
-                        f"Symbol '{value}' already exists in alphabet"
-                    )
+        if self._alphabet is not None and value in self._alphabet.svals:
+            if value == self.sval:
+                warnings.warn(
+                    f"'{value}' is already the sval of Symbol {self.ival}.",
+                    UserWarning,
+                    stacklevel=3,
+                )
+            else:
+                msg = f"Symbol '{value}' already exists in alphabet"
+                raise E.AlphabetAccessError(
+                    msg
+                )
         self._sval = value
 
     @sval.deleter
     def sval(self):
-        raise E.SymbolAccessError("sval cannot be deleted")
+        msg = "sval cannot be deleted"
+        raise E.SymbolAccessError(msg)
 
     @property
     def ival(self):
@@ -117,11 +118,13 @@ class Symbol:
 
     @ival.setter
     def ival(self, value):
-        raise E.SymbolAccessError("ival is read-only")
+        msg = "ival is read-only"
+        raise E.SymbolAccessError(msg)
 
     @ival.deleter
     def ival(self):
-        raise E.SymbolAccessError("ival cannot be deleted")
+        msg = "ival cannot be deleted"
+        raise E.SymbolAccessError(msg)
 
     def _attach(self, alphabet, value):
         """
@@ -133,7 +136,8 @@ class Symbol:
             self._alphabet = alphabet
         else:
             # This is the sign of a bug...
-            raise E.SymbolAccessError("Attachment of symbol failed.")
+            msg = "Attachment of symbol failed."
+            raise E.SymbolAccessError(msg)
 
     def __eq__(self, other):
         """
@@ -187,18 +191,21 @@ class Alphabet(tuple):
 
         elif isinstance(symbols, (list, tuple)):
             # Check that all the elements of symbols are different"
-            if all([sa != sb for sa, sb in itertools.combinations(symbols, 2)]):
-                if all([isinstance(symb, Symbol) for symb in symbols]):
+            if all(sa != sb for sa, sb in itertools.combinations(symbols, 2)):
+                if all(isinstance(symb, Symbol) for symb in symbols):
                     elements = symbols
 
-                elif all([isinstance(symb, str) for symb in symbols]):
+                elif all(isinstance(symb, str) for symb in symbols):
                     elements = [Symbol(symb) for symb in symbols]
                 else:
-                    raise ValueError("Values must all be Symbols or strings")
+                    msg = "Values must all be Symbols or strings"
+                    raise ValueError(msg)
             else:
-                raise E.AlphabetError("The values must all be different.")
+                msg = "The values must all be different."
+                raise E.AlphabetError(msg)
         else:
-            raise E.AlphabetError("The values must be an integer, a list or a tuple.")
+            msg = "The values must be an integer, a list or a tuple."
+            raise E.AlphabetError(msg)
 
         return super().__new__(cls, [copy.deepcopy(e) for e in elements])
 
@@ -294,11 +301,12 @@ class Alphabet(tuple):
         True
         """
         if not isinstance(other, Alphabet):
-            raise E.AlphabetAccessError("Can only compare alphabets with alphabets")
+            msg = "Can only compare alphabets with alphabets"
+            raise E.AlphabetAccessError(msg)
         if len(self) != len(other):
             return False
 
-        return all([ssymbol == osymbol for ssymbol, osymbol in zip(self, other)])
+        return all(ssymbol == osymbol for ssymbol, osymbol in zip(self, other))
 
     def __getitem__(self, key):
         try:
@@ -308,11 +316,13 @@ class Alphabet(tuple):
                 idx = self.svals.index(key)
                 return self._symbols[idx]
         except:
-            raise E.AlphabetAccessError("Key not in alphabet")
+            msg = "Key not in alphabet"
+            raise E.AlphabetAccessError(msg)
 
     def __setitem__(self, key, value):
+        msg = "'Alphabet' object does not support item assignment"
         raise E.AlphabetAccessError(
-            "'Alphabet' object does not support item assignment"
+            msg
         )
 
     def __deepcopy__(self, memo):
@@ -378,7 +388,7 @@ class Alphabet(tuple):
 
         The implementation in the operations module: :func:`~scyseq.operations.rename`
         """
-        from .operations import rename as _rename
+        from scyseq.operations import rename as _rename
 
         return _rename(self, replacement)
 
@@ -413,7 +423,8 @@ class Sequence:
         array = np.asarray(symbols)
 
         if array.ndim != 1:
-            raise ValueError("The symbols argument should be unidimensional (1D).")
+            msg = "The symbols argument should be unidimensional (1D)."
+            raise ValueError(msg)
 
         if np.issubdtype(array.dtype, np.bool_):
             array = array.astype(np.uint8)
@@ -421,18 +432,18 @@ class Sequence:
 
         elif np.issubdtype(array.dtype, np.integer):
             if np.any(array < 0):
-                raise ValueError("All values should be >=0")
-            if array.size == 0:
-                dtype = np.uint8
-            else:
-                dtype = U.choose_uint_dtype(array)
+                msg = "All values should be >=0"
+                raise ValueError(msg)
+            dtype = np.uint8 if array.size == 0 else U.choose_uint_dtype(array)
             array = array.astype(dtype)
             array.flags.writeable = False
             alpha = Alphabet(alphabet)
             if check and array.size > 0 and max(array) >= len(alpha):
-                raise E.AlphabetError("Invalid alphabet length")
+                msg = "Invalid alphabet length"
+                raise E.AlphabetError(msg)
         else:
-            raise TypeError("Symbols should be convertible into unsigned integers")
+            msg = "Symbols should be convertible into unsigned integers"
+            raise TypeError(msg)
 
         instance = super().__new__(cls)
         instance._validivals = array
@@ -545,9 +556,8 @@ class Sequence:
         """
         The tuple of string values
         """
-        tmp = tuple([self.alphabet[i].sval for i in self.ivals])
+        return tuple([self.alphabet[i].sval for i in self.ivals])
         # tmp.flags.writeable = False
-        return tmp
 
     # Copy method
 
@@ -600,8 +610,8 @@ class Sequence:
         #        elif type(key) is Sequence:
         #            tmpval = self._ivals[np.where(key._ivals)[0]]
         else:
-            print(key, type(key))
-            raise ValueError(f"Cannot slice with {type(key)!s}")
+            msg = f"Cannot slice with {type(key)!s}"
+            raise ValueError(msg)
 
         return Sequence(tmpval, self.alphabet)  # , check=False)
 
@@ -752,18 +762,20 @@ class Sequence:
                 if len(other) == len(self):
                     arr = op(self.ivals, other.ivals)
                 else:
-                    raise ValueError("Cannot compare Sequences with different lengths")
+                    msg = "Cannot compare Sequences with different lengths"
+                    raise ValueError(msg)
             else:
-                raise ValueError("Cannot compare Sequences with different alphabets")
+                msg = "Cannot compare Sequences with different alphabets"
+                raise ValueError(msg)
 
         elif isinstance(other, int) and other >= 0:
             arr = op(self.ivals, other)
         elif isinstance(other, str):
-            print("str comp")
             arr = np.array([op(sval, other) for sval in self.svals])
         else:
+            msg = "Sequence can be compared with a Sequence, a positive integer or a string only"
             raise ValueError(
-                "Sequence can be compared with a Sequence, a positive integer or a string only"
+                msg
             )
 
         # return Sequence(arr.astype(self._ivals.dtype), Alphabet(('False', 'True')), check=False)
@@ -771,13 +783,15 @@ class Sequence:
 
     def __lt__(self, other):
         if isinstance(other, str):
-            raise ValueError("Sequence cannot be compared with a string")
+            msg = "Sequence cannot be compared with a string"
+            raise ValueError(msg)
         else:
             return self.__mkcomp__(other, operator.__lt__)
 
     def __le__(self, other):
         if isinstance(other, str):
-            raise ValueError("Sequence cannot be compared with a string")
+            msg = "Sequence cannot be compared with a string"
+            raise ValueError(msg)
         else:
             return self.__mkcomp__(other, operator.__le__)
 
@@ -789,13 +803,15 @@ class Sequence:
 
     def __gt__(self, other):
         if isinstance(other, str):
-            raise ValueError("Sequence cannot be compared with a string")
+            msg = "Sequence cannot be compared with a string"
+            raise ValueError(msg)
         else:
             return self.__mkcomp__(other, operator.__gt__)
 
     def __ge__(self, other):
         if isinstance(other, str):
-            raise ValueError("Sequence cannot be compared with a string")
+            msg = "Sequence cannot be compared with a string"
+            raise ValueError(msg)
         else:
             return self.__mkcomp__(other, operator.__ge__)
 
@@ -807,7 +823,7 @@ class Sequence:
 
         See the implementation in the operations module: :func:`~scyseq.operations.rename`
         """
-        from .operations import rename as _rename
+        from scyseq.operations import rename as _rename
 
         return _rename(self, replacement)
 
@@ -822,7 +838,7 @@ class Sequence:
         :func:`~scyseq.operations.roll`
         """
 
-        from .operations import roll as _roll
+        from scyseq.operations import roll as _roll
 
         return _roll(self, step)
 
@@ -834,7 +850,7 @@ class Sequence:
         :func:`~scyseq.operations.reverse`
         """
 
-        from .operations import reverse as _reverse
+        from scyseq.operations import reverse as _reverse
 
         return _reverse(self)
 
@@ -846,7 +862,7 @@ class Sequence:
         :func:`~scyseq.operations.shuffle`
         """
 
-        from .operations import shuffle as _shuffle
+        from scyseq.operations import shuffle as _shuffle
 
         return _shuffle(self)
 
@@ -857,7 +873,7 @@ class Sequence:
         See the implementation in the operations module:
         :func:`~scyseq.operations.reduce`
         """
-        from .operations import reduce as _reduce
+        from scyseq.operations import reduce as _reduce
 
         return _reduce(self)
 
@@ -871,7 +887,7 @@ class Sequence:
         See the implementation in the operations module:
         :func:`~scyseq.operations.count`
         """
-        from .operations import count as _count
+        from scyseq.operations import count as _count
 
         return _count(self, value)
 
@@ -882,7 +898,7 @@ class Sequence:
         See the implementation in the operations module:
         :func:`~scyseq.operations.frequency`
         """
-        from .operations import frequency as _frequency
+        from scyseq.operations import frequency as _frequency
 
         return _frequency(self, value)
 

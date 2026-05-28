@@ -4,7 +4,7 @@ Generation of specified symbolic sequences
 
 import numpy as np
 
-from .sequence import Sequence, boolean_alphabet
+from scyseq.sequence import Sequence, boolean_alphabet
 
 # Sequences generators
 # =====================
@@ -63,7 +63,8 @@ def generate(method, N, k, *args):
         return binary_logistic_sequence(int(N), mu, xinit)
 
     else:
-        raise NotImplementedError("The method %s is not implemented." % method)
+        msg = f"The method {method} is not implemented."
+        raise NotImplementedError(msg)
 
 
 def uniform_sequence(length, alen):
@@ -115,7 +116,8 @@ def binary_logistic_sequence(length, param, xinit, threshold=0.5, skip=100):
 
     :returns: A binary Sequence
     """
-    logistic = lambda x: param * x * (1.0 - x)
+    def logistic(x):
+        return param * x * (1.0 - x)
 
     return binary_map1d_sequence(length, logistic, xinit, threshold, skip)
 
