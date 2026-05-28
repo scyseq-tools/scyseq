@@ -10,12 +10,10 @@ Zou et al. (2015) Identifying coupling directions by recurrences. In Recurrence
 Quantification Analysis.
 """
 
-import numpy as np
-
-# import scipy.spatial.distance as spdist
-import warnings
 import copy
 
+# import scipy.spatial.distance as spdist
+import numpy as np
 
 # def mwords_recurrence(seq_tuple):
 #    """

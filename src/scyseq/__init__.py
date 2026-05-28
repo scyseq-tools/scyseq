@@ -12,18 +12,18 @@ __authors__ = [
     "Dewmith Weerasena",
 ]
 
-from .sequence import Symbol, Alphabet, boolean_alphabet, binary_alphabet, Sequence
 from .exceptions import *
+from .io import read_codix, write_codix
 from .operations import (
-    recode,
-    words,
-    rename,
-    roll,
-    reverse,
-    shuffle,
-    reduce,
     count,
     frequency,
+    recode,
+    reduce,
+    rename,
+    reverse,
+    roll,
+    shuffle,
     transform,
+    words,
 )
-from .io import read_codix, write_codix
+from .sequence import Alphabet, Sequence, Symbol, binary_alphabet, boolean_alphabet

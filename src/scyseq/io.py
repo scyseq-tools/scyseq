@@ -12,7 +12,7 @@ def read_codix(fname, data_only=True):
     returns in all cases a dictionary with data['site']['code'] = Sequence
 
     """
-    with open(fname, "r") as datafile:
+    with open(fname) as datafile:
         record = json.load(datafile)
 
     if "version" in record.keys():

@@ -6,10 +6,11 @@ The object's methods are wrappers to these operations
 
 import copy
 import itertools
+
 import numpy as np
 
-from .sequence import Sequence, Alphabet, Symbol
 from . import exceptions as E
+from .sequence import Alphabet, Sequence
 
 
 def rename(obj, replacement):
@@ -246,15 +247,14 @@ def transform(seq, correspondance, new_alphabet=None):
 
     if new_alphabet is None:
         alphabet = Alphabet([str(i) for i in list(set(correspondance))])
+    elif type(new_alphabet) is not Alphabet:
+        raise E.AlphabetError("New alphabet should be an Alphabet object")
+    elif len(set(correspondance)) != len(new_alphabet):
+        raise E.AlphabetError(
+            "Length of new alphabet does not fit the correspondence length."
+        )
     else:
-        if type(new_alphabet) is not Alphabet:
-            raise E.AlphabetError("New alphabet should be an Alphabet object")
-        elif len(set(correspondance)) != len(new_alphabet):
-            raise E.AlphabetError(
-                "Length of new alphabet does not fit the correspondence length."
-            )
-        else:
-            alphabet = new_alphabet
+        alphabet = new_alphabet
     nb_symbols = len(alphabet)
 
     if all([type(c) is int for c in correspondance]):

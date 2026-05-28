@@ -1,13 +1,13 @@
-import math
-import numpy as np
 import itertools
+import math
 from random import uniform
-import matplotlib.pyplot as plt
+
 import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.patches import Patch
 
 import scyseq as sq
-
 
 # Default colormap for consistent state coloring across all plots
 DEFAULT_COLORMAP = "viridis"

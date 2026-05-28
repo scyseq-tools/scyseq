@@ -3,11 +3,11 @@ Defines stochastic matrices
 """
 
 import numpy as np
-import numpy.testing as testing
-# import warnings
+from numpy import testing
 
-from . import sequence as S
 from . import operations as O
+
+# import warnings
 
 # warnings.simplefilter('always', RuntimeWarning)
 
@@ -42,13 +42,14 @@ def conditional_matrix(dependent, conditioning, smooth=None):
 
     Example :
 
+    >>> import scyseq as sq
     >>> np.random.seed(9)
     >>> a = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
     >>> np.random.seed(6)
     >>> b = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
-    >>> A = S.Alphabet(['a','b'])
-    >>> seq1 = S.Sequence(a,A)
-    >>> seq2 = S.Sequence(b,A)
+    >>> A = sq.Alphabet(['a','b'])
+    >>> seq1 = sq.Sequence(a,A)
+    >>> seq2 = sq.Sequence(b,A)
     >>> conditional_matrix(seq1, seq2)
     array([[0.71947674, 0.28052326],
            [0.69551282, 0.30448718]])
@@ -111,10 +112,11 @@ def transition_matrix(seq, time=1, smooth=0):
 
     Example :
 
+    >>> import scyseq as sq
     >>> np.random.seed(9)
     >>> a = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
-    >>> A = S.Alphabet(['a','b'])
-    >>> seq = S.Sequence(a, A)
+    >>> A = sq.Alphabet(['a','b'])
+    >>> seq = sq.Sequence(a, A)
     >>> transition_matrix(seq)
     array([[0.70224719, 0.29775281],
            [0.73519164, 0.26480836]])
@@ -136,13 +138,14 @@ def influence_matrix(seq1, seq2, time=1, smooth=0):
 
     Example :
 
+    >>> import scyseq as sq
     >>> np.random.seed(9)
     >>> a = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
     >>> np.random.seed(6)
     >>> b = np.random.choice([0,1],1000,replace=True, p=[0.7,0.3])
-    >>> A = S.Alphabet(['a','b'])
-    >>> seq1 = S.Sequence(a,A)
-    >>> seq2 = S.Sequence(b,A)
+    >>> A = sq.Alphabet(['a','b'])
+    >>> seq1 = sq.Sequence(a,A)
+    >>> seq2 = sq.Sequence(b,A)
     >>> influence_matrix(seq1, seq2)
     array([[0.70887918, 0.29112082],
            [0.71794872, 0.28205128]])

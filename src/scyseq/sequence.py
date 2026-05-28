@@ -29,6 +29,7 @@ import numpy as np
 
 from . import exceptions as E
 from . import utils as U
+
 # from . import operations as O
 
 
@@ -600,7 +601,7 @@ class Sequence:
         #            tmpval = self._ivals[np.where(key._ivals)[0]]
         else:
             print(key, type(key))
-            raise ValueError(f"Cannot slice with {str(type(key))}")
+            raise ValueError(f"Cannot slice with {type(key)!s}")
 
         return Sequence(tmpval, self.alphabet)  # , check=False)
 

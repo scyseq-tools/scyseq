@@ -1,11 +1,8 @@
+
 import numpy as np
 from scipy.stats import scoreatpercentile
 
-import math
-import itertools
-
 from scyseq import sequence as S
-from scyseq import algorithmic as A
 
 
 def symbolize(arr, bins, d=None):

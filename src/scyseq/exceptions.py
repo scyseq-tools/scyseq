@@ -23,7 +23,6 @@ _PUBLIC_API_ = [
 class ScyseqError(Exception):
     """Base exception for all errors raised by the scyseq library."""
 
-    pass
 
 
 # === Symbol-related errors ===
@@ -32,7 +31,6 @@ class ScyseqError(Exception):
 class SymbolError(ScyseqError):
     """Base exception for symbol-related issues."""
 
-    pass
 
 
 class SymbolDefinitionError(SymbolError):
@@ -56,7 +54,6 @@ class SymbolAccessError(SymbolError):
 class AlphabetError(ScyseqError):
     """Base exception for alphabet-related issues."""
 
-    pass
 
 
 class AlphabetAccessError(AlphabetError):
@@ -89,7 +86,6 @@ class EmptyAlphabetError(AlphabetError):
 class SequenceError(ScyseqError):
     """Base exception for sequence-related issues."""
 
-    pass
 
 
 class SequenceParseError(SequenceError):
