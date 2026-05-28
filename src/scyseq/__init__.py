@@ -15,7 +15,7 @@ __authors__ = [
     "Dewmith Weerasena",
 ]
 
-from .exceptions import (
+from scyseq.exceptions import (
     AlphabetAccessError,
     AlphabetError,
     EmptyAlphabetError,
@@ -29,9 +29,9 @@ from .exceptions import (
     SymbolError,
     SymbolMismatchError,
 )
-from .io import read_codix  #, write_codix
-from .operations import count, frequency, recode, reduce, rename, reverse, roll, shuffle, transform, words
-from .sequence import Alphabet, Sequence, Symbol, binary_alphabet, boolean_alphabet
+from scyseq.io import read_codix  #, write_codix
+from scyseq.operations import count, frequency, recode, reduce, rename, reverse, roll, shuffle, transform, words
+from scyseq.sequence import Alphabet, Sequence, Symbol, binary_alphabet, boolean_alphabet
 
 __all__ = ["Symbol", "Alphabet", "Sequence",
            "binary_alphabet", "boolean_alphabet",
