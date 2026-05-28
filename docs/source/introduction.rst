@@ -32,3 +32,7 @@ variability, complexity, and recurrence patterns.
 
 An example of the use of *ScySeq* in a behavioral context is provided in
 [DoPN22]_.
+
+
+
+

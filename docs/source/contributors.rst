@@ -3,15 +3,17 @@ Contributors
 
 Main developers
 
-* Laurent Pezard (2007-)
-* Jean-Luc Blanc (2007-)
+* Laurent Pezard
+* Jean-Luc Blanc
 
+Contributors:
 
-* Noelia Montero (XXXX-XXXX)
-* Yann Mahnoun (XXXX-XXXX)
-* Nicolas Schmidt (XXXX-XXXX)
-* Abir Hadriche (XXXX-XXXX)
-* Lucas Becquet (2023)
-* Florent Boyer-Aymé (XXXX-XXXX)
-* Alexandre Veyrié (XXXX-XXXX)
-* Inès Bertuzzi (XXXX-XXXX)
+* Noelia Montero
+* Yann Mahnoun
+* Nicolas Schmidt
+* Abir Hadriche
+* Lucas Becquet
+* Florent Boyer-Aymé
+* Alexandre Veyrié
+* Inès Bertuzzi
+* Dewmith Weerasena
