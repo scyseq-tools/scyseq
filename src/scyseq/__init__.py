@@ -2,15 +2,28 @@
 
 # from version import __version__
 
-__authors__ = ["Laurent Pezard", 
-               "Jean-Luc Blanc", 
-               "Noelia Montejo-Cervera", 
-               "Nicolas Schmidt", 
-               "Yann Manhoun", 
-               "Florent Boyer-Aymé",
-               "Dewmith Weerasena"]
+__authors__ = [
+    "Laurent Pezard",
+    "Jean-Luc Blanc",
+    "Noelia Montejo-Cervera",
+    "Nicolas Schmidt",
+    "Yann Manhoun",
+    "Florent Boyer-Aymé",
+    "Dewmith Weerasena",
+]
 
 from .sequence import Symbol, Alphabet, boolean_alphabet, binary_alphabet, Sequence
 from .exceptions import *
-from .operations import recode, words, rename, roll, reverse, shuffle, reduce, count, frequency, transform
+from .operations import (
+    recode,
+    words,
+    rename,
+    roll,
+    reverse,
+    shuffle,
+    reduce,
+    count,
+    frequency,
+    transform,
+)
 from .io import read_codix, write_codix

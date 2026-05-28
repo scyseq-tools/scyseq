@@ -7,6 +7,7 @@ import itertools
 from scyseq import sequence as S
 from scyseq import algorithmic as A
 
+
 def symbolize(arr, bins, d=None):
     """
     Convert an array of continuous values into a symbolic sequence using bins.
@@ -34,19 +35,20 @@ def symbolize(arr, bins, d=None):
     alen = len(np.unique(seq))
     return S.Sequence(seq, alen)
 
-def partition(arr, method='histogram', nbin=10, d=None):
+
+def partition(arr, method="histogram", nbin=10, d=None):
     """
     Discretize a continuous series according to method.
-    
+
     Methods are described in Hlavackova-Schindler et al. Physics Reports
     441 (2007) 1--46 pages 14--19
 
-    method = 'histogram' 
+    method = 'histogram'
        simple histogram method with equidistant binning
 
-    method = 'marginal_equiquantization' 
+    method = 'marginal_equiquantization'
        marginal equiquantization ie does its best to let equal number of
-       observation in each bin. 
+       observation in each bin.
 
     Parameters
     ----------
@@ -70,7 +72,7 @@ def partition(arr, method='histogram', nbin=10, d=None):
         A symbolic Sequence.
 
 
-    .. todo:: 
+    .. todo::
        To be completed with the other methods described in
        Hlavackova-Schindler (2007)
 
@@ -79,7 +81,7 @@ def partition(arr, method='histogram', nbin=10, d=None):
     Tests and examples of the functionnement of the module
 
     >>> x = np.linspace(0,10,11)
-    >>> x 
+    >>> x
     array([ 0.,  1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.])
     >>> seq = partition(x, method='histogram', nbin=6)
     >>> seq
@@ -94,23 +96,24 @@ def partition(arr, method='histogram', nbin=10, d=None):
 
     """
 
-    if (method == 'histogram'):
-        lag = np.ptp(np.array(arr)) / float(nbin) # ptp: peak-to-peak=max-min
+    if method == "histogram":
+        lag = np.ptp(np.array(arr)) / float(nbin)  # ptp: peak-to-peak=max-min
         bins = np.min(arr) + np.arange(nbin) * lag
-        seq = np.digitize(arr, bins) - 1 # symbols between 0 and k-1
+        seq = np.digitize(arr, bins) - 1  # symbols between 0 and k-1
 
-    elif (method == 'marginal_equiquantization'):
+    elif method == "marginal_equiquantization":
         bins = []
-        lag = 100.0 / float(nbin-1)
+        lag = 100.0 / float(nbin - 1)
         for pc in range(nbin):
-            bins.append(scoreatpercentile(arr, per=pc*lag))
-        seq = np.digitize(arr, np.array(bins)) -1
+            bins.append(scoreatpercentile(arr, per=pc * lag))
+        seq = np.digitize(arr, np.array(bins)) - 1
 
     else:
         raise NotImplementedError("The method is not impleneted")
 
     # return Sequence(s=S, k=nbin, d=d)
     return S.Sequence(seq, nbin)
+
 
 def subdivision(data, iter_max):
     """
@@ -121,7 +124,7 @@ def subdivision(data, iter_max):
     Dellnitz M. and Junge O.  Handbook of dynamical systems vol. 2 p. 221-264
     Elsevier 2002.
 
-    and 
+    and
 
     Numerical approximation of random attractors
     Keller H. and Ochs G. in "Stochastic dynamics" Crauel H. and Gundlach M. Eds
@@ -130,7 +133,7 @@ def subdivision(data, iter_max):
     Parameters
     ----------
     data : numpy.ndarray
-        The input matrix/array to subdivide. 
+        The input matrix/array to subdivide.
     iter_max : int
         Maximum number of box iterations.
 
@@ -153,37 +156,37 @@ def subdivision(data, iter_max):
         # Step 0ne: split the boxes
         no_dim = no_iter % nb_dim
         lref = []
-#       lmin = []
-#       lmax = []
+        #       lmin = []
+        #       lmax = []
 
         for no_box in box_indice:
-
-            databox = data[boxes==no_box, :]
+            databox = data[boxes == no_box, :]
             min_value = np.min(databox, axis=0)
             max_value = np.min(databox, axis=0)
             diameter = np.max(databox, axis=0) - min_value
-            ref_value = min_value + diameter / 2.
+            ref_value = min_value + diameter / 2.0
             lref.append(ref_value[no_dim])
 
-#           lmin.append(min_value[no_dim])
-#           lmax.append(max_value[no_dim])
+            #           lmin.append(min_value[no_dim])
+            #           lmax.append(max_value[no_dim])
 
             bool_box = (databox > ref_value)[:, no_dim]
-            boxes[boxes==no_box] += bool_box.astype(int) * 2**no_iter
+            boxes[boxes == no_box] += bool_box.astype(int) * 2**no_iter
 
         refs.append(lref)
-#        mins.append(lmin)
-#        maxs.append(lmax)
+        #        mins.append(lmin)
+        #        maxs.append(lmax)
         no_iter += 1
-    
-#   return boxes, refs, mins, maxs
+
+    #   return boxes, refs, mins, maxs
     return boxes, refs
+
 
 def phase_cluster(data, nb_symb, target_dim=2):
     """
     This function provides the symbolic dynamic of a multivariate data It is
     based on the clusterisation of the "phase space" of the channels of MEG
-    temporal signal 
+    temporal signal
 
     Parameters
     ----------
@@ -209,11 +212,12 @@ def phase_cluster(data, nb_symb, target_dim=2):
     reduced_data = reduced_data.T
 
     # Partitionnage
-    edges = np.histogramdd(reduced_data.T, bins= nb_symb)[1]
+    edges = np.histogramdd(reduced_data.T, bins=nb_symb)[1]
 
-    #FIXME: this is not the place to compute entropy!!!
-    
+    # FIXME: this is not the place to compute entropy!!!
+
     # entropy_list = []
+
 
 #    for i in range(len(reduced_data)):
 #        edges[i][-1] = edges[i][-1] + 1
@@ -221,9 +225,10 @@ def phase_cluster(data, nb_symb, target_dim=2):
 #        entropy_rate = A.lempel_ziv(S.Sequence(seq, nb_symb))
 #        entropy_list.append(entropy_rate)
 
-    # return np.array(entropy_list)
+# return np.array(entropy_list)
 
 
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()

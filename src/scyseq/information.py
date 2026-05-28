@@ -100,7 +100,7 @@ def block_entropy(seq, wlen):
     return H(nwords)
 
 
-def entropy_rate(seq, wlen, method='average'):
+def entropy_rate(seq, wlen, method="average"):
     """
     Return an entropy-rate estimate based on block entropies.
 
@@ -202,7 +202,9 @@ def multi_information(seq1, seq2, seq3):
     seq23 = sq.recode([seq2, seq3])
     seq123 = sq.recode([seq1, seq2, seq3])
 
-    return float(H(seq1) + H(seq2) + H(seq3) + H(seq123) - H(seq12) - H(seq13) - H(seq23))
+    return float(
+        H(seq1) + H(seq2) + H(seq3) + H(seq123) - H(seq12) - H(seq13) - H(seq23)
+    )
 
 
 def transfer_entropy(seq1, seq1p, seq2):

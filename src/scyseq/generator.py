@@ -1,12 +1,14 @@
 """
 Generation of specified symbolic sequences
 """
+
 import numpy as np
 
 from .sequence import Sequence, boolean_alphabet
 
 # Sequences generators
-#=====================
+# =====================
+
 
 def generate(method, N, k, *args):
     """
@@ -32,10 +34,10 @@ def generate(method, N, k, *args):
 
     .. todo::
        Should we check the type of `N` and `k`
-    
-    .. todo:: 
+
+    .. todo::
        Deal with args more clearly (make a dict)?
-     
+
     .. todo::
        should (N,k,d) be replaced by a dictionary dict(N=..., k=...,d=...)
 
@@ -47,14 +49,14 @@ def generate(method, N, k, *args):
     """
     if method.lower() == "uniform":
         return uniform_sequence(int(N), int(k))
-#    elif method.lower() == "cantor":
-#    elif method.lower() == "cantor_it"
-    
+    #    elif method.lower() == "cantor":
+    #    elif method.lower() == "cantor_it"
+
     elif method.lower() == "markov":
         M = args[0]
         o = args[1]
         return markov_sequence(int(N), int(k), M, o)
-    
+
     elif method.lower() == "binary_logistic":
         mu = args[0]
         xinit = args[1]
@@ -62,6 +64,7 @@ def generate(method, N, k, *args):
 
     else:
         raise NotImplementedError("The method %s is not implemented." % method)
+
 
 def uniform_sequence(length, alen):
     """
@@ -78,6 +81,7 @@ def uniform_sequence(length, alen):
         check=False,
     )
 
+
 def binary_map1d_sequence(length, map1d, xinit, threshold=0.5, skip=100):
     """
     Returns a binary sequence with a specified one-dimensional map dynamics
@@ -92,10 +96,11 @@ def binary_map1d_sequence(length, map1d, xinit, threshold=0.5, skip=100):
     """
     seq = [xinit]
     for step in range(1, length + skip):
-        seq.append(map1d(seq[step-1]))
+        seq.append(map1d(seq[step - 1]))
     bseq = np.array(seq[skip:]) > threshold
 
     return Sequence(bseq.astype(np.bool_), boolean_alphabet, check=False)
+
 
 def binary_logistic_sequence(length, param, xinit, threshold=0.5, skip=100):
     """
@@ -110,9 +115,10 @@ def binary_logistic_sequence(length, param, xinit, threshold=0.5, skip=100):
 
     :returns: A binary Sequence
     """
-    logistic = lambda x: param * x * (1. - x)
+    logistic = lambda x: param * x * (1.0 - x)
 
     return binary_map1d_sequence(length, logistic, xinit, threshold, skip)
+
 
 def markov_sequence(length, alen, markov_matrix, order):
     """
@@ -136,16 +142,17 @@ def markov_sequence(length, alen, markov_matrix, order):
       symbols of the alphabet (so sum(markov_matrix[line] == 1)
       (ie np.sum(matrix, axis=1) == [[1]...[1]]
     """
-    assert np.shape(markov_matrix) == (alen**order, alen), \
-                "The shape of M does not match Markov process definition."
+    assert np.shape(markov_matrix) == (alen**order, alen), (
+        "The shape of M does not match Markov process definition."
+    )
 
     seq = list(np.random.randint(low=0, high=alen, size=order))
 
     for step in range(order, length):
         testval = np.random.uniform(0, 1)
-        # encode previous Markov states (ie order previous symbols)
-        prev_state = sum(seq[step-order:step] * alen**np.arange(order))
-        # cumulative probability
+        # encode previous Markov states (ie order previous symbols)
+        prev_state = sum(seq[step - order : step] * alen ** np.arange(order))
+        # cumulative probability
         cumprob = np.cumsum(markov_matrix[prev_state])
         # choose first symbol where cumprob > testval
         seq.append(np.where(cumprob > testval)[0][0])
