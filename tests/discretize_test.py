@@ -21,14 +21,18 @@ def test_symbolize_keeps_underflow_bin_when_values_precede_first_bin():
 def test_partition_histogram_matches_documented_example():
     seq = partition(np.linspace(0, 10, 11), method="histogram", nbin=6)
 
-    np.testing.assert_array_equal(seq.ivals, np.array([0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5]))
+    np.testing.assert_array_equal(
+        seq.ivals, np.array([0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5])
+    )
     assert seq.k == 6
 
 
 def test_partition_marginal_equi_quantization_matches_documented_example():
     seq = partition(np.linspace(0, 10, 11), method="marginal_equiquantization", nbin=6)
 
-    np.testing.assert_array_equal(seq.ivals, np.array([0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5]))
+    np.testing.assert_array_equal(
+        seq.ivals, np.array([0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5])
+    )
     assert seq.k == 6
 
 

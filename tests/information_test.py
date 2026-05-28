@@ -46,7 +46,9 @@ def test_word_based_entropy_reference_values():
 
     assert I.block_entropy(seq, 6) == pytest.approx(3.577559335188841)
     assert I.entropy_rate(seq, 6) == pytest.approx(0.5962598891981402)
-    assert I.entropy_rate(seq, 6, method="difference") == pytest.approx(0.5689107029836205)
+    assert I.entropy_rate(seq, 6, method="difference") == pytest.approx(
+        0.5689107029836205
+    )
     assert I.effective_complexity(seq, 6) == pytest.approx(0.05784767682768299)
 
 
@@ -54,8 +56,12 @@ def test_joint_information_reference_values():
     seq1, seq2, seq3 = make_reference_triplet()
 
     assert I.mutual_information(seq1, seq2) == pytest.approx(0.0002988020334349084)
-    assert I.multi_information(seq1, seq2, seq3) == pytest.approx(-4.8757282800737656e-05)
-    assert I.transfer_entropy(seq1[:-1], seq1[1:], seq2[:-1]) == pytest.approx(0.00019242807727182232)
+    assert I.multi_information(seq1, seq2, seq3) == pytest.approx(
+        -4.8757282800737656e-05
+    )
+    assert I.transfer_entropy(seq1[:-1], seq1[1:], seq2[:-1]) == pytest.approx(
+        0.00019242807727182232
+    )
 
 
 @pytest.mark.parametrize("wlen", [0, 1001])
