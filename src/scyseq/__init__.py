@@ -1,6 +1,11 @@
-# FIXME: I do not understand how to manage version
+"""
+scyseq is a Python package for defining, manipulating, analysing and
+representing symbolic sequences
+"""
 
-# from version import __version__
+# should be replaced by hatch at building with hatch build
+
+__version__ = "0.1.0"
 
 __authors__ = [
     "Laurent Pezard",
