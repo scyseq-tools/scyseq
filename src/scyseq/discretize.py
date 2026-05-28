@@ -1,3 +1,5 @@
+# Copyright (c) 2007-2026 The scyseq developers.
+# SPDX-License-Identifier: BSD-3-Clause BSD
 
 import numpy as np
 from scipy.stats import scoreatpercentile

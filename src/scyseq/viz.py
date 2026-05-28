@@ -1,3 +1,6 @@
+# Copyright (c) 2007-2026 The scyseq developers.
+# SPDX-License-Identifier: BSD-3-Clause BSD
+
 import itertools
 import math
 from random import uniform

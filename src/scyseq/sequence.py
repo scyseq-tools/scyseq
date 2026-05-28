@@ -1,4 +1,6 @@
-# pylint: disable=import-outside-toplevel
+# Copyright (c) 2007-2026 The scyseq developers.
+# SPDX-License-Identifier: BSD-3-Clause BSD
+
 """
 This module defines the base classes: Symbol, Alphabet and Sequence, their
 attributes and methods.
