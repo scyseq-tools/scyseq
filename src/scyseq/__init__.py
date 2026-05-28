@@ -3,8 +3,6 @@ scyseq is a Python package for defining, manipulating, analysing and
 representing symbolic sequences
 """
 
-# should be replaced by hatch at building with hatch build
-
 __version__ = "0.1.0"
 
 __authors__ = [
@@ -17,7 +15,15 @@ __authors__ = [
     "Dewmith Weerasena",
 ]
 
-from scyseq.exceptions import *
-from scyseq.io import read_codix, write_codix
-from scyseq.operations import count, frequency, recode, reduce, rename, reverse, roll, shuffle, transform, words
-from scyseq.sequence import Alphabet, Sequence, Symbol, binary_alphabet, boolean_alphabet
+# from scyseq.exceptions import *
+from .io import read_codix  #, write_codix
+from .operations import count, frequency, recode, reduce, rename, reverse, roll, shuffle, transform, words
+from .sequence import Alphabet, Sequence, Symbol, binary_alphabet, boolean_alphabet
+
+__all__ = ["Symbol", "Alphabet", "Sequence", 
+           "binary_alphabet", "boolean_alphabet",
+           "count", "frequency", "recode", "reduce", "rename", "reverse",
+           "roll", "shuffle", "transform", "words", "read_codix"]
+
+def __dir__():
+    return __all__
