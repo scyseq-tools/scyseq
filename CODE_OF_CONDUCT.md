@@ -38,7 +38,7 @@ This Code of Conduct applies within all community spaces, and also applies when 
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement at
-`laurent/dot/pezard/at/univ-amu/dot/fr` and `jean-luc/dot/blanc/at/univ-amu/dot/fr`. All
+laurent&#46;pezard&#64;univ-amu&#46;fr and jean-luc&#46;blanc&#64;univ-amu&#46;fr. All
 complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the reporter of any incident.

@@ -62,5 +62,4 @@ To contribute:
 3. Submit a pull request with a clear description of changes.
 4. Ensure tests pass.
 
-
-
+See also: [code of conduct](https://github.com/scyseq-tools/scyseq/blob/master/CODE_OF_CONDUCT.md)
