@@ -49,7 +49,7 @@ should do the job...
 
 ## License
 
-This project is licensed under the [BSD 3-Clause](https://github.com/scyseq-tools/scyseq/LICENSE)
+This project is licensed under the [BSD 3-Clause](https://github.com/scyseq-tools/scyseq/blob/master/LICENSE)
 
 ## Contributing
 
@@ -57,7 +57,7 @@ Contributions to `scyseq` are welcome!
 
 To contribute:
 
-1. Fork the repository: [github.com/scyseq-tools/scyseq](hhttps://github.com/scyseq-tools/scyseq).
+1. Fork the repository: [github.com/scyseq-tools/scyseq](hhttps://github.com/scyseq-tools/scyseq)
 2. Create a branch for your feature or bug fix.
 3. Submit a pull request with a clear description of changes.
 4. Ensure tests pass.
