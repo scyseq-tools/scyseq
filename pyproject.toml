@@ -4,7 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scyseq"
-version = "0.1.0"
+# version number is dynamically retrieved from __init__/py file
+dynamic = ["version"]
 description = "Provides objects and tools to analyze symbolic sequences"
 readme = "README.md"
 authors = [
@@ -16,12 +17,15 @@ requires-python = ">=3.8"
 dependencies = ["numpy", "matplotlib", "scipy"]
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = ["pytest", "ruff"]
 docs = ["sphinx", "sphinx-gallery", "nbsphinx",
 "sphinxcontrib-bibtex", "ipykernel"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/scyseq"]
+
+[tool.hatch.version]
+path = "src/scyseq/__init__.py"
 
 [tool.hatch.envs.default]
 features = ["dev", "docs"]

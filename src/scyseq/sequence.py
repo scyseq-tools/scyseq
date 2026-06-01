@@ -1,4 +1,6 @@
-# pylint: disable=import-outside-toplevel
+# Copyright (c) 2007-2026 The scyseq developers.
+# SPDX-License-Identifier: BSD-3-Clause BSD
+
 """
 This module defines the base classes: Symbol, Alphabet and Sequence, their
 attributes and methods.
@@ -27,9 +29,11 @@ import warnings
 
 import numpy as np
 
-from . import exceptions as E
-from . import utils as U
+from scyseq import exceptions as E
+from scyseq import utils as U
+
 # from . import operations as O
+
 
 class Symbol:
     """
@@ -85,20 +89,24 @@ class Symbol:
         if not isinstance(value, str):
             raise E.SymbolDefinitionError(value, "Value must be a string")
 
-        if self._alphabet is not None:
-            if value in self._alphabet.svals:
-                if value == self.sval:
-                    warnings.warn(
+        if self._alphabet is not None and value in self._alphabet.svals:
+            if value == self.sval:
+                warnings.warn(
                     f"'{value}' is already the sval of Symbol {self.ival}.",
-                    UserWarning, stacklevel=3)
-                else:
-                    raise E.AlphabetAccessError(
-                    f"Symbol '{value}' already exists in alphabet")
+                    UserWarning,
+                    stacklevel=3,
+                )
+            else:
+                msg = f"Symbol '{value}' already exists in alphabet"
+                raise E.AlphabetAccessError(
+                    msg
+                )
         self._sval = value
 
     @sval.deleter
     def sval(self):
-        raise E.SymbolAccessError("sval cannot be deleted")
+        msg = "sval cannot be deleted"
+        raise E.SymbolAccessError(msg)
 
     @property
     def ival(self):
@@ -112,12 +120,13 @@ class Symbol:
 
     @ival.setter
     def ival(self, value):
-        raise E.SymbolAccessError("ival is read-only")
+        msg = "ival is read-only"
+        raise E.SymbolAccessError(msg)
 
     @ival.deleter
     def ival(self):
-        raise E.SymbolAccessError("ival cannot be deleted")
-
+        msg = "ival cannot be deleted"
+        raise E.SymbolAccessError(msg)
 
     def _attach(self, alphabet, value):
         """
@@ -129,7 +138,8 @@ class Symbol:
             self._alphabet = alphabet
         else:
             # This is the sign of a bug...
-            raise E.SymbolAccessError("Attachment of symbol failed.")
+            msg = "Attachment of symbol failed."
+            raise E.SymbolAccessError(msg)
 
     def __eq__(self, other):
         """
@@ -162,6 +172,7 @@ class Symbol:
 
         return copied
 
+
 class Alphabet(tuple):
     """
     The set of symbols that can be visited in a Sequence.
@@ -169,6 +180,7 @@ class Alphabet(tuple):
     An `Alphabet` behaves like bidirectional dictionaries with restrictions to
     avoid problems.
     """
+
     def __new__(cls, symbols):
         """
         Create an instance of the Alphabet class
@@ -180,20 +192,22 @@ class Alphabet(tuple):
             elements = [Symbol(str(ii)) for ii in range(symbols)]
 
         elif isinstance(symbols, (list, tuple)):
-             # Check that all the elements of symbols are different"
-            if all([sa != sb for sa, sb in itertools.combinations(symbols, 2)]):
-
-                if all([isinstance(symb, Symbol) for symb in symbols]):
+            # Check that all the elements of symbols are different"
+            if all(sa != sb for sa, sb in itertools.combinations(symbols, 2)):
+                if all(isinstance(symb, Symbol) for symb in symbols):
                     elements = symbols
 
-                elif all([isinstance(symb, str) for symb in symbols]):
+                elif all(isinstance(symb, str) for symb in symbols):
                     elements = [Symbol(symb) for symb in symbols]
                 else:
-                    raise ValueError("Values must all be Symbols or strings")
+                    msg = "Values must all be Symbols or strings"
+                    raise ValueError(msg)
             else:
-                raise E.AlphabetError("The values must all be different.")
+                msg = "The values must all be different."
+                raise E.AlphabetError(msg)
         else:
-            raise E.AlphabetError("The values must be an integer, a list or a tuple.")
+            msg = "The values must be an integer, a list or a tuple."
+            raise E.AlphabetError(msg)
 
         return super().__new__(cls, [copy.deepcopy(e) for e in elements])
 
@@ -267,10 +281,10 @@ class Alphabet(tuple):
         self._symbols = tuple(s for s in self)
 
     def __str__(self):
-        return '('+', '.join([s.__str__() for s in self])+')'
+        return "(" + ", ".join([s.__str__() for s in self]) + ")"
 
     def __repr__(self):
-        return 'Alphabet('+', '.join([s.__repr__() for s in self])+')'
+        return "Alphabet(" + ", ".join([s.__repr__() for s in self]) + ")"
 
     def __eq__(self, other):
         """
@@ -289,11 +303,12 @@ class Alphabet(tuple):
         True
         """
         if not isinstance(other, Alphabet):
-            raise E.AlphabetAccessError("Can only compare alphabets with alphabets")
+            msg = "Can only compare alphabets with alphabets"
+            raise E.AlphabetAccessError(msg)
         if len(self) != len(other):
             return False
 
-        return all([ssymbol == osymbol for ssymbol, osymbol in zip(self, other)])
+        return all(ssymbol == osymbol for ssymbol, osymbol in zip(self, other))
 
     def __getitem__(self, key):
         try:
@@ -302,11 +317,15 @@ class Alphabet(tuple):
             if isinstance(key, str):
                 idx = self.svals.index(key)
                 return self._symbols[idx]
-        except:
-            raise E.AlphabetAccessError('Key not in alphabet')
+        except (IndexError, ValueError) as e:
+            msg = f"The {type(key).__name__} {key} is not in the alphabet ({type(e).__name__})."
+            raise E.AlphabetAccessError(msg) from None
 
     def __setitem__(self, key, value):
-        raise E.AlphabetAccessError("'Alphabet' object does not support item assignment")
+        msg = "'Alphabet' object does not support item assignment"
+        raise E.AlphabetAccessError(
+            msg
+        )
 
     def __deepcopy__(self, memo):
         # Deepcopy of the content of the tuple
@@ -357,7 +376,7 @@ class Alphabet(tuple):
         """
         return zip(self.ivals, self.svals)
 
-# Methods from .operations
+    # Methods from .operations
 
     def rename(self, replacement):
         """
@@ -371,8 +390,10 @@ class Alphabet(tuple):
 
         The implementation in the operations module: :func:`~scyseq.operations.rename`
         """
-        from .operations import rename as _rename
+        from scyseq.operations import rename as _rename
+
         return _rename(self, replacement)
+
 
 boolean_alphabet = Alphabet([Symbol(False), Symbol(True)])
 """
@@ -387,11 +408,13 @@ A predefined :class:`~scyseq.sequence.Alphabet` with the two symbols `(0 |
 
 """
 
+
 class Sequence:
     """
     Defines a symbolic sequence coded using integers in :math:`{0,
     k-1}` and their methods.
     """
+
     def __new__(cls, symbols, alphabet, check=True):
         """
         Creates a Sequence object.
@@ -402,7 +425,8 @@ class Sequence:
         array = np.asarray(symbols)
 
         if array.ndim != 1:
-            raise ValueError("The symbols argument should be unidimensional (1D).")
+            msg = "The symbols argument should be unidimensional (1D)."
+            raise ValueError(msg)
 
         if np.issubdtype(array.dtype, np.bool_):
             array = array.astype(np.uint8)
@@ -410,18 +434,18 @@ class Sequence:
 
         elif np.issubdtype(array.dtype, np.integer):
             if np.any(array < 0):
-                raise ValueError("All values should be >=0")
-            if array.size == 0:
-                dtype = np.uint8
-            else:
-                dtype = U.choose_uint_dtype(array)
+                msg = "All values should be >=0"
+                raise ValueError(msg)
+            dtype = np.uint8 if array.size == 0 else U.choose_uint_dtype(array)
             array = array.astype(dtype)
             array.flags.writeable = False
             alpha = Alphabet(alphabet)
             if check and array.size > 0 and max(array) >= len(alpha):
-                raise E.AlphabetError("Invalid alphabet length")
+                msg = "Invalid alphabet length"
+                raise E.AlphabetError(msg)
         else:
-            raise TypeError("Symbols should be convertible into unsigned integers")
+            msg = "Symbols should be convertible into unsigned integers"
+            raise TypeError(msg)
 
         instance = super().__new__(cls)
         instance._validivals = array
@@ -447,7 +471,7 @@ class Sequence:
 
         :param s: a sequence object
         :exc: `TypeError`: when parameter `a` is not given and `s` is not a
-               sequence 
+               sequence
 
         :raises:
             :exc:`ValueError`: when `a` is neither a `dict` nor an `int`
@@ -466,7 +490,7 @@ class Sequence:
         N = 10 ; k = 3
         """
         if isinstance(symbols, Sequence):
-            pass # everything has been done in __new__
+            pass  # everything has been done in __new__
 
         else:
             self._alphabet = self._validalphabet
@@ -474,39 +498,39 @@ class Sequence:
 
             del self._validalphabet, self._validivals
 
-#            if dtype not in DTYPES:
-#                raise TypeError(\
-#                        'Wrong dtype. Maybe you entered both alphabet and its length.')
-#            symbols = np.array(symbols)
-#            # Check if data can be represented in the dtype
-#            if np.any(symbols < np.iinfo(dtype).min) or \
-#               np.any(symbols > np.iinfo(dtype).max):
-#                raise E.SymbolError(\
-#                      'Data can not be represented in %s' % str(dtype))
-#            # Check the dimension of the data
-#            if len(symbols.shape) != 1: # 1D sequences for now
-#                raise E.ShapeError(\
-#                      'Data shape is not one-dimensional')
-#            self._ivals = np.asarray(symbols).astype(dtype)
-#            # Parse the alphabet
-#            if isinstance(alphabet, Alphabet):
-#                self._alphabet = copy.deepcopy(alphabet)
-#
-## FIXME: is the islinked is useful?
-##                self._alphabet._islinked = True
-#
-#            elif type(alphabet) == int :
-#                # self._alphabet = Alphabet(alphabet)
-#                self._alphabet = Alphabet(alphabet)
-#            else:
-#                raise
-# TypeError('The parameter alphabet must be an integer or a sequence.Alphabet object')
-#            # Check correspondence between symbols and alphabet
-#            if check:
-#                if (max(self._ivals) >= len(self._alphabet)):
-#                    raise E.AlphabetError("Invalid alphabet length")
+    #            if dtype not in DTYPES:
+    #                raise TypeError(\
+    #                        'Wrong dtype. Maybe you entered both alphabet and its length.')
+    #            symbols = np.array(symbols)
+    #            # Check if data can be represented in the dtype
+    #            if np.any(symbols < np.iinfo(dtype).min) or \
+    #               np.any(symbols > np.iinfo(dtype).max):
+    #                raise E.SymbolError(\
+    #                      'Data can not be represented in %s' % str(dtype))
+    #            # Check the dimension of the data
+    #            if len(symbols.shape) != 1: # 1D sequences for now
+    #                raise E.ShapeError(\
+    #                      'Data shape is not one-dimensional')
+    #            self._ivals = np.asarray(symbols).astype(dtype)
+    #            # Parse the alphabet
+    #            if isinstance(alphabet, Alphabet):
+    #                self._alphabet = copy.deepcopy(alphabet)
+    #
+    ## FIXME: is the islinked is useful?
+    ##                self._alphabet._islinked = True
+    #
+    #            elif type(alphabet) == int :
+    #                # self._alphabet = Alphabet(alphabet)
+    #                self._alphabet = Alphabet(alphabet)
+    #            else:
+    #                raise
+    # TypeError('The parameter alphabet must be an integer or a sequence.Alphabet object')
+    #            # Check correspondence between symbols and alphabet
+    #            if check:
+    #                if (max(self._ivals) >= len(self._alphabet)):
+    #                    raise E.AlphabetError("Invalid alphabet length")
 
-## Alphabet properties
+    ## Alphabet properties
 
     @property
     def alphabet(self):
@@ -534,20 +558,18 @@ class Sequence:
         """
         The tuple of string values
         """
-        tmp = tuple([self.alphabet[i].sval for i in self.ivals])
+        return tuple([self.alphabet[i].sval for i in self.ivals])
         # tmp.flags.writeable = False
-        return tmp
 
-# Copy method
+    # Copy method
 
     def __deepcopy__(self, memo):
         """
         Returns a copy of the Sequence object
         """
-        return Sequence(np.copy(self._ivals), \
-                        copy.deepcopy(self.alphabet))
+        return Sequence(np.copy(self._ivals), copy.deepcopy(self.alphabet))
 
-# Sequences representation
+    # Sequences representation
 
     def __str__(self):
         """
@@ -556,14 +578,18 @@ class Sequence:
         .. todo::
            Do we need more information when we want to print a Sequence
         """
-        return self.ivals.__str__() # FIXME: need more info ??
+        return self.ivals.__str__()  # FIXME: need more info ??
 
     def __repr__(self):
         """
         Defines the representation of a Sequence.
         """
-        return "Sequence: %s\n%s\nN = %d ; k = %d" % (self.ivals.__str__(),
-                self.alphabet.__repr__(), len(self), self.k)
+        return "Sequence: %s\n%s\nN = %d ; k = %d" % (
+            self.ivals.__str__(),
+            self.alphabet.__repr__(),
+            len(self),
+            self.k,
+        )
 
     def __len__(self):
         """
@@ -574,7 +600,7 @@ class Sequence:
     def __getitem__(self, key):
         """
         Allows to slice a sequence. Can be sliced with an int, a slice or an
-        ndarray 
+        ndarray
         """
         if isinstance(key, (int, np.integer)):
             tmpval = [self.ivals[key]]
@@ -583,41 +609,41 @@ class Sequence:
         elif isinstance(key, np.ndarray):
             # print(key, type(key))
             tmpval = self.ivals[np.where(key)[0]]
-#        elif type(key) is Sequence:
-#            tmpval = self._ivals[np.where(key._ivals)[0]]
+        #        elif type(key) is Sequence:
+        #            tmpval = self._ivals[np.where(key._ivals)[0]]
         else:
-            print(key, type(key))
-            raise ValueError(f"Cannot slice with {str(type(key))}")
+            msg = f"Cannot slice with {type(key)!s}"
+            raise ValueError(msg)
 
-        return Sequence(tmpval, self.alphabet) #, check=False)
+        return Sequence(tmpval, self.alphabet)  # , check=False)
 
-# FIXME: is it useful?
-#    def __setitem__(self, key, value):
-#        """
-#        Allows to change the value of an element of a Sequence.
-#
-#        :raises:
-#           :exc:`ValueError`: if `value` is not in :math:`{0, k-1}`
-#        """
-#        if (value<0) or (value>=self._alen) or type(value) is not int:
-#            raise ValueError("%d is not allowed for alphabet length=%d" % \
-#                            (value, self._alen))
-#        self.ivals.__setitem__(key, int(value))
-#
-#    def __delitem__(self, key):
-#        """
-#        Allows to delete elements of a Sequence.
-#
-#        .. todo::
-#           Give an example of the deletion of elements of a sequence
-#        """
-#        lseq = list(self.ivals)
-#        del lseq[key]
-#        self.ivals = np.array(lseq)
+    # FIXME: is it useful?
+    #    def __setitem__(self, key, value):
+    #        """
+    #        Allows to change the value of an element of a Sequence.
+    #
+    #        :raises:
+    #           :exc:`ValueError`: if `value` is not in :math:`{0, k-1}`
+    #        """
+    #        if (value<0) or (value>=self._alen) or type(value) is not int:
+    #            raise ValueError("%d is not allowed for alphabet length=%d" % \
+    #                            (value, self._alen))
+    #        self.ivals.__setitem__(key, int(value))
+    #
+    #    def __delitem__(self, key):
+    #        """
+    #        Allows to delete elements of a Sequence.
+    #
+    #        .. todo::
+    #           Give an example of the deletion of elements of a sequence
+    #        """
+    #        lseq = list(self.ivals)
+    #        del lseq[key]
+    #        self.ivals = np.array(lseq)
 
-# Iterators
+    # Iterators
 
-    def __iter__(self): # returns an iterator
+    def __iter__(self):  # returns an iterator
         """
         Returns an iterator on the Sequence. Should return an iterator over the
         ivals otherwise the all(seq != seq) returns True...
@@ -635,102 +661,101 @@ class Sequence:
         """
         Returns the iterator over the integer values
         """
-        return iter(self.ivals) # .__iter__()
+        return iter(self.ivals)  # .__iter__()
 
     def itersvals(self):
         """
         Returns the iterator over the string values
         """
-        return iter(self.svals) #.__iter__()
+        return iter(self.svals)  # .__iter__()
 
-## FIXME:
-## I do not know when this is really used... for checking reversibility etc.
-#    def __reversed__(self): # returns an iterator
-#        """
-#        Returns an iterator on the Sequence in the reverse order
-#        """
-#        # return np.flipud(self.ivals).__iter__()
-#
-#        # return zip(np.flipud(self.ivals), np.flipud(self.svals))
-##        raises:
-##        AttributeError: property 'ivals' of 'Sequence' object has no setter
+    ## FIXME:
+    ## I do not know when this is really used... for checking reversibility etc.
+    #    def __reversed__(self): # returns an iterator
+    #        """
+    #        Returns an iterator on the Sequence in the reverse order
+    #        """
+    #        # return np.flipud(self.ivals).__iter__()
+    #
+    #        # return zip(np.flipud(self.ivals), np.flipud(self.svals))
+    ##        raises:
+    ##        AttributeError: property 'ivals' of 'Sequence' object has no setter
 
+    # "numeric" operations
 
-# "numeric" operations
+    #    def __add__(self, other):
+    #        """
+    #        Allows to add two sequences: they are concatenated
+    #
+    #        :raises:
+    #           :exc:`ValueError`: when the alphabets are different
+    #        """
+    #        if (self.alphabet != other.alphabet):
+    #            raise ValueError('Alphabets are different')
+    #        else:
+    #            return Sequence(np.concatenate((self._ivals, other._ivals)), \
+    #                            self.alphabet, check=False)
 
-#    def __add__(self, other):
-#        """
-#        Allows to add two sequences: they are concatenated
-#
-#        :raises:
-#           :exc:`ValueError`: when the alphabets are different
-#        """
-#        if (self.alphabet != other.alphabet):
-#            raise ValueError('Alphabets are different')
-#        else:
-#            return Sequence(np.concatenate((self._ivals, other._ivals)), \
-#                            self.alphabet, check=False)
+    # Logical operations
+    # FIXME:
+    # np.logical_? are defined for any array. Why do we check binary?
+    # This is strange to change logical_? to operators, no?
 
-# Logical operations
-# FIXME:
-# np.logical_? are defined for any array. Why do we check binary?
-# This is strange to change logical_? to operators, no?
+    #    def __and__(self, other):
+    #        """
+    #        Returns a binary sequence which is the result of comparison with `&`
+    #
+    #        .. seealso::
+    #           numpy.logical_and
+    #
+    #        .. caution::
+    #           This corresponds to the `&` operator and not the `and` keyword.
+    #        """
+    #        # if self._alen != 2 or other._alen != 2:
+    #        if self.k != 2 or other.k != 2:
+    #            raise NotImplementedError('& is defined for binary sequences only')
+    #        else:
+    #            seq = np.logical_and(self._ivals, other._ivals)
+    #            return Sequence(seq.astype(self._ivals.dtype), Alphabet(('False', 'True')), \
+    #                            check=False)
+    #
+    #    def __or__(self, other):
+    #        """
+    #        Returns a binary sequence which is the result of comparison with `|`
+    #
+    #        .. seealso::
+    #           numpy.logical_or
+    #
+    #        .. caution::
+    #           This corresponds to the `|` operator and not the `or` keyword.
+    #        """
+    #        # if self._alen != 2 or other._alen != 2:
+    #        if self.k != 2 or other.k != 2:
+    #            raise NotImplementedError('| is defined for binary sequences only')
+    #        else:
+    #            arr = np.logical_or(self._ivals, other._ivals)
+    #            return Sequence(arr.astype(self._ivals.dtype), Alphabet(('False', 'True')), \
+    #                            check=False)
+    #
+    #    def _xor_(self, other):
+    #        """
+    #        Returns a binary sequence which is the result of comparison with `^`
+    #
+    #        .. seealso::
+    #           numpy.logical_xor
+    #
+    #        .. caution::
+    #           This corresponds to the `^` operator.
+    #        """
+    #        # if self._alen != 2 or other._alen != 2:
+    #        if self.k != 2 or other.k != 2:
+    #            raise NotImplementedError('| is defined for binary sequences only')
+    #        else:
+    #            arr = np.logical_xor(self._ivals, other._ivals)
+    #            return Sequence(arr.astype(self._ivals.dtype), Alphabet(('False', 'True')), \
+    #                            check=False)
 
-#    def __and__(self, other):
-#        """
-#        Returns a binary sequence which is the result of comparison with `&`
-#
-#        .. seealso::
-#           numpy.logical_and
-#
-#        .. caution::
-#           This corresponds to the `&` operator and not the `and` keyword.
-#        """
-#        # if self._alen != 2 or other._alen != 2:
-#        if self.k != 2 or other.k != 2:
-#            raise NotImplementedError('& is defined for binary sequences only')
-#        else:
-#            seq = np.logical_and(self._ivals, other._ivals)
-#            return Sequence(seq.astype(self._ivals.dtype), Alphabet(('False', 'True')), \
-#                            check=False)
-#
-#    def __or__(self, other):
-#        """
-#        Returns a binary sequence which is the result of comparison with `|`
-#
-#        .. seealso::
-#           numpy.logical_or
-#
-#        .. caution::
-#           This corresponds to the `|` operator and not the `or` keyword.
-#        """
-#        # if self._alen != 2 or other._alen != 2:
-#        if self.k != 2 or other.k != 2:
-#            raise NotImplementedError('| is defined for binary sequences only')
-#        else:
-#            arr = np.logical_or(self._ivals, other._ivals)
-#            return Sequence(arr.astype(self._ivals.dtype), Alphabet(('False', 'True')), \
-#                            check=False)
-#
-#    def _xor_(self, other):
-#        """
-#        Returns a binary sequence which is the result of comparison with `^`
-#
-#        .. seealso::
-#           numpy.logical_xor
-#
-#        .. caution::
-#           This corresponds to the `^` operator.
-#        """
-#        # if self._alen != 2 or other._alen != 2:
-#        if self.k != 2 or other.k != 2:
-#            raise NotImplementedError('| is defined for binary sequences only')
-#        else:
-#            arr = np.logical_xor(self._ivals, other._ivals)
-#            return Sequence(arr.astype(self._ivals.dtype), Alphabet(('False', 'True')), \
-#                            check=False)
-
-# Rich comparison methods
+    # Rich comparison methods
 
     def __mkcomp__(self, other, op):
 
@@ -739,33 +764,36 @@ class Sequence:
                 if len(other) == len(self):
                     arr = op(self.ivals, other.ivals)
                 else:
-                    raise \
-                    ValueError('Cannot compare Sequences with different lengths')
+                    msg = "Cannot compare Sequences with different lengths"
+                    raise ValueError(msg)
             else:
-                raise \
-                ValueError('Cannot compare Sequences with different alphabets')
+                msg = "Cannot compare Sequences with different alphabets"
+                raise ValueError(msg)
 
         elif isinstance(other, int) and other >= 0:
             arr = op(self.ivals, other)
         elif isinstance(other, str):
-            print('str comp')
             arr = np.array([op(sval, other) for sval in self.svals])
         else:
-            raise \
-            ValueError("Sequence can be compared with a Sequence, a positive integer or a string only")
+            msg = "Sequence can be compared with a Sequence, a positive integer or a string only"
+            raise ValueError(
+                msg
+            )
 
         # return Sequence(arr.astype(self._ivals.dtype), Alphabet(('False', 'True')), check=False)
         return arr
 
     def __lt__(self, other):
         if isinstance(other, str):
-            raise ValueError("Sequence cannot be compared with a string")
+            msg = "Sequence cannot be compared with a string"
+            raise ValueError(msg)
         else:
             return self.__mkcomp__(other, operator.__lt__)
 
     def __le__(self, other):
         if isinstance(other, str):
-            raise ValueError("Sequence cannot be compared with a string")
+            msg = "Sequence cannot be compared with a string"
+            raise ValueError(msg)
         else:
             return self.__mkcomp__(other, operator.__le__)
 
@@ -777,17 +805,19 @@ class Sequence:
 
     def __gt__(self, other):
         if isinstance(other, str):
-            raise ValueError("Sequence cannot be compared with a string")
+            msg = "Sequence cannot be compared with a string"
+            raise ValueError(msg)
         else:
             return self.__mkcomp__(other, operator.__gt__)
 
     def __ge__(self, other):
         if isinstance(other, str):
-            raise ValueError("Sequence cannot be compared with a string")
+            msg = "Sequence cannot be compared with a string"
+            raise ValueError(msg)
         else:
             return self.__mkcomp__(other, operator.__ge__)
 
-# Method that transform the sequence (wrapped from .operations)
+    # Method that transform the sequence (wrapped from .operations)
 
     def rename(self, replacement):
         """
@@ -795,10 +825,11 @@ class Sequence:
 
         See the implementation in the operations module: :func:`~scyseq.operations.rename`
         """
-        from .operations import rename as _rename
+        from scyseq.operations import rename as _rename
+
         return _rename(self, replacement)
 
-# Method that return a new sequence (wrapped from .operations)
+    # Method that return a new sequence (wrapped from .operations)
 
     # roll = U.delegate_to(".operations", "roll")
     def roll(self, step):
@@ -809,7 +840,8 @@ class Sequence:
         :func:`~scyseq.operations.roll`
         """
 
-        from .operations import roll as _roll
+        from scyseq.operations import roll as _roll
+
         return _roll(self, step)
 
     def reverse(self):
@@ -820,7 +852,8 @@ class Sequence:
         :func:`~scyseq.operations.reverse`
         """
 
-        from .operations import reverse as _reverse
+        from scyseq.operations import reverse as _reverse
+
         return _reverse(self)
 
     def shuffle(self):
@@ -831,7 +864,8 @@ class Sequence:
         :func:`~scyseq.operations.shuffle`
         """
 
-        from .operations import shuffle as _shuffle
+        from scyseq.operations import shuffle as _shuffle
+
         return _shuffle(self)
 
     def reduce(self):
@@ -841,11 +875,12 @@ class Sequence:
         See the implementation in the operations module:
         :func:`~scyseq.operations.reduce`
         """
-        from .operations import reduce as _reduce
+        from scyseq.operations import reduce as _reduce
+
         return _reduce(self)
 
-# Methods that compute characteristics of the sequence (wrapped from
-# .operations)
+    # Methods that compute characteristics of the sequence (wrapped from
+    # .operations)
 
     def count(self, value=None):
         """
@@ -854,7 +889,8 @@ class Sequence:
         See the implementation in the operations module:
         :func:`~scyseq.operations.count`
         """
-        from .operations import count as _count
+        from scyseq.operations import count as _count
+
         return _count(self, value)
 
     def frequency(self, value=None):
@@ -864,7 +900,9 @@ class Sequence:
         See the implementation in the operations module:
         :func:`~scyseq.operations.frequency`
         """
-        from .operations import frequency as _frequency
+        from scyseq.operations import frequency as _frequency
+
         return _frequency(self, value)
+
 
 # vim: set spell spelllang=en

@@ -1,3 +1,6 @@
+# Copyright (c) 2007-2026 The scyseq developers.
+# SPDX-License-Identifier: BSD-3-Clause BSD
+
 """
 Utilities for algorithmic complexity on symbolic sequences.
 
@@ -8,12 +11,13 @@ history used to count phrases. ``lempel_ziv`` works on
 :class:`scyseq.sequence.Sequence` objects and returns either the raw or the
 normalized complexity score.
 """
+
 __docformat__ = "reStructuredText"
 
 import numpy as np
 
-from . import sequence as S
-from .generator import uniform_sequence
+from scyseq import sequence as S
+from scyseq.generator import uniform_sequence
 
 
 def contains_sublist(lst, sublst):
@@ -35,7 +39,7 @@ def contains_sublist(lst, sublst):
     """
     sublist_length = len(sublst)
     return any(
-        sublst == lst[index:index + sublist_length]
+        sublst == lst[index : index + sublist_length]
         for index in range(len(lst) - sublist_length + 1)
     )
 
@@ -137,17 +141,22 @@ def _get_parser(parsing):
     try:
         return parsers[parsing]
     except KeyError as exc:
-        raise NotImplementedError("The parsing %s is not implemented" % parsing) from exc
+        msg = f"The parsing {parsing} is not implemented"
+        raise NotImplementedError(
+            msg
+        ) from exc
 
 
 def _complexity_from_phrases(dotcount, alphabet_length, sequence_length):
     """
     Return the normalized Lempel-Ziv score for a phrase count.
     """
-    return float(dotcount * (np.log(dotcount) / np.log(alphabet_length) + 1.0) / sequence_length)
+    return float(
+        dotcount * (np.log(dotcount) / np.log(alphabet_length) + 1.0) / sequence_length
+    )
 
 
-def lempel_ziv(seq, parsing='lz76', norm=False, nbsur=None):
+def lempel_ziv(seq, parsing="lz76", norm=False, nbsur=None):
     """
     Return the Lempel-Ziv complexity of a symbolic sequence.
 
@@ -177,13 +186,13 @@ def lempel_ziv(seq, parsing='lz76', norm=False, nbsur=None):
         return lz_raw
 
     if nbsur is None:
-        raise ValueError('You should give the number of surrogate data')
+        msg = "You should give the number of surrogate data"
+        raise ValueError(msg)
 
     zero_ivals = np.zeros(seqlen, dtype=seq.ivals.dtype)
     c_min = algorithm(S.Sequence(zero_ivals, seq.k).ivals)
     c_max = max(
-        algorithm(uniform_sequence(seqlen, alen=seq.k).ivals)
-        for _ in range(nbsur)
+        algorithm(uniform_sequence(seqlen, alen=seq.k).ivals) for _ in range(nbsur)
     )
     lz_min = _complexity_from_phrases(c_min, seq.k, seqlen)
     lz_max = _complexity_from_phrases(c_max, seq.k, seqlen)

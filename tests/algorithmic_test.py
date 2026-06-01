@@ -72,14 +72,18 @@ def test_lempel_ziv_raw_reference_value(parsing):
 def test_lempel_ziv_rejects_unknown_parser():
     seq = Sequence(np.array([0, 0, 1, 0, 1, 1], dtype=np.uint8), 2)
 
-    with pytest.raises(NotImplementedError, match="The parsing nope is not implemented"):
+    with pytest.raises(
+        NotImplementedError, match="The parsing nope is not implemented"
+    ):
         lempel_ziv(seq, parsing="nope")
 
 
 def test_lempel_ziv_requires_nbsur_for_normalization():
     seq = Sequence(np.array([0, 0, 1, 0, 1, 1], dtype=np.uint8), 2)
 
-    with pytest.raises(ValueError, match="You should give the number of surrogate data"):
+    with pytest.raises(
+        ValueError, match="You should give the number of surrogate data"
+    ):
         lempel_ziv(seq, norm=True)
 
 

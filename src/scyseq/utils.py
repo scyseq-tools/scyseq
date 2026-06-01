@@ -1,7 +1,12 @@
+# Copyright (c) 2007-2026 The scyseq developers.
+# SPDX-License-Identifier: BSD-3-Clause BSD
+
 """
 Utils
 """
+
 import numpy as np
+
 
 def choose_uint_dtype(arr):
     max_val = arr.max()
@@ -20,7 +25,6 @@ def delegate_to(module_name, func_name):
 
     # import functools
     import importlib
-
 
     # @functools.wraps(func)  # copie __name__, __doc__, __annotations__, etc.
     def method(self, *args, **kwargs):

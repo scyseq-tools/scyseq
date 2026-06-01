@@ -123,7 +123,9 @@ def test_sequence_reduce_count_and_frequency_legacy_cases():
     values = [0, 0, 2, 2, 2, 0, 0, 0, 1, 1, 1, 0, 1, 2, 0, 0]
     seq = sq.Sequence(values, 3)
 
-    np.testing.assert_array_equal(seq.reduce().ivals, np.array([0, 2, 0, 1, 0, 1, 2, 0]))
+    np.testing.assert_array_equal(
+        seq.reduce().ivals, np.array([0, 2, 0, 1, 0, 1, 2, 0])
+    )
     np.testing.assert_array_equal(seq.count(), np.array([8, 4, 4]))
     np.testing.assert_array_equal(seq.frequency(), np.array([8, 4, 4]) / len(values))
 
@@ -136,7 +138,9 @@ def test_transform_function_legacy_cases_with_current_alphabet_api():
     seq = sq.Sequence([0, 2, 0, 2, 0, 1, 2, 1, 1], 3)
 
     transformed = sq.transform(seq, [1, 0, 0])
-    np.testing.assert_array_equal(transformed.ivals, np.array([1, 0, 1, 0, 1, 0, 0, 0, 0]))
+    np.testing.assert_array_equal(
+        transformed.ivals, np.array([1, 0, 1, 0, 1, 0, 0, 0, 0])
+    )
     assert transformed.k == 2
     assert transformed.alphabet == sq.Alphabet(2)
 
@@ -147,7 +151,7 @@ def test_transform_function_legacy_cases_with_current_alphabet_api():
 
 
 @pytest.mark.parametrize(
-    "correspondence,new_alphabet,error",
+    ("correspondence", "new_alphabet", "error"),
     [
         ([0, 1], None, ValueError),
         ([0, 1, 1, 0], None, ValueError),

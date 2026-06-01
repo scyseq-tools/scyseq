@@ -1,3 +1,6 @@
+# Copyright (c) 2007-2026 The scyseq developers.
+# SPDX-License-Identifier: BSD-3-Clause BSD
+
 """
 Information-theoretic measures for symbolic sequences.
 
@@ -100,7 +103,7 @@ def block_entropy(seq, wlen):
     return H(nwords)
 
 
-def entropy_rate(seq, wlen, method='average'):
+def entropy_rate(seq, wlen, method="average"):
     """
     Return an entropy-rate estimate based on block entropies.
 
@@ -127,7 +130,8 @@ def entropy_rate(seq, wlen, method='average'):
     if method.lower() == "difference":
         return block_entropy(seq, wlen + 1) - block_entropy(seq, wlen)
 
-    raise NotImplementedError("The %s entropy rate is not implemented" % method)
+    msg = f"The {method} entropy rate is not implemented"
+    raise NotImplementedError(msg)
 
 
 def effective_complexity(seq, n_max):
@@ -202,7 +206,9 @@ def multi_information(seq1, seq2, seq3):
     seq23 = sq.recode([seq2, seq3])
     seq123 = sq.recode([seq1, seq2, seq3])
 
-    return float(H(seq1) + H(seq2) + H(seq3) + H(seq123) - H(seq12) - H(seq13) - H(seq23))
+    return float(
+        H(seq1) + H(seq2) + H(seq3) + H(seq123) - H(seq12) - H(seq13) - H(seq23)
+    )
 
 
 def transfer_entropy(seq1, seq1p, seq2):

@@ -13,7 +13,10 @@ def test_read_new_codix_returns_sequences_by_default(tmp_path):
         json.dumps(
             {
                 "version": "0.9",
-                "code": {"codes": {"gaze": ["away", "face"]}, "sites": {"infant": ["gaze"]}},
+                "code": {
+                    "codes": {"gaze": ["away", "face"]},
+                    "sites": {"infant": ["gaze"]},
+                },
                 "data": {"infant": {"gaze": [0, 1, 1, 0]}},
             }
         )
@@ -32,7 +35,10 @@ def test_read_new_codix_can_return_full_record(tmp_path):
         json.dumps(
             {
                 "version": "0.9",
-                "code": {"codes": {"gaze": ["away", "face"]}, "sites": {"infant": ["gaze"]}},
+                "code": {
+                    "codes": {"gaze": ["away", "face"]},
+                    "sites": {"infant": ["gaze"]},
+                },
                 "data": {"infant": {"gaze": [0, 1]}},
             }
         )
