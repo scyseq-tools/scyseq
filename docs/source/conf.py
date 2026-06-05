@@ -25,6 +25,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
     "nbsphinx",
+    "myst_parser",
     "sphinx.ext.todo",
     "sphinxcontrib.bibtex",
 ]

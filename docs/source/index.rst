@@ -14,6 +14,7 @@ Welcome to scyseq's documentation!
    notebooks/tutorial
    library
    notebooks/infant-mother
+   devel
    contributors
    references
 
