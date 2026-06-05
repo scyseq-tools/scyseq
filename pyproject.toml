@@ -19,7 +19,7 @@ dependencies = ["numpy", "matplotlib", "scipy"]
 [project.optional-dependencies]
 dev = ["pytest", "ruff"]
 docs = ["sphinx", "sphinx-gallery", "nbsphinx",
-"sphinxcontrib-bibtex", "ipykernel"]
+"sphinxcontrib-bibtex", "ipykernel", "myst-parser"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/scyseq"]

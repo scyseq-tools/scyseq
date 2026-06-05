@@ -1,0 +1,111 @@
+name: Publish to TestPyPI
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+      - "[0-9]*.[0-9]*.[0-9]*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: testpypi-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build distribution
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.tag-version.outputs.version }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install hatch build twine packaging
+
+      - name: Extract version from tag
+        id: tag-version
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import os
+          from packaging.version import InvalidVersion, Version
+
+          tag_name = os.environ["TAG_NAME"].strip()
+          tag_version = tag_name[1:] if tag_name.startswith("v") else tag_name
+
+          if not tag_version:
+              raise SystemExit("Tag did not contain a package version")
+
+          try:
+              Version(tag_version)
+          except InvalidVersion as error:
+              raise SystemExit(
+                  f"Invalid PEP 440 version {tag_version!r} from tag {tag_name!r}: {error}"
+              )
+
+          print(f"version={tag_version}")
+          PY
+
+      - name: Set package version from tag
+        run: hatch version "${{ steps.tag-version.outputs.version }}"
+
+      - name: Install package
+        run: python -m pip install -e ".[dev]"
+
+      - name: Run pytest
+        run: python -m pytest
+
+      - name: Build wheel and source distribution
+        run: python -m build
+
+      - name: Check distributions
+        run: twine check dist/*
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v6
+        with:
+          name: python-package-distributions
+          path: dist/*
+          if-no-files-found: error
+
+  publish-testpypi:
+    name: Publish distribution to TestPyPI
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/scyseq
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v6
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish distribution to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/

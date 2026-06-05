@@ -89,3 +89,31 @@ jupyter notebook
 
 This will open a web interface where you can navigate to the `docs/source/notebooks` directory and open the tutorial notebooks to run them interactively.
 
+## Publishing test releases from tags
+
+The `Publish to TestPyPI` GitHub Actions workflow publishes package distributions to TestPyPI only when a version tag is pushed to `Dewmith/scyseq_Official`.
+
+Supported tag formats include:
+
+```bash
+git tag v0.1.2
+git push origin v0.1.2
+```
+
+and:
+
+```bash
+git tag 0.1.2
+git push origin 0.1.2
+```
+
+The workflow strips a leading `v`, validates the remaining value as a PEP 440 version, runs `hatch version` in the temporary CI checkout, runs the test suite, builds the wheel and source distribution, checks the artifacts with `twine`, and publishes them to TestPyPI with PyPI Trusted Publishing.
+
+Before using the workflow, configure TestPyPI Trusted Publishing for the `scyseq` project with:
+
+- owner: `Dewmith`
+- repository: `scyseq_Official`
+- workflow: `publish-testpypi.yml`
+- environment: `testpypi`
+
+No PyPI token secret is required. Real PyPI publishing should use a separate follow-up workflow or workflow update with the `pypi` environment and the regular PyPI repository URL.
