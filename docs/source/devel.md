@@ -107,7 +107,7 @@ git tag 0.1.2
 git push origin 0.1.2
 ```
 
-The workflow strips a leading `v`, validates the remaining value as a PEP 440 version, runs `hatch version` in the temporary CI checkout, runs the test suite, builds the wheel and source distribution, checks the artifacts with `twine`, and publishes them to TestPyPI with PyPI Trusted Publishing.
+The workflow strips a leading `v`, validates the remaining value as a PEP 440 version, and exports it through `SETUPTOOLS_SCM_PRETEND_VERSION` so `hatch-vcs` builds the package with the pushed tag version. It then runs the test suite, builds the wheel and source distribution, verifies that each artifact uses the tag version, checks the artifacts with `twine`, and publishes them to TestPyPI with PyPI Trusted Publishing.
 
 Before using the workflow, configure TestPyPI Trusted Publishing for the `scyseq` project with:
 

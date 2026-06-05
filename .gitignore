@@ -4,3 +4,4 @@ __pycache__/
 *.tmp
 .vimrc
 dist/
+src/scyseq/_version.py

@@ -6,7 +6,12 @@ scyseq is a Python package for defining, manipulating, analysing and
 representing symbolic sequences
 """
 
-__version__ = "0.1.0"
+from importlib.metadata import version, PackageNotFoundError
+
+try:
+    __version__ = version("scyseq")
+except PackageNotFoundError:
+    __version__ = "unknown"
 
 __authors__ = [
     "Laurent Pezard",
@@ -44,7 +49,7 @@ __all__ = ["Symbol", "Alphabet", "Sequence",
            "ScyseqError", "SymbolError", "SymbolDefinitionError",
            "SymbolAccessError", "AlphabetError", "AlphabetAccessError",
            "InvalidSymbolError", "EmptyAlphabetError", "SequenceError",
-           "SequenceParseError", "LengthError", "SymbolMismatchError" ]
+           "SequenceParseError", "LengthError", "SymbolMismatchError", "__version__" ]
 
 def __dir__():
     return __all__
