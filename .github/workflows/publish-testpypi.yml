@@ -64,8 +64,10 @@ jobs:
           print(f"version={tag_version}")
           PY
 
-      - name: Set package version from tag
-        run: hatch version "${{ steps.tag-version.outputs.version }}"
+      - name: Use tag version for hatch-vcs
+        run: |
+          echo "PACKAGE_VERSION=${{ steps.tag-version.outputs.version }}" >> "$GITHUB_ENV"
+          echo "SETUPTOOLS_SCM_PRETEND_VERSION=${{ steps.tag-version.outputs.version }}" >> "$GITHUB_ENV"
 
       - name: Install package
         run: python -m pip install -e ".[dev]"
@@ -75,6 +77,37 @@ jobs:
 
       - name: Build wheel and source distribution
         run: python -m build
+
+      - name: Verify distribution versions
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          from packaging.utils import parse_sdist_filename, parse_wheel_filename
+          from packaging.version import Version
+
+          expected = Version(os.environ["PACKAGE_VERSION"])
+          distributions = sorted(Path("dist").iterdir())
+
+          if not distributions:
+              raise SystemExit("No distributions were built")
+
+          mismatches = []
+          for distribution in distributions:
+              if distribution.suffix == ".whl":
+                  _, version, _, _ = parse_wheel_filename(distribution.name)
+              elif distribution.name.endswith((".tar.gz", ".zip")):
+                  _, version = parse_sdist_filename(distribution.name)
+              else:
+                  raise SystemExit(f"Unexpected distribution file: {distribution.name}")
+
+              if version != expected:
+                  mismatches.append(f"{distribution.name} has version {version}, expected {expected}")
+
+          if mismatches:
+              raise SystemExit("\n".join(mismatches))
+          PY
 
       - name: Check distributions
         run: twine check dist/*
