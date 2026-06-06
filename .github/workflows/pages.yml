@@ -18,6 +18,13 @@ jobs:
     name: Build documentation
     runs-on: ubuntu-latest
 
+    if: >-
+      ${{
+        github.repository == 'scyseq-tools/scyseq' &&
+        github.ref == 'refs/heads/master' &&
+        github.event.repository.fork == false
+      }}
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
@@ -51,9 +58,18 @@ jobs:
     name: Deploy documentation
     runs-on: ubuntu-latest
     needs: build
+
+    if: >-
+      ${{
+        github.repository == 'scyseq-tools/scyseq' &&
+        github.ref == 'refs/heads/master' &&
+        github.event.repository.fork == false
+      }}
+
     permissions:
       pages: write
       id-token: write
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
