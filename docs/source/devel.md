@@ -89,9 +89,9 @@ jupyter notebook
 
 This will open a web interface where you can navigate to the `docs/source/notebooks` directory and open the tutorial notebooks to run them interactively.
 
-## Publishing test releases from tags
+## Publishing releases to PyPI from tags
 
-The `Publish to TestPyPI` GitHub Actions workflow publishes package distributions to TestPyPI only when a version tag is pushed to `Dewmith/scyseq_Official`.
+The `Publish to PyPI` GitHub Actions workflow publishes package distributions to PyPI when a supported version tag is pushed.
 
 Supported tag formats include:
 
@@ -107,13 +107,4 @@ git tag 0.1.2
 git push origin 0.1.2
 ```
 
-The workflow strips a leading `v`, validates the remaining value as a PEP 440 version, and exports it through `SETUPTOOLS_SCM_PRETEND_VERSION` so `hatch-vcs` builds the package with the pushed tag version. It then runs the test suite, builds the wheel and source distribution, verifies that each artifact uses the tag version, checks the artifacts with `twine`, and publishes them to TestPyPI with PyPI Trusted Publishing.
-
-Before using the workflow, configure TestPyPI Trusted Publishing for the `scyseq` project with:
-
-- owner: `Dewmith`
-- repository: `scyseq_Official`
-- workflow: `publish-testpypi.yml`
-- environment: `testpypi`
-
-No PyPI token secret is required. Real PyPI publishing should use a separate follow-up workflow or workflow update with the `pypi` environment and the regular PyPI repository URL.
+The workflow strips a leading `v`, validates the remaining value as a PEP 440 version, and exports it through `SETUPTOOLS_SCM_PRETEND_VERSION` so `hatch-vcs` builds the package with the pushed tag version. It then installs the package, runs the project checks, builds the wheel and source distribution, verifies that each artifact uses the tag version, checks the artifacts with `twine`, uploads the distributions as a workflow artifact, and publishes them to PyPI with Trusted Publishing.
