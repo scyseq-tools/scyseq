@@ -1,4 +1,4 @@
-name: Publish to TestPyPI
+name: Publish to PyPI
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: testpypi-${{ github.ref }}
+  group: pypi-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -119,14 +119,14 @@ jobs:
           path: dist/*
           if-no-files-found: error
 
-  publish-testpypi:
-    name: Publish distribution to TestPyPI
+  publish-pypi:
+    name: Publish distribution to PyPI
     needs: build
     runs-on: ubuntu-latest
 
     environment:
-      name: testpypi
-      url: https://test.pypi.org/p/scyseq
+      name: pypi
+      url: https://pypi.org/p/scyseq
 
     permissions:
       id-token: write
@@ -138,7 +138,5 @@ jobs:
           name: python-package-distributions
           path: dist/
 
-      - name: Publish distribution to TestPyPI
+      - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/

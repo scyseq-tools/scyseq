@@ -4,13 +4,16 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - master
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -33,32 +36,55 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install hatch
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-
       - name: Install pandoc
         uses: pandoc/actions/setup@v1
 
       - name: Build HTML documentation
         run: hatch run docs:build
 
-      - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v4
+      - name: Upload built documentation artifact
+        uses: actions/upload-artifact@v4
         with:
+          name: html-docs
           path: docs/build/html
 
   deploy:
     name: Deploy documentation
     runs-on: ubuntu-latest
     needs: build
+
+    if: >-
+      ${{
+        github.repository == 'scyseq-tools/scyseq' &&
+        github.ref == 'refs/heads/master' &&
+        github.event.repository.fork == false &&
+        github.event_name == 'push'
+      }}
+
     permissions:
+      contents: read
       pages: write
       id-token: write
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
+      - name: Download built documentation artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: html-docs
+          path: site
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
